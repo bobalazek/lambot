@@ -3,7 +3,7 @@ export interface AssetInterface {
   name: string;
 }
 
-export interface AssetFeeInterface {
+export interface AssetFeesInterface {
   takerFeePercentage: string;
   makerFeePercentage: string;
 }
@@ -18,7 +18,7 @@ export class Asset implements AssetInterface {
   }
 }
 
-export class AssetFee implements AssetFeeInterface {
+export class AssetFees implements AssetFeesInterface {
   takerFeePercentage: string;
   makerFeePercentage: string;
 

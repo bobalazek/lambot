@@ -1,18 +1,18 @@
-import { ApiCredentials } from './ApiCredentials';
-import { Asset, AssetFee, AssetFeeInterface, AssetInterface } from './Asset';
+import { Asset, AssetFees, AssetFeesInterface, AssetInterface } from './Asset';
+import { Exchange, ExchangeInterface } from './Exchange';
 import { Order, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
 
 export interface AccountInterface {
+  key: string;
   name: string;
-  apiCredentials: Map<string, ApiCredentials>;
-  assets: AccountAssetInterface[];
+  exchange: ExchangeInterface;
   getOrders(): Promise<OrderInterface[]>;
   getOrder(id: string): Promise<OrderInterface>;
   cancelOrder(id: string): Promise<OrderInterface>;
   newOrder(order: OrderInterface): Promise<OrderInterface>;
   getAssets(): Promise<AssetInterface[]>;
   getAsset(symbol: string): Promise<AssetInterface>;
-  getAssetFee(symbol: string, quantity: string): Promise<AssetFeeInterface>;
+  getAssetFees(symbol: string, quantity: string): Promise<AssetFeesInterface>;
   buyAsset(symbol: string, quantity: string): Promise<OrderInterface>;
   sellAsset(symbol: string, quantity: string): Promise<OrderInterface>;
 }
@@ -24,16 +24,14 @@ export interface AccountAssetInterface {
   quantityLocked: string;
 }
 export class Account implements AccountInterface {
+  key: string;
   name: string;
-  apiCredentials: Map<string, ApiCredentials>;
-  assets: AccountAssetInterface[];
+  exchange: Exchange;
 
-  constructor(
-    name: string,
-    apiCredentials: Map<string, ApiCredentials>
-  ) {
+  constructor(key: string, name: string, exchange: Exchange) {
+    this.key = key;
     this.name = name;
-    this.apiCredentials = apiCredentials;
+    this.exchange = exchange;
   }
 
   getOrders(): Promise<Order[]> {
@@ -95,23 +93,17 @@ export class Account implements AccountInterface {
     });
   }
 
-  getAssetFee(symbol: string, quantity: string): Promise<AssetFee> {
-    return new Promise(async (resolve, reject) => {
-      const assetFee = new AssetFee('0.075', '0.075');
+  getAssetFees(symbol: string, quantity: string): Promise<AssetFees> {
+    return new Promise(async (resolve) => {
+      const assetFees = this._getMockAssetFees();
 
-      return resolve(assetFee);
+      return resolve(assetFees);
     });
   }
 
   buyAsset(symbol: string, quantity: string): Promise<Order> {
     return new Promise(async (resolve) => {
-      const order = new Order(
-        '0001',
-        symbol,
-        OrderSideEnum.BUY,
-        OrderTypeEnum.LIMIT,
-        quantity
-      );
+      const order = this._getMockOrder();
 
       return resolve(this.newOrder(order));
     });
@@ -119,16 +111,28 @@ export class Account implements AccountInterface {
 
   sellAsset(symbol: string, quantity: string): Promise<Order> {
     return new Promise(async (resolve) => {
-      const order = new Order(
-        '0001',
-        symbol,
-        OrderSideEnum.SELL,
-        OrderTypeEnum.LIMIT,
-        quantity
-      );
+      const order = this._getMockOrder();
 
       return resolve(this.newOrder(order));
     });
+  }
+
+  /***** Mocks *****/
+  private _getMockAssetFees(): AssetFees {
+    return new AssetFees(
+      '0.075',
+      '0.075'
+    );
+  }
+
+  private _getMockOrder(): Order {
+    return new Order(
+      '0001',
+      'BTC',
+      OrderSideEnum.SELL,
+      OrderTypeEnum.LIMIT,
+      '0.000000001'
+    );
   }
 }
 
