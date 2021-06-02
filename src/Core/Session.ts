@@ -1,13 +1,11 @@
 import { Account, AccountInterface } from './Account';
 import { Asset, AssetInterface } from './Asset';
 import { Exchange, ExchangeInterface } from './Exchange';
-import { Strategy, StrategyInterface } from './Strategy';
 
 export interface SessionInterface {
   id: string;
   account: AccountInterface;
   exchange: ExchangeInterface;
-  strategy: StrategyInterface;
   assets: SessionAssetInterface[];
   warmupPeriod: number; // In seconds. How long should we wait and pool the data before we start trading.
   createdAt: number;
@@ -30,7 +28,6 @@ export class Session implements SessionInterface {
   id: string;
   account: Account;
   exchange: Exchange;
-  strategy: Strategy;
   assets: SessionAsset[];
   warmupPeriod: number;
   createdAt: number;

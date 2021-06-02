@@ -1,7 +1,6 @@
 import { Asset, AssetInterface } from './Asset';
 import { Exchange, ExchangeInterface } from './Exchange';
 import { Session, SessionInterface } from './Session';
-import { Strategy, StrategyInterface } from './Strategy';
 
 export enum OrderSideEnum {
   BUY = 'BUY',
@@ -40,13 +39,13 @@ export interface OrderInterface {
   quoteAsset: AssetInterface;
   quoteAssetQuantity: string;
   quoteAssetPrice: string;
-  feePercentage: number;
+  fee: string;
   trailing: boolean;
   trailingPercentage: number;
   time: number;
+  exchangeResponse: unknown;
   session: SessionInterface;
   exchange: ExchangeInterface;
-  strategy: StrategyInterface;
 }
 
 export class Order implements OrderInterface {
@@ -61,13 +60,13 @@ export class Order implements OrderInterface {
   quoteAsset: Asset;
   quoteAssetQuantity: string;
   quoteAssetPrice: string;
-  feePercentage: number;
+  fee: string;
   trailing: boolean;
   trailingPercentage: number;
   time: number;
+  exchangeResponse: unknown;
   session: Session;
   exchange: Exchange;
-  strategy: Strategy;
 
   constructor(
     id: string,

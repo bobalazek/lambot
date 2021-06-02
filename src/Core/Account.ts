@@ -1,5 +1,5 @@
 import { ApiCredentials } from './ApiCredentials';
-import { Asset, AssetInterface } from './Asset';
+import { Asset, AssetFee, AssetFeeInterface, AssetInterface } from './Asset';
 import { Order, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
 
 export interface AccountInterface {
@@ -12,6 +12,7 @@ export interface AccountInterface {
   newOrder(order: OrderInterface): Promise<OrderInterface>;
   getAssets(): Promise<AssetInterface[]>;
   getAsset(symbol: string): Promise<AssetInterface>;
+  getAssetFee(symbol: string, quantity: string): Promise<AssetFeeInterface>;
   buyAsset(symbol: string, quantity: string): Promise<OrderInterface>;
   sellAsset(symbol: string, quantity: string): Promise<OrderInterface>;
 }
@@ -91,6 +92,14 @@ export class Account implements AccountInterface {
       }
 
       return resolve(asset);
+    });
+  }
+
+  getAssetFee(symbol: string, quantity: string): Promise<AssetFee> {
+    return new Promise(async (resolve, reject) => {
+      const assetFee = new AssetFee('0.075', '0.075');
+
+      return resolve(assetFee);
     });
   }
 
