@@ -5,7 +5,8 @@
   "license": "ISC",
   "scripts": {
     "start": "webpack serve --open --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js --progress"
+    "build": "webpack --config webpack.prod.js --progress",
+    "build:watch": "webpack --config webpack.prod.js --progress --watch"
   },
   "dependencies": {
     "@types/node": "^15.6.1",

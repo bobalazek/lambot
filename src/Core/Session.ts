@@ -1,13 +1,13 @@
 import { Account, AccountInterface } from './Account';
 import { Asset, AssetInterface } from './Asset';
-import { ExchangeInterface } from './Exchange';
-import { StrategyInterface } from './Strategy';
+import { Exchange, ExchangeInterface } from './Exchange';
+import { Strategy, StrategyInterface } from './Strategy';
 
 export interface SessionInterface {
   id: string;
   account: AccountInterface;
-  strategy: StrategyInterface;
   exchange: ExchangeInterface;
+  strategy: StrategyInterface;
   assets: SessionAssetInterface[];
   createdAt: number;
   startedAt: number;
@@ -27,18 +27,19 @@ export interface SessionAssetInterface {
 
 export class Session implements SessionInterface {
   id: string;
-  account: AccountInterface;
-  strategy: StrategyInterface;
-  exchange: ExchangeInterface;
-  assets: SessionAssetInterface[];
+  account: Account;
+  exchange: Exchange;
+  strategy: Strategy;
+  assets: SessionAsset[];
   createdAt: number;
   startedAt: number;
   endedAt: number;
   isTestMode: boolean;
 
-  constructor(id: string, account: Account) {
+  constructor(id: string, account: Account, exchange: Exchange) {
     this.id = id;
     this.account = account;
+    this.exchange = exchange;
   }
 }
 
