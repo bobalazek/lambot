@@ -7,7 +7,7 @@ const exchange = new Exchange('binance', 'Binance', {
   key: 'test',
   secret: 'test',
 });
-const account = new Account('binance_account', 'SoonToBeLamboOwner', exchange);
+const account = new Account('BorutBinance', exchange);
 const sessionId = (new Date()).toISOString().replace(/\..+/, '');
 const session = new Session(sessionId, account, exchange);
 const trader = new Trader([

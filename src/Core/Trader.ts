@@ -14,7 +14,7 @@ export class Trader {
     console.info(`Trader is starting now ...`);
     this.sessions.forEach((session) => {
       console.log(`
-        Account: ${session.account.name};
+        Account: ${session.account.key};
         Exchange: ${session.exchange.name};
         Session ID: ${session.id};
       `);
@@ -30,6 +30,10 @@ export class Trader {
   }
 
   private async _prepareExhanges(): Promise<void> {
+    // Those exchanges here will only be used when updating the prices.
+    // Other, account related bits (get orders, ...) will still be executed
+    // by the same API, but indirectly via account.exchange.customMethod().
+
     return new Promise((resolve) => {
       this.sessions.forEach((session) => {
         const exchange = session.exchange;
@@ -43,7 +47,7 @@ export class Trader {
 
         this.exchanges.set(exchangeKey, exchange);
 
-        console.log(`Prepared the "${exchangeKey}" exchange from "${session.account.name}".`)
+        console.log(`Prepared the "${exchangeKey}" exchange from "${session.account.key}".`)
       });
 
       resolve();

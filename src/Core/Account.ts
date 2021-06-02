@@ -4,7 +4,6 @@ import { Order, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
 
 export interface AccountInterface {
   key: string;
-  name: string;
   exchange: ExchangeInterface;
   getOrders(): Promise<OrderInterface[]>;
   getOrder(id: string): Promise<OrderInterface>;
@@ -23,98 +22,79 @@ export interface AccountAssetInterface {
   quantityFree: string;
   quantityLocked: string;
 }
+
 export class Account implements AccountInterface {
   key: string;
-  name: string;
   exchange: Exchange;
 
-  constructor(key: string, name: string, exchange: Exchange) {
+  constructor(key: string, exchange: Exchange) {
     this.key = key;
-    this.name = name;
     this.exchange = exchange;
   }
 
-  getOrders(): Promise<Order[]> {
-    return new Promise((resolve) => {
-      return resolve([]);
-    });
+  async getOrders(): Promise<Order[]> {
+    return [];
   }
 
-  getOrder(id: string): Promise<Order> {
-    return new Promise(async (resolve, reject) => {
-      const orders = await this.getOrders();
+  async getOrder(id: string): Promise<Order> {
+    const orders = await this.getOrders();
 
-      const order = orders.find((order) => {
-        return order.id === id;
-      });
-      if (!order) {
-        return reject(`Order with ID "${id}" not found.`);
-      }
-
-      return resolve(order);
+    const order = orders.find((order) => {
+      return order.id === id;
     });
+    if (!order) {
+      throw new Error(`Order with ID "${id}" not found.`);
+    }
+
+    return order;
   }
 
-  cancelOrder(id: string): Promise<Order> {
-    return new Promise(async (resolve, reject) => {
+  async cancelOrder(id: string): Promise<Order> {
       const order = this.getOrder(id);
       if (!order) {
-        return reject(`Order with ID "${id}" not found.`);
+        throw new Error(`Order with ID "${id}" not found.`);
       }
 
-      return resolve(order);
-    });
+      return order;
   }
 
-  newOrder(order: Order): Promise<Order> {
-    return new Promise(async (resolve) => {
-      return resolve(order);
-    });
+  async newOrder(order: Order): Promise<Order> {
+    return order;
   }
 
-  getAssets(): Promise<Asset[]> {
-    return new Promise((resolve) => {
-      return resolve([]);
-    });
+  async getAssets(): Promise<Asset[]> {
+    return [];
   }
 
-  getAsset(symbol: string): Promise<Asset> {
-    return new Promise(async (resolve, reject) => {
-      const assets = await this.getAssets();
+  async getAsset(symbol: string): Promise<Asset> {
+    const assets = await this.getAssets();
 
-      const asset = assets.find((asset) => {
-        return asset.symbol === symbol;
-      });
-      if (!asset) {
-        return reject(`Asset with symbol "${symbol}" not found.`);
-      }
-
-      return resolve(asset);
+    const asset = assets.find((asset) => {
+      return asset.symbol === symbol;
     });
+    if (!asset) {
+      throw new Error(`Asset with symbol "${symbol}" not found.`);
+    }
+
+    return asset;
   }
 
-  getAssetFees(symbol: string, quantity: string): Promise<AssetFees> {
-    return new Promise(async (resolve) => {
-      const assetFees = this._getMockAssetFees();
+  async getAssetFees(symbol: string, quantity: string): Promise<AssetFees> {
+    const assetFees = this._getMockAssetFees();
 
-      return resolve(assetFees);
-    });
+    return assetFees;
   }
 
-  buyAsset(symbol: string, quantity: string): Promise<Order> {
-    return new Promise(async (resolve) => {
-      const order = this._getMockOrder();
+  async buyAsset(symbol: string, quantity: string): Promise<Order> {
+    const order = this._getMockOrder();
 
-      return resolve(this.newOrder(order));
-    });
+    return this.newOrder(order);
   }
 
-  sellAsset(symbol: string, quantity: string): Promise<Order> {
-    return new Promise(async (resolve) => {
-      const order = this._getMockOrder();
+  async sellAsset(symbol: string, quantity: string): Promise<Order> {
+    const order = this._getMockOrder();
 
-      return resolve(this.newOrder(order));
-    });
+    return this.newOrder(order);
   }
 
   /***** Mocks *****/
