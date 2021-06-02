@@ -9,6 +9,7 @@ export interface SessionInterface {
   exchange: ExchangeInterface;
   strategy: StrategyInterface;
   assets: SessionAssetInterface[];
+  warmupPeriod: number; // In seconds. How long should we wait and pool the data before we start trading.
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -31,6 +32,7 @@ export class Session implements SessionInterface {
   exchange: Exchange;
   strategy: Strategy;
   assets: SessionAsset[];
+  warmupPeriod: number;
   createdAt: number;
   startedAt: number;
   endedAt: number;

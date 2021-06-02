@@ -4,7 +4,7 @@ import { Order, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
 
 export interface AccountInterface {
   name: string;
-  apiCredentials: {[key: string]: ApiCredentials};
+  apiCredentials: Map<string, ApiCredentials>;
   assets: AccountAssetInterface[];
   getOrders(): Promise<OrderInterface[]>;
   getOrder(id: string): Promise<OrderInterface>;
@@ -24,12 +24,12 @@ export interface AccountAssetInterface {
 }
 export class Account implements AccountInterface {
   name: string;
-  apiCredentials: {[key: string]: ApiCredentials};
+  apiCredentials: Map<string, ApiCredentials>;
   assets: AccountAssetInterface[];
 
   constructor(
     name: string,
-    apiCredentials: {[key: string]: ApiCredentials}
+    apiCredentials: Map<string, ApiCredentials>
   ) {
     this.name = name;
     this.apiCredentials = apiCredentials;
