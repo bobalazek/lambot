@@ -12,6 +12,7 @@ export class Trader {
 
   async start() {
     console.info(`Trader is starting now ...`);
+
     this.sessions.forEach((session) => {
       console.log(`
         Account: ${session.account.key};

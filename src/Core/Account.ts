@@ -1,24 +1,23 @@
-import { Asset, AssetFees, AssetFeesInterface, AssetInterface } from './Asset';
-import { Exchange, ExchangeInterface } from './Exchange';
-import { Order, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
+import { Exchange } from './Exchange';
+import { Order, OrderFees, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
 
 export interface AccountInterface {
   key: string;
-  exchange: ExchangeInterface;
-  getOrders(): Promise<OrderInterface[]>;
-  getOrder(id: string): Promise<OrderInterface>;
-  cancelOrder(id: string): Promise<OrderInterface>;
-  newOrder(order: OrderInterface): Promise<OrderInterface>;
-  getAssets(): Promise<AssetInterface[]>;
-  getAsset(symbol: string): Promise<AssetInterface>;
-  getAssetFees(symbol: string, quantity: string): Promise<AssetFeesInterface>;
-  buyAsset(symbol: string, quantity: string): Promise<OrderInterface>;
-  sellAsset(symbol: string, quantity: string): Promise<OrderInterface>;
+  exchange: Exchange;
+  getOrders(): Promise<Order[]>;
+  getOrder(id: string): Promise<Order>;
+  cancelOrder(id: string): Promise<Order>;
+  newOrder(order: Order): Promise<Order>;
+  getAssets(): Promise<AccountAsset[]>;
+  getAsset(symbol: string): Promise<AccountAsset>;
+  getAssetFees(symbol: string, quantity: string): Promise<OrderFees>;
+  buyAsset(symbol: string, quantity: string): Promise<Order>;
+  sellAsset(symbol: string, quantity: string): Promise<Order>;
 }
 
 export interface AccountAssetInterface {
-  account: AccountInterface;
-  asset: AssetInterface;
+  account: Account;
+  symbol: string;
   quantityFree: string;
   quantityLocked: string;
 }
@@ -62,11 +61,11 @@ export class Account implements AccountInterface {
     return order;
   }
 
-  async getAssets(): Promise<Asset[]> {
+  async getAssets(): Promise<AccountAsset[]> {
     return [];
   }
 
-  async getAsset(symbol: string): Promise<Asset> {
+  async getAsset(symbol: string): Promise<AccountAsset> {
     const assets = await this.getAssets();
 
     const asset = assets.find((asset) => {
@@ -79,7 +78,7 @@ export class Account implements AccountInterface {
     return asset;
   }
 
-  async getAssetFees(symbol: string, quantity: string): Promise<AssetFees> {
+  async getAssetFees(symbol: string, quantity: string): Promise<OrderFees> {
     const assetFees = this._getMockAssetFees();
 
     return assetFees;
@@ -98,8 +97,8 @@ export class Account implements AccountInterface {
   }
 
   /***** Mocks *****/
-  private _getMockAssetFees(): AssetFees {
-    return new AssetFees(
+  private _getMockAssetFees(): OrderFees {
+    return new OrderFees(
       '0.075',
       '0.075'
     );
@@ -117,19 +116,19 @@ export class Account implements AccountInterface {
 }
 
 export class AccountAsset implements AccountAssetInterface {
-  account: AccountInterface;
-  asset: AssetInterface;
+  account: Account;
+  symbol: string;
   quantityFree: string;
   quantityLocked: string;
 
   constructor(
-    account: AccountInterface,
-    asset: AssetInterface,
+    account: Account,
+    symbol: string,
     quantityFree: string = '0',
     quantityLocked: string = '0'
   ) {
     this.account = account;
-    this.asset = asset;
+    this.symbol = symbol;
     this.quantityFree = quantityFree;
     this.quantityLocked = quantityLocked;
   }

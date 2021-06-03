@@ -1,12 +1,11 @@
-import { Account, AccountInterface } from './Account';
-import { Asset, AssetInterface } from './Asset';
-import { Exchange, ExchangeInterface } from './Exchange';
+import { Account } from './Account';
+import { Exchange } from './Exchange';
 
 export interface SessionInterface {
   id: string;
-  account: AccountInterface;
-  exchange: ExchangeInterface;
-  assets: SessionAssetInterface[];
+  account: Account;
+  exchange: Exchange;
+  assets: SessionAsset[];
   warmupPeriod: number; // In seconds. How long should we wait and pool the data before we start trading.
   createdAt: number;
   startedAt: number;
@@ -15,9 +14,9 @@ export interface SessionInterface {
 }
 
 export interface SessionAssetInterface {
-  session: SessionInterface;
-  asset: AssetInterface;
-  pairs: Set<string>; // With which pairs do we want to trade? BTC_USDT, ETH_BTC, ...
+  session: Session;
+  asset: string;
+  pairs: string[]; // With which pairs do we want to trade? BTC_USDT, ETH_BTC, ...
   quantityPerOrder: string; // What's the base quantity we want to trade each order?
   quantityFree: string; // How much free funds do we still have to use?
   quantityLocked: string; // How much funds are currently in order?
@@ -43,15 +42,15 @@ export class Session implements SessionInterface {
 }
 
 export class SessionAsset implements SessionAssetInterface {
-  session: SessionInterface;
-  asset: AssetInterface;
-  pairs: Set<string>;
+  session: Session;
+  asset: string;
+  pairs: string[];
   quantityPerOrder: string;
   quantityFree: string;
   quantityLocked: string;
   startOnDip: boolean;
 
-  constructor(session: Session, asset: Asset) {
+  constructor(session: Session, asset: string) {
     this.session = session;
     this.asset = asset;
   }

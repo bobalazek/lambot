@@ -1,6 +1,5 @@
-import { Asset, AssetInterface } from './Asset';
-import { Exchange, ExchangeInterface } from './Exchange';
-import { Session, SessionInterface } from './Session';
+import { Exchange } from './Exchange';
+import { Session } from './Session';
 
 export enum OrderSideEnum {
   BUY = 'BUY',
@@ -33,10 +32,10 @@ export interface OrderInterface {
   side: OrderSideEnum;
   type: OrderTypeEnum;
   status: OrderStatusEnum;
-  baseAsset: AssetInterface;
+  baseAsset: string;
   baseAssetAmount: string;
   baseAssetPrice: string;
-  quoteAsset: AssetInterface;
+  quoteAsset: string;
   quoteAssetQuantity: string;
   quoteAssetPrice: string;
   fee: string;
@@ -44,8 +43,13 @@ export interface OrderInterface {
   trailingPercentage: number;
   time: number;
   exchangeResponse: unknown;
-  session: SessionInterface;
-  exchange: ExchangeInterface;
+  session: Session;
+  exchange: Exchange;
+}
+
+export interface OrderFeesInterface {
+  takerFeePercentage: string;
+  makerFeePercentage: string;
 }
 
 export class Order implements OrderInterface {
@@ -54,10 +58,10 @@ export class Order implements OrderInterface {
   side: OrderSideEnum;
   type: OrderTypeEnum;
   status: OrderStatusEnum;
-  baseAsset: Asset;
+  baseAsset: string;
   baseAssetAmount: string;
   baseAssetPrice: string;
-  quoteAsset: Asset;
+  quoteAsset: string;
   quoteAssetQuantity: string;
   quoteAssetPrice: string;
   fee: string;
@@ -80,5 +84,15 @@ export class Order implements OrderInterface {
     this.side = side;
     this.type = type;
     // TODO: quantity
+  }
+}
+
+export class OrderFees implements OrderFeesInterface {
+  takerFeePercentage: string;
+  makerFeePercentage: string;
+
+  constructor(takerFeePercentage: string, makerFeePercentage: string) {
+    this.takerFeePercentage = takerFeePercentage;
+    this.makerFeePercentage = makerFeePercentage;
   }
 }
