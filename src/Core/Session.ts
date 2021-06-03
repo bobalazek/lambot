@@ -1,9 +1,9 @@
-import { Account } from './Account';
 import { Asset, AssetPair } from './Asset';
+import { Exchange } from './Exchange';
 
 export interface SessionInterface {
   id: string;
-  account: Account;
+  exchange: Exchange;
   assets: SessionAsset[];
   warmupPeriod: number; // In seconds. How long should we wait and pool the data before we start trading.
   createdAt: number;
@@ -23,16 +23,16 @@ export interface SessionAssetInterface {
 
 export class Session implements SessionInterface {
   id: string;
-  account: Account;
+  exchange: Exchange;
   assets: SessionAsset[];
   warmupPeriod: number;
   createdAt: number;
   startedAt: number;
   endedAt: number;
 
-  constructor(id: string, account: Account) {
+  constructor(id: string, exchange: Exchange) {
     this.id = id;
-    this.account = account;
+    this.exchange = exchange;
   }
 
   addAsset(asset: Asset, assetPairs: AssetPair[]) {

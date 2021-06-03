@@ -2,13 +2,11 @@ import { Exchange } from './Exchange';
 import { Session } from './Session';
 
 export class Trader {
-  sessions: Session[];
-  exchanges: Map<string, Exchange>;
+  session: Session;
   isTestMode: boolean;
 
-  constructor(sessions: Session[], isTestMode: boolean = true) {
-    this.sessions = sessions;
-    this.exchanges = new Map();
+  constructor(session: Session, isTestMode: boolean = true) {
+    this.session = session;
     this.isTestMode = isTestMode;
   }
 
@@ -17,15 +15,12 @@ export class Trader {
         ? `Trader (in TEST MODE) is starting now ...`
         : `Trader is starting now ...`);
 
-    this.sessions.forEach((session) => {
-      console.log(`
-        Account: ${session.account.key};
-        Exchange: ${session.account.exchange.name};
-        Session ID: ${session.id};
-      `);
-    });
+    console.log(`
+      Exchange: ${this.session.exchange.name};
+      Session ID: ${this.session.id};
+    `);
 
-    await this._prepareExhanges();
+    await this._prepareExhange();
 
     console.info(`Starting the ticks now ...`);
 
@@ -34,26 +29,9 @@ export class Trader {
     }
   }
 
-  private async _prepareExhanges(): Promise<void> {
-    // Those exchanges here will only be used when updating the prices.
-    // Other, account related bits (get orders, ...) will still be executed
-    // by the same API, but indirectly via account.exchange.customMethod().
-
+  private async _prepareExhange(): Promise<void> {
     return new Promise((resolve) => {
-      this.sessions.forEach((session) => {
-        const { exchange } = session.account;
-        const exchangeKey = exchange.key;
-
-        // We only need one exchange to pool the prices for now.
-        // In the future we may conect to more and alternate between them.
-        if (this.exchanges.has(exchangeKey)) {
-          return;
-        }
-
-        this.exchanges.set(exchangeKey, exchange);
-
-        console.log(`Prepared the "${exchangeKey}" exchange from "${session.account.key}".`)
-      });
+      // TODO: actually connect to the exchange and start updating the prices
 
       resolve();
     });
