@@ -1,4 +1,4 @@
-import { Asset, AssetPair } from './Asset';
+import { AssetPair } from './Asset';
 import { Exchange } from './Exchange';
 import { Session } from './Session';
 
@@ -18,11 +18,6 @@ export interface OrderInterface {
   side: OrderSideEnum;
   type: OrderTypeEnum;
   amount: string;
-  time: number;
-  isCompleted: boolean;
-  exchangeResponse: unknown;
-  session: Session;
-  exchange: Exchange;
 }
 
 export interface OrderFeesInterface {
@@ -36,11 +31,10 @@ export class Order implements OrderInterface {
   side: OrderSideEnum;
   type: OrderTypeEnum;
   amount: string;
-  time: number;
-  isCompleted: boolean;
-  exchangeResponse: unknown;
-  session: Session;
-  exchange: Exchange;
+  _time: number;
+  _exchangeResponse: unknown;
+  _session: Session;
+  _exchange: Exchange;
 
   constructor(
     id: string,

@@ -6,7 +6,7 @@ import { Session } from './Core/Session';
 import { Trader } from './Core/Trader';
 import { BinanceExchange } from './Exchanges/BinanceExchange';
 
-// Prepare environment
+// Prepare environment variables
 dotenv.config();
 
 // Prepare CLI
@@ -14,7 +14,7 @@ const program = new Command();
 program
   .version('0.1')
   .option('-p, --production', 'Use actual production credentials', false)
-  .option('-s, --session', 'Want to continue a session? Leave blank if you want to start a new one.', null)
+  .option('-s, --session <session>', 'Want to continue a session? Leave blank if you want to start a new one.', null)
   .parse(process.argv)
 ;
 const programOptions = program.opts();
@@ -33,7 +33,8 @@ session.addAsset(
   [
     new AssetPair(Assets.ETH, Assets.USDT),
   ],
-  '0.05'
+  '0.1',
+  '0.02'
 );
 
 const trader = new Trader(session, isTestMode);

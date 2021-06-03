@@ -94,7 +94,7 @@ export class Assets {
   static readonly ATOM = new Asset('ATOM', 'Cosmos');
   static readonly SNX = new Asset('SNX', 'Synthetix Network Token');
 
-  getBySymbol(symbol: string) {
+  getBySymbol(symbol: string): Asset {
     if (!!this[symbol]) {
       return this[symbol];
     }

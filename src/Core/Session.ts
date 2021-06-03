@@ -1,5 +1,6 @@
 import { Asset, AssetPair } from './Asset';
 import { Exchange } from './Exchange';
+import { Order } from './Order';
 
 export interface SessionInterface {
   id: string;
@@ -15,10 +16,8 @@ export interface SessionAssetInterface {
   session: Session;
   asset: Asset; // What is the default asset you want to trade in?
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
+  amountTotal: string; // How much total resources we want to use for this session?
   amountPerOrder: string; // What's the base amount we want to trade each order?
-  amountFree: string; // How much free funds do we still have to use?
-  amountLocked: string; // How much funds are currently in order?
-  startOnDip: boolean; // If that is set to false, then trading will start immediately, else it will wait for a dip
 }
 
 export class Session implements SessionInterface {
@@ -35,9 +34,18 @@ export class Session implements SessionInterface {
     this.exchange = exchange;
   }
 
+  /**
+   * Add a asset to this session.
+   *
+   * @param asset Which is the base asset we want to do all the trades with?
+   * @param assetPairs Which pairs do we want to trade with?
+   * @param amountTotal What is the total amount we want to spend of this asset from this session?
+   * @param amountPerOrder How much of this asset do we want to spend of per order?
+   */
   addAsset(
     asset: Asset,
     assetPairs: AssetPair[],
+    amountTotal: string,
     amountPerOrder: string
   ) {
     this.assets.push(
@@ -45,6 +53,7 @@ export class Session implements SessionInterface {
         this,
         asset,
         assetPairs,
+        amountTotal,
         amountPerOrder
       )
     );
@@ -55,20 +64,23 @@ export class SessionAsset implements SessionAssetInterface {
   session: Session;
   asset: Asset;
   assetPairs: AssetPair[];
+  amountTotal: string;
   amountPerOrder: string;
-  amountFree: string;
-  amountLocked: string;
-  startOnDip: boolean;
+  _orders: Order[];
+  _amountFree: string; // How much free funds do we still have to use?
+  _amountLocked: string; // How much funds are currently in order?
 
   constructor(
     session: Session,
     asset: Asset,
     assetPairs: AssetPair[],
+    amountTotal: string,
     amountPerOrder: string
   ) {
     this.session = session;
     this.asset = asset;
     this.assetPairs = assetPairs;
+    this.amountTotal = amountTotal;
     this.amountPerOrder = amountPerOrder;
   }
 }

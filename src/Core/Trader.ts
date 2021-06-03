@@ -1,3 +1,4 @@
+import logger from '../Utils/Logger';
 import { Session } from './Session';
 
 export class Trader {
@@ -10,20 +11,22 @@ export class Trader {
   }
 
   async boot() {
-    console.info(this.isTestMode
+    logger.info(
+      this.isTestMode
         ? `Trader (in TEST MODE) is starting now ...`
-        : `Trader is starting now ...`);
+        : `Trader is starting now ...`
+    );
 
-    console.log(`
-      Exchange: ${this.session.exchange.name};
-      Session ID: ${this.session.id};
+    logger.info(`
+      Exchange: ${this.session.exchange.name}
+      Session ID: ${this.session.id}
     `);
 
-    console.log('Starting the exchange ...');
+    logger.info('Booting up the exchange ...');
 
     await this.session.exchange.boot(this.session);
 
-    console.info(`Starting the ticks now ...`);
+    logger.info(`Starting the ticks now ...`);
 
     while(true) {
       await this._tick();
@@ -37,7 +40,7 @@ export class Trader {
       // Excecute orders
 
       setTimeout(() => {
-        console.log(`Tick at ${new Date()}`);
+        logger.debug(`Tick at ${new Date()}`);
 
         resolve();
       }, 1000);
