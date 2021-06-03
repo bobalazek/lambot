@@ -23,8 +23,8 @@ export interface SessionAssetInterface {
 export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
-  assets: SessionAsset[] = [];
-  warmupPeriod: number = 5 * 60 * 1000;
+  assets: SessionAsset[];
+  warmupPeriod: number;
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -32,6 +32,8 @@ export class Session implements SessionInterface {
   constructor(id: string, exchange: Exchange) {
     this.id = id;
     this.exchange = exchange;
+    this.assets = [];
+    this.warmupPeriod = 5 * 60 * 1000;
   }
 
   /**

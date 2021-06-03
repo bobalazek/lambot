@@ -7,7 +7,6 @@ export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
-  assetPrices: ExchangeAssetPriceInterface;
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   newAccountOrder(order: Order): Promise<Order>;
@@ -18,17 +17,17 @@ export interface ExchangeInterface {
   sellAsset(symbol: string, amount: string): Promise<Order>;
 }
 
-export interface ExchangeAssetPriceInterface {
+export class ExchangeAssetPrice extends Map<string, {
+  timestamp: number,
+  value: string,
+}[]> {
   /**
-   * BTC_ETH: {
+   * BTCETH: [
    *   100000000: '0.00001',
    *   100000001: '0.00002',
    *   100000003: '0.00003',
-   * },
+   * ],
    */
-  [asset: string]: {
-    [time: number]: string
-  };
 }
 
 export interface ExchangeAccountAssetInterface {
@@ -42,7 +41,8 @@ export class Exchange implements ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
-  assetPrices: ExchangeAssetPriceInterface;
+  _session: Session;
+  _assetPrices: ExchangeAssetPrice;
 
   constructor(
     key: string,
@@ -52,6 +52,7 @@ export class Exchange implements ExchangeInterface {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
+    this._assetPrices = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
