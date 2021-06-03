@@ -1,12 +1,14 @@
 import { ApiCredentials } from './ApiCredentials';
 import { Asset, AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
+import { Session } from './Session';
 
 export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
   assetPrices: ExchangeAssetPriceInterface;
+  boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   newAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAsset[]>;
@@ -50,6 +52,10 @@ export class Exchange implements ExchangeInterface {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
+  }
+
+  async boot(session: Session): Promise<boolean> {
+    throw new Error('boot() not implemented yet.');
   }
 
   async getAccountOrders(): Promise<Order[]> {

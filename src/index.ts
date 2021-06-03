@@ -28,10 +28,14 @@ const exchange = new BinanceExchange({
   secret: process.env.BINANCE_API_SECRET,
 });
 const session = new Session(sessionId, exchange);
-session.addAsset(Assets.ETH, [
-  new AssetPair(Assets.ETH, Assets.USDT),
-]);
+session.addAsset(
+  Assets.ETH,
+  [
+    new AssetPair(Assets.ETH, Assets.USDT),
+  ],
+  '0.05'
+);
 
 const trader = new Trader(session, isTestMode);
 
-trader.start();
+trader.boot();

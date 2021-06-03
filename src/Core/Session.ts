@@ -5,7 +5,7 @@ export interface SessionInterface {
   id: string;
   exchange: Exchange;
   assets: SessionAsset[];
-  warmupPeriod: number; // In seconds. How long should we wait and pool the data before we start trading.
+  warmupPeriod: number; // In milliseconds. How long should we just pool the prices until we actually start trading?
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -35,8 +35,19 @@ export class Session implements SessionInterface {
     this.exchange = exchange;
   }
 
-  addAsset(asset: Asset, assetPairs: AssetPair[]) {
-    this.assets.push(new SessionAsset(this, asset, assetPairs));
+  addAsset(
+    asset: Asset,
+    assetPairs: AssetPair[],
+    amountPerOrder: string
+  ) {
+    this.assets.push(
+      new SessionAsset(
+        this,
+        asset,
+        assetPairs,
+        amountPerOrder
+      )
+    );
   }
 }
 
@@ -49,9 +60,15 @@ export class SessionAsset implements SessionAssetInterface {
   amountLocked: string;
   startOnDip: boolean;
 
-  constructor(session: Session, asset: Asset, assetPairs: AssetPair[]) {
+  constructor(
+    session: Session,
+    asset: Asset,
+    assetPairs: AssetPair[],
+    amountPerOrder: string
+  ) {
     this.session = session;
     this.asset = asset;
     this.assetPairs = assetPairs;
+    this.amountPerOrder = amountPerOrder;
   }
 }

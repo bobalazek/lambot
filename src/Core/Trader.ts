@@ -1,4 +1,3 @@
-import { Exchange } from './Exchange';
 import { Session } from './Session';
 
 export class Trader {
@@ -10,7 +9,7 @@ export class Trader {
     this.isTestMode = isTestMode;
   }
 
-  async start() {
+  async boot() {
     console.info(this.isTestMode
         ? `Trader (in TEST MODE) is starting now ...`
         : `Trader is starting now ...`);
@@ -20,21 +19,15 @@ export class Trader {
       Session ID: ${this.session.id};
     `);
 
-    await this._prepareExhange();
+    console.log('Starting the exchange ...');
+
+    await this.session.exchange.boot(this.session);
 
     console.info(`Starting the ticks now ...`);
 
     while(true) {
       await this._tick();
     }
-  }
-
-  private async _prepareExhange(): Promise<void> {
-    return new Promise((resolve) => {
-      // TODO: actually connect to the exchange and start updating the prices
-
-      resolve();
-    });
   }
 
   private async _tick(): Promise<void> {
