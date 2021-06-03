@@ -10,6 +10,7 @@ export enum OrderTypeEnum {
   LIMIT = 'LIMIT',
   MARKET = 'MARKET',
 }
+
 export interface OrderInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
   asset: string; // Must be underscore delimited, like: BTC_ETH

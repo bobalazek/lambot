@@ -4,19 +4,23 @@ import { Session } from './Session';
 export class Trader {
   sessions: Session[];
   exchanges: Map<string, Exchange>;
+  isTestMode: boolean;
 
-  constructor(sessions: Session[]) {
+  constructor(sessions: Session[], isTestMode: boolean = true) {
     this.sessions = sessions;
     this.exchanges = new Map();
+    this.isTestMode = isTestMode;
   }
 
   async start() {
-    console.info(`Trader is starting now ...`);
+    console.info(this.isTestMode
+        ? `Trader (in TEST MODE) is starting now ...`
+        : `Trader is starting now ...`);
 
     this.sessions.forEach((session) => {
       console.log(`
         Account: ${session.account.key};
-        Exchange: ${session.exchange.name};
+        Exchange: ${session.account.exchange.name};
         Session ID: ${session.id};
       `);
     });
@@ -37,7 +41,7 @@ export class Trader {
 
     return new Promise((resolve) => {
       this.sessions.forEach((session) => {
-        const exchange = session.exchange;
+        const { exchange } = session.account;
         const exchangeKey = exchange.key;
 
         // We only need one exchange to pool the prices for now.
