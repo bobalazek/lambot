@@ -3,6 +3,12 @@ export interface AssetInterface {
   name: string;
 }
 
+export interface AssetPairInterface {
+  assetBase: Asset;
+  assetQuote: Asset;
+  toString(delimiter: string): string;
+}
+
 export class Asset implements AssetInterface {
   symbol: string;
   name: string;
@@ -17,9 +23,27 @@ export class Asset implements AssetInterface {
   }
 }
 
-export type AssetPair = [Asset, Asset];
+export class AssetPair implements AssetPairInterface {
+  assetBase: Asset;
+  assetQuote: Asset;
+
+  constructor(assetBase: Asset, assetQuote: Asset) {
+    this.assetBase = assetBase;
+    this.assetQuote = assetQuote;
+  }
+
+  toString(delimiter: string = ''): string {
+    return (
+      this.assetBase.symbol +
+      delimiter +
+      this.assetQuote.symbol
+    );
+  }
+};
 
 export class Assets {
+  static readonly EUR = new Asset('EUR', 'Euro');
+  static readonly USD = new Asset('USD', 'United States Dollar');
   static readonly BTC = new Asset('BTC', 'Bitcoin');
   static readonly ETH = new Asset('ETH', 'Ethereum');
   static readonly USDT = new Asset('USDT', 'Tether');
@@ -57,5 +81,24 @@ export class Assets {
   static readonly BTT = new Asset('BTT', 'BitTorrent');
   static readonly DASH = new Asset('DASH', 'Dash');
   static readonly ZEC = new Asset('ZEC', 'Zcash');
+  static readonly AVAX = new Asset('AVAX', 'Avalanche');
+  static readonly COMP = new Asset('COMP', 'Compound');
+  static readonly CEL = new Asset('CEL', 'Celsius');
+  static readonly TEL = new Asset('TEL', 'Telcoin');
+  static readonly YFI = new Asset('YFI', 'yearn.finance');
   static readonly SUSHI = new Asset('SUSHI', 'SushiSwap');
+  static readonly MANA = new Asset('MANA', 'Decrentraland');
+  static readonly ENJ = new Asset('ENJ', 'Enjin Coin');
+  static readonly XTZ = new Asset('XTZ', 'Tezos');
+  static readonly MKR = new Asset('MKR', 'Maker');
+  static readonly ATOM = new Asset('ATOM', 'Cosmos');
+  static readonly SNX = new Asset('SNX', 'Synthetix Network Token');
+
+  getBySymbol(symbol: string) {
+    if (!!this[symbol]) {
+      return this[symbol];
+    }
+
+    return new Asset(symbol, symbol);
+  }
 }
