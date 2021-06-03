@@ -12,12 +12,12 @@ export enum OrderTypeEnum {
 }
 export interface OrderInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
-  symbol: string; // BTCETH
+  asset: string; // Must be underscore delimited, like: BTC_ETH
   side: OrderSideEnum;
   type: OrderTypeEnum;
   amount: string;
-  fee: string;
   time: number;
+  isCompleted: boolean;
   exchangeResponse: unknown;
   session: Session;
   exchange: Exchange;
@@ -30,24 +30,24 @@ export interface OrderFeesInterface {
 
 export class Order implements OrderInterface {
   id: string;
-  symbol: string;
+  asset: string;
   side: OrderSideEnum;
   type: OrderTypeEnum;
   amount: string;
-  fee: string;
   time: number;
+  isCompleted: boolean;
   exchangeResponse: unknown;
   session: Session;
   exchange: Exchange;
 
   constructor(
     id: string,
-    symbol: string,
+    asset: string,
     side: OrderSideEnum,
     amount: string
   ) {
     this.id = id;
-    this.symbol = symbol;
+    this.asset = asset;
     this.side = side;
     this.amount = amount;
   }
