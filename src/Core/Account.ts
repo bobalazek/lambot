@@ -1,5 +1,5 @@
 import { Exchange } from './Exchange';
-import { Order, OrderFees, OrderInterface, OrderSideEnum, OrderTypeEnum } from './Order';
+import { Order, OrderFees, OrderSideEnum } from './Order';
 
 export interface AccountInterface {
   key: string;
@@ -10,16 +10,16 @@ export interface AccountInterface {
   newOrder(order: Order): Promise<Order>;
   getAssets(): Promise<AccountAsset[]>;
   getAsset(symbol: string): Promise<AccountAsset>;
-  getAssetFees(symbol: string, quantity: string): Promise<OrderFees>;
-  buyAsset(symbol: string, quantity: string): Promise<Order>;
-  sellAsset(symbol: string, quantity: string): Promise<Order>;
+  getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
+  buyAsset(symbol: string, amount: string): Promise<Order>;
+  sellAsset(symbol: string, amount: string): Promise<Order>;
 }
 
 export interface AccountAssetInterface {
   account: Account;
   symbol: string;
-  quantityFree: string;
-  quantityLocked: string;
+  amountFree: string;
+  amountLocked: string;
 }
 
 export class Account implements AccountInterface {
@@ -78,19 +78,19 @@ export class Account implements AccountInterface {
     return asset;
   }
 
-  async getAssetFees(symbol: string, quantity: string): Promise<OrderFees> {
+  async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
     const assetFees = this._getMockAssetFees();
 
     return assetFees;
   }
 
-  async buyAsset(symbol: string, quantity: string): Promise<Order> {
+  async buyAsset(symbol: string, amount: string): Promise<Order> {
     const order = this._getMockOrder();
 
     return this.newOrder(order);
   }
 
-  async sellAsset(symbol: string, quantity: string): Promise<Order> {
+  async sellAsset(symbol: string, amount: string): Promise<Order> {
     const order = this._getMockOrder();
 
     return this.newOrder(order);
@@ -108,8 +108,7 @@ export class Account implements AccountInterface {
     return new Order(
       '0001',
       'BTC',
-      OrderSideEnum.SELL,
-      OrderTypeEnum.LIMIT,
+      OrderSideEnum.BUY,
       '0.000000001'
     );
   }
@@ -118,18 +117,18 @@ export class Account implements AccountInterface {
 export class AccountAsset implements AccountAssetInterface {
   account: Account;
   symbol: string;
-  quantityFree: string;
-  quantityLocked: string;
+  amountFree: string;
+  amountLocked: string;
 
   constructor(
     account: Account,
     symbol: string,
-    quantityFree: string = '0',
-    quantityLocked: string = '0'
+    amountFree: string = '0',
+    amountLocked: string = '0'
   ) {
     this.account = account;
     this.symbol = symbol;
-    this.quantityFree = quantityFree;
-    this.quantityLocked = quantityLocked;
+    this.amountFree = amountFree;
+    this.amountLocked = amountLocked;
   }
 }
