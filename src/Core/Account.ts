@@ -1,3 +1,4 @@
+import { Assets } from './Asset';
 import { Exchange } from './Exchange';
 import { Order, OrderFees, OrderSideEnum } from './Order';
 
@@ -107,7 +108,7 @@ export class Account implements AccountInterface {
   private _getMockOrder(): Order {
     return new Order(
       '0001',
-      'BTC',
+      Assets.BTC,
       OrderSideEnum.BUY,
       '0.000000001'
     );

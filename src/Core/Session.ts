@@ -1,4 +1,5 @@
 import { Account } from './Account';
+import { Asset, AssetPair } from './Asset';
 
 export interface SessionInterface {
   id: string;
@@ -12,15 +13,13 @@ export interface SessionInterface {
 
 export interface SessionAssetInterface {
   session: Session;
-  asset: string; // What is the default asset you want to trade in?
+  asset: Asset; // What is the default asset you want to trade in?
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   amountPerOrder: string; // What's the base amount we want to trade each order?
   amountFree: string; // How much free funds do we still have to use?
   amountLocked: string; // How much funds are currently in order?
   startOnDip: boolean; // If that is set to false, then trading will start immediately, else it will wait for a dip
 }
-
-export type AssetPair = [string, string];
 
 export class Session implements SessionInterface {
   id: string;
@@ -36,21 +35,21 @@ export class Session implements SessionInterface {
     this.account = account;
   }
 
-  addAsset(asset: string, assetPairs: AssetPair[]) {
+  addAsset(asset: Asset, assetPairs: AssetPair[]) {
     this.assets.push(new SessionAsset(this, asset, assetPairs));
   }
 }
 
 export class SessionAsset implements SessionAssetInterface {
   session: Session;
-  asset: string;
+  asset: Asset;
   assetPairs: AssetPair[];
   amountPerOrder: string;
   amountFree: string;
   amountLocked: string;
   startOnDip: boolean;
 
-  constructor(session: Session, asset: string, assetPairs: AssetPair[]) {
+  constructor(session: Session, asset: Asset, assetPairs: AssetPair[]) {
     this.session = session;
     this.asset = asset;
     this.assetPairs = assetPairs;
