@@ -1,6 +1,8 @@
+import axios from 'axios';
 import Websocket from 'ws';
 
 import { ApiCredentials } from '../Core/ApiCredentials';
+import { AssetPair, Assets } from '../Core/Asset';
 import { Exchange } from '../Core/Exchange';
 import { Session } from '../Core/Session';
 import logger from '../Utils/Logger';
@@ -28,6 +30,26 @@ export class BinanceExchange extends Exchange {
     }, 5000);
 
     return true;
+  }
+
+  async getAssetPairs(): Promise<AssetPair[]> {
+    logger.debug('Fetching asset pairs ...');
+
+    const response = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+
+    let assetPairs = [];
+    for (let i = 0; i < response.data.symbols.length; i++) {
+      const symbolData = response.data.symbols[i];
+
+      assetPairs.push(
+        new AssetPair(
+          Assets.getBySymbol(symbolData.baseAsset),
+          Assets.getBySymbol(symbolData.quoteAsset)
+        )
+      );
+    }
+
+    return assetPairs;
   }
 
   async _prepareWebsocket() {

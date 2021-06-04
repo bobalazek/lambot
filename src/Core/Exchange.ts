@@ -1,3 +1,4 @@
+import logger from '../Utils/Logger';
 import { ApiCredentials } from './ApiCredentials';
 import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
@@ -68,6 +69,26 @@ export class Exchange implements ExchangeInterface {
 
   async boot(session: Session): Promise<boolean> {
     this._session = session;
+
+    const exhangeAssetPairs = await this.getAssetPairs();
+    const exhangeAssetPairsSet = new Set(exhangeAssetPairs.map((assetPair) => {
+      return assetPair.toString(this.assetPairDelimiter);
+    }));
+
+    logger.info('I will be trading with the following assets:');
+
+    this._session.assets.forEach((sessionAsset) => {
+      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet();
+      sessionAssetAssetPairSet.forEach((assetPairString) => {
+        if (!exhangeAssetPairsSet.has(assetPairString)) {
+          logger.error(`Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`);
+
+          process.exit(1);
+        }
+      });
+
+      logger.info(sessionAsset.toString());
+    });
 
     return true;
   }

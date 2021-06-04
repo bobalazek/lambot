@@ -18,6 +18,8 @@ export interface SessionAssetInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   amountTotal: string; // How much total resources we want to use for this session?
   amountPerOrder: string; // What's the base amount we want to trade each order?
+  getAssetPairsSet(): Set<string>;
+  toString(): string;
 }
 
 export class Session implements SessionInterface {
@@ -111,5 +113,18 @@ export class SessionAsset implements SessionAssetInterface {
     });
 
     return assetPairs;
+  }
+
+  toString(): string {
+    const assetString = this.asset.toString();
+    const assetPairsString = this.assetPairs.map((assetPair) => {
+      return assetPair.toString(this.session.exchange.assetPairDelimiter);
+    }).join(',');
+
+    return (
+      'Base asset: ' + assetString +
+      '; ' +
+      'Asset pairs: ' + assetPairsString
+    );
   }
 }

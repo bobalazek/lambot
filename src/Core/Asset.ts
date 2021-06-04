@@ -32,7 +32,7 @@ export class AssetPair implements AssetPairInterface {
     this.assetQuote = assetQuote;
   }
 
-  toString(delimiter: string = ''): string {
+  toString(delimiter: string): string {
     return (
       this.assetBase.symbol +
       delimiter +
@@ -94,7 +94,7 @@ export class Assets {
   static readonly ATOM = new Asset('ATOM', 'Cosmos');
   static readonly SNX = new Asset('SNX', 'Synthetix Network Token');
 
-  getBySymbol(symbol: string): Asset {
+  static getBySymbol(symbol: string): Asset {
     if (!!this[symbol]) {
       return this[symbol];
     }
