@@ -9,12 +9,16 @@ export interface ExchangeInterface {
   apiCredentials: ApiCredentials;
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
-  newAccountOrder(order: Order): Promise<Order>;
+  addAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAsset[]>;
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
-  getAssetPairs(asset: Asset): Promise<AssetPair[]>;
-  buyAsset(symbol: string, amount: string): Promise<Order>;
-  sellAsset(symbol: string, amount: string): Promise<Order>;
+  getAssetPairs(): Set<string>;
+  addAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPrice): ExchangeAssetPrice;
+  addAssetPairPriceEntry(
+    symbol: string,
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
+    lastEntryInterval: number
+  ): ExchangeAssetPriceEntryInterface;
 }
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
@@ -55,15 +59,17 @@ export class Exchange implements ExchangeInterface {
   }
 
   async boot(session: Session): Promise<boolean> {
-    throw new Error('boot() not implemented yet.');
+    this._session = session;
+
+    return true;
   }
 
   async getAccountOrders(): Promise<Order[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 
-  async newAccountOrder(order: Order): Promise<Order> {
-    throw new Error('newAccountOrder() not implemented yet.');
+  async addAccountOrder(order: Order): Promise<Order> {
+    throw new Error('addAccountOrder() not implemented yet.');
   }
 
   async getAccountAssets(): Promise<ExchangeAccountAsset[]> {
@@ -74,19 +80,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetFees() not implemented yet.');
   }
 
-  async getAssetPairs(asset: Asset): Promise<AssetPair[]> {
-    throw new Error('getAssetPairs() not implemented yet.');
-  }
-
-  async buyAsset(symbol: string, amount: string): Promise<Order> {
-    throw new Error('buyAsset() not implemented yet.');
-  }
-
-  async sellAsset(symbol: string, amount: string): Promise<Order> {
-    throw new Error('sellAsset() not implemented yet.');
-  }
-
-  getAssetPairsSet(): Set<string> {
+  getAssetPairs(): Set<string> {
     const assetPairs = new Set<string>();
 
     this._assetPairPrices.forEach((_, key) => {
@@ -102,38 +96,36 @@ export class Exchange implements ExchangeInterface {
       : this._assetPairPrices;
   }
 
-  addAssetPairPrice(symbol: string): ExchangeAssetPrice {
-    const assetPairPrice = new ExchangeAssetPrice();
-
+  addAssetPairPrice(
+    symbol: string,
+    assetPairPrice: ExchangeAssetPrice = new ExchangeAssetPrice()
+  ): ExchangeAssetPrice {
     this._assetPairPrices.set(symbol, assetPairPrice);
 
     return assetPairPrice;
   }
 
-  /**
-   * @param symbol
-   * @param assetPriceDataEntry
-   * @param lastEntryInterval Only add the entry if the last entry was created longer ago then the specified interval
-   * @returns
-   */
+  getLastAssetPairPriceEntry(symbol: string): ExchangeAssetPriceEntryInterface | null {
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getAssetPairPrices(symbol);
+    if (
+      !symbolAssetPrice ||
+      symbolAssetPrice.entries.length === 0
+    ) {
+      return null;
+    }
+
+    return symbolAssetPrice.entries[symbolAssetPrice.entries.length - 1];
+  }
+
   addAssetPairPriceEntry(
     symbol: string,
-    assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
-    lastEntryInterval: number = 5000
-  ): boolean {
-    const now = +new Date();
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
+  ): ExchangeAssetPriceEntryInterface {
     const symbolAssetPrice = <ExchangeAssetPrice>this.getAssetPairPrices(symbol);
-
-    if (symbolAssetPrice.entries.length > 0) {
-      const assetPricesLast = symbolAssetPrice.entries[symbolAssetPrice.entries.length - 1];
-      if (now - assetPricesLast.timestamp < lastEntryInterval) {
-        return false;
-      }
-    }
 
     symbolAssetPrice.entries.push(assetPriceDataEntry);
 
-    return true;
+    return assetPriceDataEntry;
   }
 }
 

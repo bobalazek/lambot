@@ -6,6 +6,8 @@ import { Session } from '../Core/Session';
 import logger from '../Utils/Logger';
 
 export class BinanceExchange extends Exchange {
+  private _assetPairPriceUpdateInterval: number = 5000;
+
   constructor(apiCredentials: ApiCredentials) {
     super('binance', 'Binance', apiCredentials);
 
@@ -17,7 +19,7 @@ export class BinanceExchange extends Exchange {
   }
 
   async boot(session: Session): Promise<boolean> {
-    this._session = session;
+    await super.boot(session);
 
     await this._prepareWebsocket();
 
@@ -33,7 +35,7 @@ export class BinanceExchange extends Exchange {
       logger.info('Starting binance websocket ...');
 
       const ws = new Websocket(`wss://stream.binance.com:9443/ws/!bookTicker`);
-      const watchedAssetPairs = this.getAssetPairsSet();
+      const watchedAssetPairs = this.getAssetPairs();
 
       ws.on('open', () => {
         logger.info('Binance Websocket open');
@@ -64,11 +66,21 @@ export class BinanceExchange extends Exchange {
         const assetAskPrice = parsedData.a;
         const assetBidPrice = parsedData.b;
 
-        this.addAssetPairPriceEntry(asset, {
-          timestamp: now,
-          askPrice: assetAskPrice,
-          bidPrice: assetBidPrice,
-        });
+        // Only add a new entry if the last one was added more then the interval ago ...
+        const lastAssetPairPriceEntry = this.getLastAssetPairPriceEntry(asset);
+        if (
+          !lastAssetPairPriceEntry ||
+          (
+            lastAssetPairPriceEntry &&
+            now - lastAssetPairPriceEntry.timestamp > this._assetPairPriceUpdateInterval
+          )
+        ) {
+          this.addAssetPairPriceEntry(asset, {
+            timestamp: now,
+            askPrice: assetAskPrice,
+            bidPrice: assetBidPrice,
+          });
+        }
       });
     });
   }
