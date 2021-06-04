@@ -59,6 +59,12 @@ export class Session implements SessionInterface {
         amountPerOrder
       )
     );
+
+    assetPairs.forEach((assetPair) => {
+      this.exchange.addAssetPairPrice(
+        assetPair.toString()
+      );
+    });
   }
 }
 

@@ -17,17 +17,16 @@ export interface ExchangeInterface {
   sellAsset(symbol: string, amount: string): Promise<Order>;
 }
 
-export class ExchangeAssetPrice extends Map<string, {
-  timestamp: number,
-  value: string,
-}[]> {
-  /**
-   * BTCETH: [
-   *   100000000: '0.00001',
-   *   100000001: '0.00002',
-   *   100000003: '0.00003',
-   * ],
-   */
+export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
+
+export interface ExchangeAssetPriceInterface {
+  entries: ExchangeAssetPriceEntryInterface[];
+}
+
+export interface ExchangeAssetPriceEntryInterface {
+  timestamp: number;
+  askPrice: string;
+  bidPrice: string;
 }
 
 export interface ExchangeAccountAssetInterface {
@@ -42,7 +41,7 @@ export class Exchange implements ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   _session: Session;
-  _assetPrices: ExchangeAssetPrice;
+  _assetPairPrices: ExchangeAssetPricesMap;
 
   constructor(
     key: string,
@@ -52,7 +51,7 @@ export class Exchange implements ExchangeInterface {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
-    this._assetPrices = new Map();
+    this._assetPairPrices = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
@@ -86,6 +85,56 @@ export class Exchange implements ExchangeInterface {
   async sellAsset(symbol: string, amount: string): Promise<Order> {
     throw new Error('sellAsset() not implemented yet.');
   }
+
+  getAssetPairsSet(): Set<string> {
+    const assetPairs = new Set<string>();
+
+    this._assetPairPrices.forEach((_, key) => {
+      assetPairs.add(key);
+    });
+
+    return assetPairs;
+  }
+
+  getAssetPairPrices(symbol?: string): ExchangeAssetPricesMap | ExchangeAssetPrice {
+    return symbol
+      ? this._assetPairPrices.get(symbol)
+      : this._assetPairPrices;
+  }
+
+  addAssetPairPrice(symbol: string): ExchangeAssetPrice {
+    const assetPairPrice = new ExchangeAssetPrice();
+
+    this._assetPairPrices.set(symbol, assetPairPrice);
+
+    return assetPairPrice;
+  }
+
+  /**
+   * @param symbol
+   * @param assetPriceDataEntry
+   * @param lastEntryInterval Only add the entry if the last entry was created longer ago then the specified interval
+   * @returns
+   */
+  addAssetPairPriceEntry(
+    symbol: string,
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
+    lastEntryInterval: number = 5000
+  ): boolean {
+    const now = +new Date();
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getAssetPairPrices(symbol);
+
+    if (symbolAssetPrice.entries.length > 0) {
+      const assetPricesLast = symbolAssetPrice.entries[symbolAssetPrice.entries.length - 1];
+      if (now - assetPricesLast.timestamp < lastEntryInterval) {
+        return false;
+      }
+    }
+
+    symbolAssetPrice.entries.push(assetPriceDataEntry);
+
+    return true;
+  }
 }
 
 export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
@@ -104,5 +153,13 @@ export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
     this.symbol = symbol;
     this.amountFree = amountFree;
     this.amountLocked = amountLocked;
+  }
+}
+
+export class ExchangeAssetPrice {
+  entries: ExchangeAssetPriceEntryInterface[];
+
+  constructor() {
+    this.entries = [];
   }
 }
