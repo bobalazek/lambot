@@ -1,5 +1,5 @@
 import { ApiCredentials } from './ApiCredentials';
-import { Asset, AssetPair } from './Asset';
+import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
 import { Session } from './Session';
 
@@ -11,10 +11,12 @@ export interface ExchangeInterface {
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAsset[]>;
+  getAssetPairs(): Promise<AssetPair[]>;
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
-  getAssetPairs(): Set<string>;
-  addAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPrice): ExchangeAssetPrice;
-  addAssetPairPriceEntry(
+  getSession(): Session;
+  addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPrice): ExchangeAssetPrice;
+  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface | null;
+  addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
     lastEntryInterval: number
@@ -45,7 +47,7 @@ export class Exchange implements ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   _session: Session;
-  _assetPairPrices: ExchangeAssetPricesMap;
+  _sessionAssetPairPrices: ExchangeAssetPricesMap;
 
   constructor(
     key: string,
@@ -55,7 +57,7 @@ export class Exchange implements ExchangeInterface {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
-    this._assetPairPrices = new Map();
+    this._sessionAssetPairPrices = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
@@ -76,37 +78,35 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAccountAssets() not implemented yet.');
   }
 
+  async getAssetPairs(): Promise<AssetPair[]> {
+    throw new Error('getAssetPairs() not implemented yet.');
+  }
+
   async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 
-  getAssetPairs(): Set<string> {
-    const assetPairs = new Set<string>();
-
-    this._assetPairPrices.forEach((_, key) => {
-      assetPairs.add(key);
-    });
-
-    return assetPairs;
+  getSession(): Session {
+    return this._session;
   }
 
-  getAssetPairPrices(symbol?: string): ExchangeAssetPricesMap | ExchangeAssetPrice {
+  getSessionAssetPairPrices(symbol?: string): ExchangeAssetPricesMap | ExchangeAssetPrice {
     return symbol
-      ? this._assetPairPrices.get(symbol)
-      : this._assetPairPrices;
+      ? this._sessionAssetPairPrices.get(symbol)
+      : this._sessionAssetPairPrices;
   }
 
-  addAssetPairPrice(
+  addSessionAssetPairPrice(
     symbol: string,
     assetPairPrice: ExchangeAssetPrice = new ExchangeAssetPrice()
   ): ExchangeAssetPrice {
-    this._assetPairPrices.set(symbol, assetPairPrice);
+    this._sessionAssetPairPrices.set(symbol, assetPairPrice);
 
     return assetPairPrice;
   }
 
-  getLastAssetPairPriceEntry(symbol: string): ExchangeAssetPriceEntryInterface | null {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getAssetPairPrices(symbol);
+  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface | null {
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrices(symbol);
     if (
       !symbolAssetPrice ||
       symbolAssetPrice.entries.length === 0
@@ -117,11 +117,11 @@ export class Exchange implements ExchangeInterface {
     return symbolAssetPrice.entries[symbolAssetPrice.entries.length - 1];
   }
 
-  addAssetPairPriceEntry(
+  addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface
   ): ExchangeAssetPriceEntryInterface {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getAssetPairPrices(symbol);
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrices(symbol);
 
     symbolAssetPrice.entries.push(assetPriceDataEntry);
 

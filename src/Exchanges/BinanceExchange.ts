@@ -24,7 +24,7 @@ export class BinanceExchange extends Exchange {
     await this._prepareWebsocket();
 
     setInterval(() => {
-      console.log(this.getAssetPairPrices());
+      console.log(this.getSessionAssetPairPrices());
     }, 5000);
 
     return true;
@@ -35,7 +35,7 @@ export class BinanceExchange extends Exchange {
       logger.info('Starting binance websocket ...');
 
       const ws = new Websocket(`wss://stream.binance.com:9443/ws/!bookTicker`);
-      const watchedAssetPairs = this.getAssetPairs();
+      const allAssetPairs = this.getSession().getAllAssetPairsSet();
 
       ws.on('open', () => {
         logger.info('Binance Websocket open');
@@ -58,7 +58,7 @@ export class BinanceExchange extends Exchange {
       ws.on('message', (data) => {
         const parsedData = JSON.parse(data.toString());
         const asset = parsedData.s;
-        if (!watchedAssetPairs.has(asset)) {
+        if (!allAssetPairs.has(asset)) {
           return;
         }
 
@@ -67,7 +67,7 @@ export class BinanceExchange extends Exchange {
         const assetBidPrice = parsedData.b;
 
         // Only add a new entry if the last one was added more then the interval ago ...
-        const lastAssetPairPriceEntry = this.getLastAssetPairPriceEntry(asset);
+        const lastAssetPairPriceEntry = this.getSessionAssetPairPriceEntryLast(asset);
         if (
           !lastAssetPairPriceEntry ||
           (
@@ -75,7 +75,7 @@ export class BinanceExchange extends Exchange {
             now - lastAssetPairPriceEntry.timestamp > this._assetPairPriceUpdateInterval
           )
         ) {
-          this.addAssetPairPriceEntry(asset, {
+          this.addSessionAssetPairPriceEntry(asset, {
             timestamp: now,
             askPrice: assetAskPrice,
             bidPrice: assetBidPrice,

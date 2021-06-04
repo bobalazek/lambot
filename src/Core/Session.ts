@@ -10,6 +10,7 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
+  getAllAssetPairsSet(): Set<string>;
 }
 
 export interface SessionAssetInterface {
@@ -61,10 +62,22 @@ export class Session implements SessionInterface {
     );
 
     assetPairs.forEach((assetPair) => {
-      this.exchange.addAssetPairPrice(
+      this.exchange.addSessionAssetPairPrice(
         assetPair.toString()
       );
     });
+  }
+
+  getAllAssetPairsSet(): Set<string> {
+    const assetPairs = new Set<string>();
+
+    this.assets.forEach((sessionAsset) => {
+      sessionAsset.getAssetPairsSet().forEach((assetPair) => {
+        assetPairs.add(assetPair.toString());
+      });
+    });
+
+    return assetPairs;
   }
 }
 
@@ -90,5 +103,15 @@ export class SessionAsset implements SessionAssetInterface {
     this.assetPairs = assetPairs;
     this.amountTotal = amountTotal;
     this.amountPerOrder = amountPerOrder;
+  }
+
+  getAssetPairsSet(): Set<string> {
+    const assetPairs = new Set<string>();
+
+    this.assetPairs.forEach((assetPair) => {
+      assetPairs.add(assetPair.toString());
+    });
+
+    return assetPairs;
   }
 }
