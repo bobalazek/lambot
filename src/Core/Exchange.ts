@@ -7,6 +7,7 @@ export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
+  assetPairDelimiter: string;
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
@@ -46,17 +47,22 @@ export class Exchange implements ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
+  assetPairDelimiter: string;
+
   _session: Session;
   _sessionAssetPairPrices: ExchangeAssetPricesMap;
 
   constructor(
     key: string,
     name: string,
-    apiCredentials: ApiCredentials
+    apiCredentials: ApiCredentials,
+    assetPairDelimiter: string = ''
   ) {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
+    this.assetPairDelimiter = assetPairDelimiter;
+
     this._sessionAssetPairPrices = new Map();
   }
 

@@ -6,7 +6,6 @@ export interface SessionInterface {
   id: string;
   exchange: Exchange;
   assets: SessionAsset[];
-  warmupPeriod: number; // In milliseconds. How long should we just pool the prices until we actually start trading?
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -25,7 +24,6 @@ export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
   assets: SessionAsset[];
-  warmupPeriod: number;
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -34,7 +32,6 @@ export class Session implements SessionInterface {
     this.id = id;
     this.exchange = exchange;
     this.assets = [];
-    this.warmupPeriod = 5 * 60 * 1000;
   }
 
   /**
@@ -63,7 +60,7 @@ export class Session implements SessionInterface {
 
     assetPairs.forEach((assetPair) => {
       this.exchange.addSessionAssetPairPrice(
-        assetPair.toString()
+        assetPair.toString(this.exchange.assetPairDelimiter)
       );
     });
   }
@@ -73,7 +70,7 @@ export class Session implements SessionInterface {
 
     this.assets.forEach((sessionAsset) => {
       sessionAsset.getAssetPairsSet().forEach((assetPair) => {
-        assetPairs.add(assetPair.toString());
+        assetPairs.add(assetPair);
       });
     });
 
@@ -87,6 +84,7 @@ export class SessionAsset implements SessionAssetInterface {
   assetPairs: AssetPair[];
   amountTotal: string;
   amountPerOrder: string;
+
   _orders: Order[];
   _amountFree: string; // How much free funds do we still have to use?
   _amountLocked: string; // How much funds are currently in order?
@@ -109,7 +107,7 @@ export class SessionAsset implements SessionAssetInterface {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
-      assetPairs.add(assetPair.toString());
+      assetPairs.add(assetPair.toString(this.session.exchange.assetPairDelimiter));
     });
 
     return assetPairs;

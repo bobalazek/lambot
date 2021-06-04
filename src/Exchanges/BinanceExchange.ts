@@ -9,7 +9,7 @@ export class BinanceExchange extends Exchange {
   private _assetPairPriceUpdateInterval: number = 5000;
 
   constructor(apiCredentials: ApiCredentials) {
-    super('binance', 'Binance', apiCredentials);
+    super('binance', 'Binance', apiCredentials ,'');
 
     if (!apiCredentials.key || !apiCredentials.secret) {
       logger.error('Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!');
