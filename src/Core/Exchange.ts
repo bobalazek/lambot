@@ -18,8 +18,10 @@ export interface ExchangeInterface {
   getAssetPairs(): Promise<AssetPair[]>;
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
   getSession(): Session;
+  getSessionAssetPairPrices(): ExchangeAssetPricesMap;
+  getSessionAssetPairPrice(symbol: string): ExchangeAssetPrice;
   addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPrice): ExchangeAssetPrice;
-  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface | null;
+  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface;
   addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
@@ -31,6 +33,9 @@ export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceInterface {
   entries: ExchangeAssetPriceEntryInterface[];
+  lastPrice: string;
+  getLastEntry(): ExchangeAssetPriceEntryInterface;
+  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
 }
 
 export interface ExchangeAssetPriceEntryInterface {
@@ -71,6 +76,8 @@ export class Exchange implements ExchangeInterface {
 
   async boot(session: Session): Promise<boolean> {
     this._session = session;
+
+    logger.info('Booting up the exchange ...');
 
     const sessionAssets = session.assets;
     if (sessionAssets.length === 0) {
@@ -128,10 +135,12 @@ export class Exchange implements ExchangeInterface {
     return this._session;
   }
 
-  getSessionAssetPairPrices(symbol?: string): ExchangeAssetPricesMap | ExchangeAssetPrice {
-    return symbol
-      ? this._sessionAssetPairPrices.get(symbol)
-      : this._sessionAssetPairPrices;
+  getSessionAssetPairPrices(): ExchangeAssetPricesMap {
+    return this._sessionAssetPairPrices;
+  }
+
+  getSessionAssetPairPrice(symbol: string): ExchangeAssetPrice {
+    return this._sessionAssetPairPrices.get(symbol);
   }
 
   addSessionAssetPairPrice(
@@ -143,27 +152,25 @@ export class Exchange implements ExchangeInterface {
     return assetPairPrice;
   }
 
-  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface | null {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrices(symbol);
-    if (
-      !symbolAssetPrice ||
-      symbolAssetPrice.entries.length === 0
-    ) {
+  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface {
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrice(symbol);
+    if (!symbolAssetPrice) {
       return null;
     }
 
-    return symbolAssetPrice.entries[symbolAssetPrice.entries.length - 1];
+    return symbolAssetPrice.getLastEntry();
   }
 
   addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface
   ): ExchangeAssetPriceEntryInterface {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrices(symbol);
+    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrice(symbol);
+    if (!symbolAssetPrice) {
+      return null;
+    }
 
-    symbolAssetPrice.entries.push(assetPriceDataEntry);
-
-    return assetPriceDataEntry;
+    return symbolAssetPrice.addEntry(assetPriceDataEntry);
   }
 
   toExport(): Object {
@@ -176,7 +183,7 @@ export class Exchange implements ExchangeInterface {
     };
   }
 
-  static fromImport(data: any): Exchange {
+  static async fromImport(data: any): Promise<Exchange> {
     return ExchangesFactory.get(data.key, data.apiCredentials);
   }
 }
@@ -200,11 +207,29 @@ export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
   }
 }
 
-export class ExchangeAssetPrice {
+export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   entries: ExchangeAssetPriceEntryInterface[];
+  lastPrice: string;
 
   constructor() {
     this.entries = [];
+    this.lastPrice = null;
+  }
+
+  getLastEntry(): ExchangeAssetPriceEntryInterface {
+    if (this.entries.length === 0) {
+      return null;
+    }
+
+    return this.entries[this.entries.length - 1];
+  }
+
+  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface {
+    this.entries.push(entry);
+
+    this.lastPrice = entry.bidPrice;
+
+    return entry;
   }
 }
 

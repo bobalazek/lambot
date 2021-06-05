@@ -24,6 +24,7 @@ export interface OrderInterface {
   assetPair: AssetPair;
   side: OrderSideEnum;
   amount: string;
+  price: string; // only relevant for limit orders
   type: OrderTypeEnum;
   accountType: OrderAccountTypeEnum;
 }
@@ -38,6 +39,7 @@ export class Order implements OrderInterface {
   assetPair: AssetPair;
   side: OrderSideEnum;
   amount: string;
+  price: string;
   type: OrderTypeEnum;
   accountType: OrderAccountTypeEnum;
 
@@ -51,6 +53,7 @@ export class Order implements OrderInterface {
     assetPair: AssetPair,
     side: OrderSideEnum,
     amount: string,
+    price: string = null,
     type: OrderTypeEnum = OrderTypeEnum.MARKET,
     accountType: OrderAccountTypeEnum = OrderAccountTypeEnum.SPOT
   ) {
@@ -58,6 +61,7 @@ export class Order implements OrderInterface {
     this.assetPair = assetPair;
     this.side = side;
     this.amount = amount;
+    this.price = price;
     this.type = type;
     this.accountType = accountType;
   }

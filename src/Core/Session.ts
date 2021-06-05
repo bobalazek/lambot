@@ -1,6 +1,5 @@
 import { Asset, AssetPair, Assets } from './Asset';
 import { Exchange } from './Exchange';
-import { ExchangesFactory } from './Exchanges';
 import { Order } from './Order';
 
 export enum SessionStatusEnum {
@@ -118,8 +117,8 @@ export class Session implements SessionInterface {
     };
   }
 
-  static fromImport(data: any): Session {
-    const exchange = Exchange.fromImport(data.exchange);
+  static async fromImport(data: any): Promise<Session> {
+    const exchange = await Exchange.fromImport(data.exchange);
 
     const session = new Session(
       data.session.id,

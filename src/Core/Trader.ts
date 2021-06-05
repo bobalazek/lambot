@@ -1,4 +1,5 @@
 import logger from '../Utils/Logger';
+import { ExchangeAssetPrice } from './Exchange';
 import { Session } from './Session';
 
 export class Trader {
@@ -19,28 +20,33 @@ export class Trader {
 
     logger.info(`Session ID: ${this.session.id}; Exchange: ${this.session.exchange.name}`);
 
-    logger.info('Booting up the exchange ...');
-
     await this.session.exchange.boot(this.session);
 
-    logger.info(`Starting the ticks now ...`);
-
-    while(true) {
-      await this._tick();
-    }
+    this._startMemoryUsageMonitoring(15 * 1000);
+    this._startExchangeSessionAssetPairMonitoring(5 * 1000);
   }
 
-  private async _tick(): Promise<void> {
-    return new Promise((resolve) => {
-      // Update current prices
-      // Check if we need to do any order
-      // Excecute orders
+  private _startMemoryUsageMonitoring(updateInterval: number) {
+    return setInterval(() => {
+      const memoryUsage = process.memoryUsage();
+      const memoryUsageText = (
+        'Memory usage: ' +
+        Object.keys(memoryUsage).map((key) => {
+          return `${key} - ${Math.round(memoryUsage[key] / 1024 / 1024 * 100) / 100} MB`;
+        }).join('; ')
+      );
 
-      setTimeout(() => {
-        logger.debug(`Ticking ...`);
+      logger.debug(memoryUsageText);
+    }, updateInterval);
+  }
 
-        resolve();
-      }, 1000);
-    });
+  private _startExchangeSessionAssetPairMonitoring(updateInterval: number) {
+    return setInterval(() => {
+      logger.info('Last price updates:');
+
+      this.session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
+        logger.info(key + ' - ' + sessionAssetPairPrice.lastPrice);
+      });
+    }, updateInterval);
   }
 }

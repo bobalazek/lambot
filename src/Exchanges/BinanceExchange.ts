@@ -8,7 +8,7 @@ import { Session } from '../Core/Session';
 import logger from '../Utils/Logger';
 
 export class BinanceExchange extends Exchange {
-  private _assetPairPriceUpdateInterval: number = 5000;
+  private _assetPairPriceUpdateInterval: number = 2000;
 
   constructor(apiCredentials: ApiCredentials) {
     super('binance', 'Binance', apiCredentials ,'');
