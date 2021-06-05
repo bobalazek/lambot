@@ -176,8 +176,8 @@ export class Exchange implements ExchangeInterface {
     };
   }
 
-  static fromImport(object: any): Exchange {
-    return ExchangesFactory.get(object.key, object.apiCredentials);
+  static fromImport(data: any): Exchange {
+    return ExchangesFactory.get(data.key, data.apiCredentials);
   }
 }
 

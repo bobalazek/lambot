@@ -13,13 +13,14 @@ export class SessionManager {
 
     const sessionFilePath = this.getPathById(session.id);
 
-    const object = {
+    const data = {
       session: session.toExport(),
       exchange: session.exchange.toExport(),
       createdAt: +new Date(),
+      version: 1,
     };
 
-    fs.writeFileSync(sessionFilePath, JSON.stringify(object, null, 4), {
+    fs.writeFileSync(sessionFilePath, JSON.stringify(data, null, 4), {
       encoding: 'utf8',
       flag: 'w+',
     });
@@ -38,19 +39,19 @@ export class SessionManager {
     }
 
     const contents = fs.readFileSync(sessionFilePath, 'utf8');
-    const object = JSON.parse(contents);
+    const data = JSON.parse(contents);
 
-    return Session.fromImport(object);
+    return Session.fromImport(data);
   }
 
   static async new(
     id: string,
-    exchangeString: ExchangesEnum | string,
+    exchangeKey: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
     logger.info(`Creating a new session with ID "${id}" ...`);
 
-    const exchange = ExchangesFactory.get(exchangeString);
+    const exchange = ExchangesFactory.get(exchangeKey);
     const session = new Session(id, exchange);
 
     sessionAssets.forEach((sessionAsset) => {
@@ -67,12 +68,14 @@ export class SessionManager {
 
   static async newOrLoad(
     id: string,
-    exchangeString: ExchangesEnum | string,
+    exchangeKey: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
     const sessionFilePath = this.getPathById(id);
     if (fs.existsSync(sessionFilePath)) {
       const sessionLoaded = await this.load(id);
+
+      // TODO: what to do if parameters are different?
 
       if (sessionLoaded) {
         return sessionLoaded;
@@ -81,7 +84,7 @@ export class SessionManager {
       logger.info(`Tried to load session with ID "${id}", but it returned null ...`);
     }
 
-    return this.new(id, exchangeString, sessionAssets);
+    return this.new(id, exchangeKey, sessionAssets);
   }
 
   static getPathById(id: string): string {

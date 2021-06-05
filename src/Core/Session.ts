@@ -94,7 +94,19 @@ export class Session implements SessionInterface {
   toExport(): Object {
     const assets = [];
 
-    // TODO
+    this.assets.forEach((sessionAsset) => {
+      assets.push({
+        asset: sessionAsset.asset.toString(),
+        assetPairs: sessionAsset.assetPairs.map((assetPair) => {
+          return [
+            assetPair.assetBase.toString(),
+            assetPair.assetQuote.toString(),
+          ];
+        }),
+        amountTotal: sessionAsset.amountTotal,
+        amountPerOrder: sessionAsset.amountPerOrder,
+      });
+    });
 
     return {
       id: this.id,
@@ -106,15 +118,24 @@ export class Session implements SessionInterface {
     };
   }
 
-  static fromImport(object: any): Session {
-    const exchange = Exchange.fromImport(object.exchange);
+  static fromImport(data: any): Session {
+    const exchange = Exchange.fromImport(data.exchange);
 
     const session = new Session(
-      object.id,
+      data.session.id,
       exchange
     );
 
-    // TODO: assets
+    data.session.assets.forEach((assetData) => {
+      session.addAsset(
+        new Asset(assetData.asset, assetData.asset),
+        assetData.assetPairs.map((assetPair) => {
+          return new Asset(assetPair[0], assetPair[1]);
+        }),
+        assetData.amountTotal,
+        assetData.amountPerOrder,
+      );
+    });
 
     return session;
   }
