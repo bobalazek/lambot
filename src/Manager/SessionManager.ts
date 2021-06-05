@@ -1,23 +1,46 @@
 import path from 'path';
+import fs from 'fs';
 
-import { ExchangesEnum, ExhangesFactory } from '../Core/Exchanges';
+import { ExchangesEnum, ExchangesFactory } from '../Core/Exchanges';
 import { Session, SessionAsset } from '../Core/Session';
+import logger from '../Utils/Logger';
 
-const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', '..', 'data', 'sessions');
+const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
 
 export class SessionManager {
   static async save(session: Session): Promise<string> {
-    const sessionPath = path.resolve(DATA_SESSIONS_DIR, session.id + '.json');
+    logger.info('Saving the session ...');
 
-    // TODO
+    const sessionFilePath = this.getPathById(session.id);
 
-    return sessionPath;
+    const object = {
+      session: session.toExport(),
+      exchange: session.exchange.toExport(),
+      createdAt: +new Date(),
+    };
+
+    fs.writeFileSync(sessionFilePath, JSON.stringify(object, null, 4), {
+      encoding: 'utf8',
+      flag: 'w+',
+    });
+
+    return sessionFilePath;
   }
 
-  static async load(sessionPath: string): Promise<Session | null> {
-    // TODO
+  static async load(id: string): Promise<Session | null> {
+    logger.info(`Loading session with ID "${id}" ...`);
 
-    return null;
+    const sessionFilePath = this.getPathById(id);
+    if (!fs.existsSync(sessionFilePath)) {
+      logger.debug(`Loading session with ID "${id}" ...`);
+
+      return null;
+    }
+
+    const contents = fs.readFileSync(sessionFilePath, 'utf8');
+    const object = JSON.parse(contents);
+
+    return Session.fromImport(object);
   }
 
   static async new(
@@ -25,7 +48,9 @@ export class SessionManager {
     exchangeString: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
-    const exchange = ExhangesFactory.get(exchangeString);
+    logger.info(`Creating a new session with ID "${id}" ...`);
+
+    const exchange = ExchangesFactory.get(exchangeString);
     const session = new Session(id, exchange);
 
     sessionAssets.forEach((sessionAsset) => {
@@ -38,5 +63,28 @@ export class SessionManager {
     });
 
     return session;
+  }
+
+  static async newOrLoad(
+    id: string,
+    exchangeString: ExchangesEnum | string,
+    sessionAssets: SessionAsset[]
+  ): Promise<Session> {
+    const sessionFilePath = this.getPathById(id);
+    if (fs.existsSync(sessionFilePath)) {
+      const sessionLoaded = await this.load(id);
+
+      if (sessionLoaded) {
+        return sessionLoaded;
+      }
+
+      logger.info(`Tried to load session with ID "${id}", but it returned null ...`);
+    }
+
+    return this.new(id, exchangeString, sessionAssets);
+  }
+
+  static getPathById(id: string): string {
+    return path.resolve(DATA_SESSIONS_DIR, id + '.json');
   }
 }

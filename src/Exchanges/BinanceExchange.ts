@@ -14,7 +14,7 @@ export class BinanceExchange extends Exchange {
     super('binance', 'Binance', apiCredentials ,'');
 
     if (!apiCredentials.key || !apiCredentials.secret) {
-      logger.error('Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!');
+      logger.critical('Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!');
 
       process.exit(1);
     }
@@ -24,10 +24,6 @@ export class BinanceExchange extends Exchange {
     await super.boot(session);
 
     await this._prepareWebsocket();
-
-    setInterval(() => {
-      console.log(this.getSessionAssetPairPrices());
-    }, 5000);
 
     return true;
   }

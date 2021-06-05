@@ -37,7 +37,7 @@ export class Trader {
       // Excecute orders
 
       setTimeout(() => {
-        logger.debug(`Tick at ${new Date()}`);
+        logger.debug(`Ticking ...`);
 
         resolve();
       }, 1000);

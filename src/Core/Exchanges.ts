@@ -7,7 +7,7 @@ export enum ExchangesEnum {
   BINANCE = 'binance',
 }
 
-export class ExhangesFactory {
+export class ExchangesFactory {
   static get(key: ExchangesEnum | string, apiCredentials?: ApiCredentials): Exchange {
     switch (key) {
       case ExchangesEnum.BINANCE:

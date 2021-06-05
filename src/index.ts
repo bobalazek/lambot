@@ -25,7 +25,7 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-lever-await issue
 (async() => {
-  const session = await SessionManager.new(
+  const session = await SessionManager.newOrLoad(
     sessionId,
     'binance',
     [

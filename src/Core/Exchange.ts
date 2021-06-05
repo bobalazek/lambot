@@ -1,9 +1,10 @@
 import logger from '../Utils/Logger';
-
 import { ApiCredentials } from './ApiCredentials';
 import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
 import { Session } from './Session';
+import { ExchangesFactory } from './Exchanges';
+import { SessionManager } from '../Manager/SessionManager';
 
 export interface ExchangeInterface {
   key: string;
@@ -71,6 +72,13 @@ export class Exchange implements ExchangeInterface {
   async boot(session: Session): Promise<boolean> {
     this._session = session;
 
+    const sessionAssets = session.assets;
+    if (sessionAssets.length === 0) {
+      logger.critical('No assets found for this session!');
+
+      process.exit(1);
+    }
+
     const exhangeAssetPairs = await this.getAssetPairs();
     const exhangeAssetPairsSet = new Set(exhangeAssetPairs.map((assetPair) => {
       return assetPair.toString(this.assetPairDelimiter);
@@ -78,11 +86,11 @@ export class Exchange implements ExchangeInterface {
 
     logger.info('I will be trading with the following assets:');
 
-    this._session.assets.forEach((sessionAsset) => {
+    sessionAssets.forEach((sessionAsset) => {
       const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet();
       sessionAssetAssetPairSet.forEach((assetPairString) => {
         if (!exhangeAssetPairsSet.has(assetPairString)) {
-          logger.error(`Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`);
+          logger.critical(`Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`);
 
           process.exit(1);
         }
@@ -90,6 +98,8 @@ export class Exchange implements ExchangeInterface {
 
       logger.info(sessionAsset.toString());
     });
+
+    await SessionManager.save(session);
 
     return true;
   }
@@ -154,6 +164,20 @@ export class Exchange implements ExchangeInterface {
     symbolAssetPrice.entries.push(assetPriceDataEntry);
 
     return assetPriceDataEntry;
+  }
+
+  toExport(): Object {
+    return {
+      key: this.key,
+      apiCredentials: {
+        key: this.apiCredentials.key,
+        secret: this.apiCredentials.secret,
+      },
+    };
+  }
+
+  static fromImport(object: any): Exchange {
+    return ExchangesFactory.get(object.key, object.apiCredentials);
   }
 }
 

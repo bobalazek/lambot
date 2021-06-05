@@ -1,5 +1,6 @@
 import { Asset, AssetPair } from './Asset';
 import { Exchange } from './Exchange';
+import { ExchangesFactory } from './Exchanges';
 import { Order } from './Order';
 
 export enum SessionStatusEnum {
@@ -88,6 +89,34 @@ export class Session implements SessionInterface {
     });
 
     return assetPairs;
+  }
+
+  toExport(): Object {
+    const assets = [];
+
+    // TODO
+
+    return {
+      id: this.id,
+      assets,
+      status: this.status,
+      createdAt: this.createdAt,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt,
+    };
+  }
+
+  static fromImport(object: any): Session {
+    const exchange = Exchange.fromImport(object.exchange);
+
+    const session = new Session(
+      object.id,
+      exchange
+    );
+
+    // TODO: assets
+
+    return session;
   }
 }
 
