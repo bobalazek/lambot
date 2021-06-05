@@ -130,7 +130,10 @@ export class Session implements SessionInterface {
       session.addAsset(
         new Asset(assetData.asset, assetData.asset),
         assetData.assetPairs.map((assetPair) => {
-          return new Asset(assetPair[0], assetPair[1]);
+          return new AssetPair(
+            new Asset(assetPair[0], assetPair[0]),
+            new Asset(assetPair[1], assetPair[0])
+          );
         }),
         assetData.amountTotal,
         assetData.amountPerOrder,
