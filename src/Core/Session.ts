@@ -1,4 +1,4 @@
-import { Asset, AssetPair } from './Asset';
+import { Asset, AssetPair, Assets } from './Asset';
 import { Exchange } from './Exchange';
 import { ExchangesFactory } from './Exchanges';
 import { Order } from './Order';
@@ -128,11 +128,11 @@ export class Session implements SessionInterface {
 
     data.session.assets.forEach((assetData) => {
       session.addAsset(
-        new Asset(assetData.asset, assetData.asset),
+        Assets.getBySymbol(assetData.asset),
         assetData.assetPairs.map((assetPair) => {
           return new AssetPair(
-            new Asset(assetPair[0], assetPair[0]),
-            new Asset(assetPair[1], assetPair[0])
+            Assets.getBySymbol(assetPair[0]),
+            Assets.getBySymbol(assetPair[1])
           );
         }),
         assetData.amountTotal,
