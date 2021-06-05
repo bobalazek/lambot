@@ -1,6 +1,7 @@
 import { Asset, AssetPair, Assets } from './Asset';
 import { Exchange } from './Exchange';
 import { Order } from './Order';
+import logger from '../Utils/Logger';
 
 export enum SessionStatusEnum {
   PENDING = 'PENDING',
@@ -118,14 +119,22 @@ export class Session implements SessionInterface {
   }
 
   static async fromImport(data: any): Promise<Session> {
-    const exchange = await Exchange.fromImport(data.exchange);
+    const sessionData = data.session;
+    const exchangeData = data.exchange;
 
+    if (sessionData.status === SessionStatusEnum.ENDED) {
+      logger.critical('The session you are trying to import has already ended. Please create a new one instead.');
+
+      process.exit(1);
+    }
+
+    const exchange = await Exchange.fromImport(exchangeData);
     const session = new Session(
-      data.session.id,
+      sessionData.id,
       exchange
     );
 
-    data.session.assets.forEach((assetData) => {
+    sessionData.assets.forEach((assetData) => {
       session.addAsset(
         Assets.getBySymbol(assetData.asset),
         assetData.assetPairs.map((assetPair) => {
@@ -138,6 +147,10 @@ export class Session implements SessionInterface {
         assetData.amountPerOrder,
       );
     });
+
+    session.status = sessionData.status;
+    session.createdAt = sessionData.createdAt;
+    session.endedAt = sessionData.endedAt;
 
     return session;
   }

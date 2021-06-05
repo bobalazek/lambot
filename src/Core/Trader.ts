@@ -2,24 +2,24 @@ import { Session } from './Session';
 import logger from '../Utils/Logger';
 
 export class Trader {
-  session: Session;
-  isTestMode: boolean;
+  _session: Session;
+  _isTestMode: boolean;
 
   constructor(session: Session, isTestMode: boolean = true) {
-    this.session = session;
-    this.isTestMode = isTestMode;
+    this._session = session;
+    this._isTestMode = isTestMode;
   }
 
   async boot() {
     logger.info(
-      this.isTestMode
+      this._isTestMode
         ? 'Trader (in TEST MODE) is starting now ...'
         : 'Trader is starting now ...'
     );
 
-    logger.info(`Session ID: ${this.session.id}; Exchange: ${this.session.exchange.name}`);
+    logger.info(`Session ID: ${this._session.id}; Exchange: ${this._session.exchange.name}`);
 
-    await this.session.exchange.boot(this.session);
+    await this._session.exchange.boot(this._session);
 
     this._startMemoryUsageMonitoring(15 * 1000);
     this._startExchangeSessionAssetPairMonitoring(5 * 1000);
@@ -45,7 +45,7 @@ export class Trader {
 
       const now = +new Date();
 
-      this.session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
+      this._session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
         const lastEntry = sessionAssetPairPrice.getLastEntry();
         let price = 'no price yet';
         if (lastEntry) {

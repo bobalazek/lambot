@@ -208,6 +208,18 @@ export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
 
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
+  private _changePercentages: {
+    '5s': number,
+    '15s': number,
+    '30s': number,
+    '1m': number,
+    '2m': number,
+    '5m': number,
+    '10m': number,
+    '15m': number,
+    '30m': number,
+    '1h': number,
+  };
 
   constructor() {
     this._entries = [];

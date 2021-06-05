@@ -16,6 +16,7 @@ export class SessionManager {
     const data = {
       session: session.toExport(),
       exchange: session.exchange.toExport(),
+      positions: [], // TODO
       createdAt: +new Date(),
       version: 1,
     };
