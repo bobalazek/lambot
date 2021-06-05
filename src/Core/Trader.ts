@@ -13,14 +13,11 @@ export class Trader {
   async boot() {
     logger.info(
       this.isTestMode
-        ? `Trader (in TEST MODE) is starting now ...`
-        : `Trader is starting now ...`
+        ? 'Trader (in TEST MODE) is starting now ...'
+        : 'Trader is starting now ...'
     );
 
-    logger.info(`
-      Exchange: ${this.session.exchange.name}
-      Session ID: ${this.session.id}
-    `);
+    logger.info(`Session ID: ${this.session.id}; Exchange: ${this.session.exchange.name}`);
 
     logger.info('Booting up the exchange ...');
 

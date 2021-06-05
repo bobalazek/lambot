@@ -1,4 +1,5 @@
 import logger from '../Utils/Logger';
+
 import { ApiCredentials } from './ApiCredentials';
 import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
@@ -182,3 +183,4 @@ export class ExchangeAssetPrice {
     this.entries = [];
   }
 }
+

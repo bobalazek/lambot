@@ -2,10 +2,17 @@ import { Asset, AssetPair } from './Asset';
 import { Exchange } from './Exchange';
 import { Order } from './Order';
 
+export enum SessionStatusEnum {
+  PENDING = 'PENDING',
+  STARTED = 'STARTED',
+  ENDED = 'ENDED',
+}
+
 export interface SessionInterface {
   id: string;
   exchange: Exchange;
   assets: SessionAsset[];
+  status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -26,6 +33,7 @@ export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
   assets: SessionAsset[];
+  status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
   endedAt: number;
@@ -34,6 +42,9 @@ export class Session implements SessionInterface {
     this.id = id;
     this.exchange = exchange;
     this.assets = [];
+    this.status = SessionStatusEnum.STARTED;
+    this.createdAt = +new Date();
+    this.startedAt = +new Date();
   }
 
   /**
