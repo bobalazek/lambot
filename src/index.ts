@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import { Command } from 'commander';
 
 import { AssetPair, Assets } from './Core/Asset';
-import { ExhangesFactory, ExchangesEnum } from './Core/Exchanges';
-import { Session } from './Core/Session';
 import { Trader } from './Core/Trader';
+import { SessionManager } from './Manager/SessionManager';
+import { SessionAsset } from './Core/Session';
 
 // Prepare environment variables
 dotenv.config();
@@ -21,28 +21,36 @@ const programOptions = program.opts();
 
 // Actual program
 const isTestMode = !programOptions.production;
-const sessionId = programOptions.session ?? (new Date()).toISOString().replace(/\..+/, '');
+const sessionId = programOptions.session;
 
-const exchange = ExhangesFactory.get(ExchangesEnum.BINANCE);
-const session = new Session(sessionId, exchange);
-session.addAsset(
-  Assets.USDT,
-  [
-    new AssetPair(Assets.ETH, Assets.USDT),
-    new AssetPair(Assets.BTC, Assets.USDT),
-    new AssetPair(Assets.ADA, Assets.USDT),
-    new AssetPair(Assets.DOT, Assets.USDT),
-    new AssetPair(Assets.FIL, Assets.USDT),
-    new AssetPair(Assets.MATIC, Assets.USDT),
-    new AssetPair(Assets.VET, Assets.USDT),
-    new AssetPair(Assets.XRP, Assets.USDT),
-    new AssetPair(Assets.LUNA, Assets.USDT),
-    new AssetPair(Assets.XRP, Assets.USDT),
-  ],
-  '0.1',
-  '0.02'
-);
+// A workaround for the top-lever-await issue
+(async() => {
+  const session = await SessionManager.new(
+    sessionId,
+    'binance',
+    [
+      new SessionAsset(
+        null, // Keep that null, because it will be set in the manager
+        Assets.USDT,
+        [
+          new AssetPair(Assets.ETH, Assets.USDT),
+          new AssetPair(Assets.BTC, Assets.USDT),
+          new AssetPair(Assets.ADA, Assets.USDT),
+          new AssetPair(Assets.DOT, Assets.USDT),
+          new AssetPair(Assets.FIL, Assets.USDT),
+          new AssetPair(Assets.MATIC, Assets.USDT),
+          new AssetPair(Assets.VET, Assets.USDT),
+          new AssetPair(Assets.XRP, Assets.USDT),
+          new AssetPair(Assets.LUNA, Assets.USDT),
+          new AssetPair(Assets.XRP, Assets.USDT),
+        ],
+        '0.1',
+        '0.02'
+      ),
+    ]
+  );
 
-const trader = new Trader(session, isTestMode);
+  const trader = new Trader(session, isTestMode);
 
-trader.boot();
+  trader.boot();
+})();
