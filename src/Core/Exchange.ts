@@ -1,10 +1,10 @@
-import logger from '../Utils/Logger';
 import { ApiCredentials } from './ApiCredentials';
 import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
 import { Session } from './Session';
 import { ExchangesFactory } from './Exchanges';
 import { SessionManager } from '../Manager/SessionManager';
+import logger from '../Utils/Logger';
 
 export interface ExchangeInterface {
   key: string;
@@ -19,8 +19,8 @@ export interface ExchangeInterface {
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
   getSession(): Session;
   getSessionAssetPairPrices(): ExchangeAssetPricesMap;
-  getSessionAssetPairPrice(symbol: string): ExchangeAssetPrice;
-  addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPrice): ExchangeAssetPrice;
+  getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
+  addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPriceInterface): ExchangeAssetPriceInterface;
   getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface;
   addSessionAssetPairPriceEntry(
     symbol: string,
@@ -32,8 +32,7 @@ export interface ExchangeInterface {
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceInterface {
-  entries: ExchangeAssetPriceEntryInterface[];
-  lastPrice: string;
+  getEntries(): ExchangeAssetPriceEntryInterface[];
   getLastEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
 }
@@ -139,7 +138,7 @@ export class Exchange implements ExchangeInterface {
     return this._sessionAssetPairPrices;
   }
 
-  getSessionAssetPairPrice(symbol: string): ExchangeAssetPrice {
+  getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface {
     return this._sessionAssetPairPrices.get(symbol);
   }
 
@@ -208,26 +207,26 @@ export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
 }
 
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
-  entries: ExchangeAssetPriceEntryInterface[];
-  lastPrice: string;
+  private _entries: ExchangeAssetPriceEntryInterface[];
 
   constructor() {
-    this.entries = [];
-    this.lastPrice = null;
+    this._entries = [];
+  }
+
+  getEntries(): ExchangeAssetPriceEntryInterface[] {
+    return this._entries;
   }
 
   getLastEntry(): ExchangeAssetPriceEntryInterface {
-    if (this.entries.length === 0) {
+    if (this._entries.length === 0) {
       return null;
     }
 
-    return this.entries[this.entries.length - 1];
+    return this._entries[this._entries.length - 1];
   }
 
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface {
-    this.entries.push(entry);
-
-    this.lastPrice = entry.bidPrice;
+    this._entries.push(entry);
 
     return entry;
   }

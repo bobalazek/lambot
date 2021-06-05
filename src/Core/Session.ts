@@ -182,7 +182,7 @@ export class SessionAsset implements SessionAssetInterface {
     const assetString = this.asset.toString();
     const assetPairsString = this.assetPairs.map((assetPair) => {
       return assetPair.toString(this.session.exchange.assetPairDelimiter);
-    }).join(',');
+    }).join(', ');
 
     return (
       'Base asset: ' + assetString +

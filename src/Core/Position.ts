@@ -1,4 +1,4 @@
-import { OrderInterface } from "./Order";
+import { OrderInterface } from './Order';
 
 export enum PositionTypeEnum {
   LONG = 'LONG',

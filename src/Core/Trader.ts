@@ -1,6 +1,5 @@
-import logger from '../Utils/Logger';
-import { ExchangeAssetPrice } from './Exchange';
 import { Session } from './Session';
+import logger from '../Utils/Logger';
 
 export class Trader {
   session: Session;
@@ -44,8 +43,17 @@ export class Trader {
     return setInterval(() => {
       logger.info('Last price updates:');
 
+      const now = +new Date();
+
       this.session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
-        logger.info(key + ' - ' + sessionAssetPairPrice.lastPrice);
+        const lastEntry = sessionAssetPairPrice.getLastEntry();
+        let price = 'no price yet';
+        if (lastEntry) {
+          const secondsAgo = (now - lastEntry.timestamp) / 1000;
+          price = lastEntry.bidPrice + ' (updated ' + secondsAgo + 's ago)';
+        }
+
+        logger.info(key + ' - ' + price);
       });
     }, updateInterval);
   }
