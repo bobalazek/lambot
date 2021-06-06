@@ -32,10 +32,31 @@ export interface ExchangeInterface {
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
+export interface ExchangeAssetPriceChangeInterface {
+  relativePercentage: number; // relative to the previous tick
+  absolutePercentage: number; // absolute to the currently last entry
+}
+
+export const ExchangeAssetPriceChangeBreakpoints = {
+  5: '5s',
+  10: '10s',
+  15: '15s',
+  30: '30s',
+  60: '1m',
+  120: '2m',
+  300: '5m',
+  600: '10m',
+  900: '15m',
+  1800: '30m',
+  3600: '1h',
+};
+
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
   getLastEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
+  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface};
+  getStatusText(time: number): string;
 }
 
 export interface ExchangeAssetPriceEntryInterface {
@@ -237,6 +258,60 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._entries.push(entry);
 
     return entry;
+  }
+
+  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface} {
+    const entriesCount = this._entries.length;
+    if (entriesCount < 2) {
+      return null;
+    }
+
+    const lastEntry = this._entries[entriesCount - 1];
+
+    let changes = {};
+    // We don't need the last one, so add -1 to the loop
+    for (let i = 0; i < entriesCount - 1; i++) {
+      const entry = this._entries[i];
+      const nextEntry = this._entries[i + 1];
+      const differenceSeconds = Math.round((lastEntry.timestamp - entry.timestamp) / 1000);
+      const lastEntryPrice = parseFloat(lastEntry.price);
+      const entryPrice = parseFloat(entry.price);
+      const nextEntryPrice = parseFloat(nextEntry.price);
+      const absolutePercentage = ((entryPrice - lastEntryPrice) / lastEntryPrice) * 100;
+      const relativePercentage = ((entryPrice - nextEntryPrice) / nextEntryPrice) * 100;
+
+      changes[differenceSeconds + 's'] = {
+        absolutePercentage,
+        relativePercentage,
+      };
+    }
+
+    return changes;
+  }
+
+  getStatusText(time: number = +new Date()): string {
+    const lastEntry = this.getLastEntry();
+    if (!lastEntry) {
+      return 'no price set yet';
+    }
+
+    const changes = this.getChanges();
+    const changesString = changes
+      ? Object.keys(changes).map((key) => {
+        const change = changes[key];
+        return (
+          key + ' - ' +
+          'ABS: ' + change.absolutePercentage.toPrecision(2) + '%; ' +
+          'REL: ' + change.relativePercentage.toPrecision(2) + '%'
+        );
+      }).join('; ')
+      : null;
+
+    return (
+      lastEntry.price +
+      ' (updated ' + ((time - lastEntry.timestamp) / 1000) + 's ago)' +
+      (changesString ? ' (' + changesString + ')' : '')
+    );
   }
 }
 

@@ -10,4 +10,10 @@ Yes, you read that right. This Bot could possibly catapult you to the moon, so y
 
 ## Disclaimer
 
-This program is not investment advice. Only invest what you are willing to lose.
+All investment strategies and investments involve risk of loss.
+Nothing contained in this program, scripts, code or repository should be construed as investment advice.
+Any reference to an investment's past or potential performance is not,
+and should not be construed as, a recommendation or as a guarantee of any specific outcome or profit.
+
+The developers of this repository expressly disclaims any liability or loss
+incurred by any person who acts on the information, ideas or strategies discussed herein.

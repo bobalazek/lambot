@@ -34,6 +34,7 @@ const sessionId = programOptions.session;
         Assets.USDT,
         [
           new AssetPair(Assets.ETH, Assets.USDT),
+          /*
           new AssetPair(Assets.BTC, Assets.USDT),
           new AssetPair(Assets.ADA, Assets.USDT),
           new AssetPair(Assets.DOT, Assets.USDT),
@@ -43,6 +44,7 @@ const sessionId = programOptions.session;
           new AssetPair(Assets.XRP, Assets.USDT),
           new AssetPair(Assets.LUNA, Assets.USDT),
           new AssetPair(Assets.XRP, Assets.USDT),
+          */
         ],
         '0.1',
         '0.02'
