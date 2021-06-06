@@ -22,7 +22,7 @@ export class Trader {
     await this._session.exchange.boot(this._session);
 
     this._startMemoryUsageMonitoring(15 * 1000);
-    this._startExchangeSessionAssetPairMonitoring(5 * 1000);
+    this._startExchangeSessionAssetPairsMonitoring(2 * 1000);
   }
 
   private _startMemoryUsageMonitoring(updateInterval: number) {
@@ -39,7 +39,7 @@ export class Trader {
     }, updateInterval);
   }
 
-  private _startExchangeSessionAssetPairMonitoring(updateInterval: number) {
+  private _startExchangeSessionAssetPairsMonitoring(updateInterval: number) {
     return setInterval(() => {
       logger.info('Last price updates:');
 
@@ -47,11 +47,9 @@ export class Trader {
 
       this._session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
         const lastEntry = sessionAssetPairPrice.getLastEntry();
-        let price = 'no price yet';
-        if (lastEntry) {
-          const secondsAgo = (now - lastEntry.timestamp) / 1000;
-          price = lastEntry.bidPrice + ' (updated ' + secondsAgo + 's ago)';
-        }
+        const price = lastEntry
+          ? lastEntry.price + ' (updated ' + ((now - lastEntry.timestamp) / 1000) + 's ago)'
+          : 'no price set yet';
 
         logger.info(key + ' - ' + price);
       });

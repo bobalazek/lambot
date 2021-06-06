@@ -16,6 +16,7 @@ export interface ExchangeInterface {
   addAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAsset[]>;
   getAssetPairs(): Promise<AssetPair[]>;
+  getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]>;
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
   getSession(): Session;
   getSessionAssetPairPrices(): ExchangeAssetPricesMap;
@@ -35,35 +36,15 @@ export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
   getLastEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
-  getHistory(): ExchangeAssetPriceHistoryInterface;
-}
-
-export interface ExchangeAssetPriceHistoryInterface {
-  changes: {
-    '5s': number,
-    '10s': number,
-    '15s': number,
-    '30s': number,
-    '1m': number,
-    '2m': number,
-    '3m': number,
-    '5m': number,
-    '10m': number,
-    '15m': number,
-    '30m': number,
-    '1h': number,
-    '2h': number,
-    '3h': number,
-    '6h': number,
-    '12h': number,
-    '1d': number,
-  };
 }
 
 export interface ExchangeAssetPriceEntryInterface {
   timestamp: number;
-  askPrice: string;
-  bidPrice: string;
+  price: string;
+}
+
+export interface ExchangeAssetPriceSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
+  symbol: string;
 }
 
 export interface ExchangeAccountAssetInterface {
@@ -147,6 +128,10 @@ export class Exchange implements ExchangeInterface {
 
   async getAssetPairs(): Promise<AssetPair[]> {
     throw new Error('getAssetPairs() not implemented yet.');
+  }
+
+  async getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]> {
+    throw new Error('getAssetPrices() not implemented yet.');
   }
 
   async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
@@ -252,34 +237,6 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._entries.push(entry);
 
     return entry;
-  }
-
-  getHistory(): ExchangeAssetPriceHistoryInterface {
-    const history = {
-      changes: {
-        '5s': null,
-        '10s': null,
-        '15s': null,
-        '30s': null,
-        '1m': null,
-        '2m': null,
-        '3m': null,
-        '5m': null,
-        '10m': null,
-        '15m': null,
-        '30m': null,
-        '1h': null,
-        '2h': null,
-        '3h': null,
-        '6h': null,
-        '12h': null,
-        '1d': null,
-      },
-    };
-
-    // TODO
-
-    return history;
   }
 }
 
