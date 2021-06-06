@@ -33,7 +33,7 @@ export interface ExchangeInterface {
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
-  relativePercentage: number; // relative to the previous tick
+  relativePercentage: number; // relative to the previous entry
   absolutePercentage: number; // absolute to the currently last entry
 }
 
@@ -297,12 +297,12 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 
     const changes = this.getChanges();
     const changesString = changes
-      ? Object.keys(changes).map((key) => {
+      ? Object.keys(changes).splice(0, 1).map((key) => {
         const change = changes[key];
         return (
           key + ' - ' +
-          'ABS: ' + change.absolutePercentage.toPrecision(2) + '%; ' +
-          'REL: ' + change.relativePercentage.toPrecision(2) + '%'
+          'ABS(' + change.absolutePercentage.toPrecision(3) + '%); ' +
+          'REL(' + change.relativePercentage.toPrecision(3) + '%)'
         );
       }).join('; ')
       : null;
