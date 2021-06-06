@@ -33,8 +33,8 @@ export interface ExchangeInterface {
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
-  relativePercentage: number; // relative to the previous entry
-  absolutePercentage: number; // absolute to the currently last entry
+  relativePricePercentage: number; // relative to the previous entry
+  absolutePricePercentage: number; // absolute to the currently last entry
 }
 
 export const ExchangeAssetPriceChangeBreakpoints = {
@@ -277,12 +277,12 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       const lastEntryPrice = parseFloat(lastEntry.price);
       const entryPrice = parseFloat(entry.price);
       const nextEntryPrice = parseFloat(nextEntry.price);
-      const absolutePercentage = ((entryPrice - lastEntryPrice) / lastEntryPrice) * 100;
-      const relativePercentage = ((entryPrice - nextEntryPrice) / nextEntryPrice) * 100;
+      const absolutePricePercentage = ((entryPrice - lastEntryPrice) / lastEntryPrice) * 100;
+      const relativePricePercentage = ((entryPrice - nextEntryPrice) / nextEntryPrice) * 100;
 
       changes[differenceSeconds + 's'] = {
-        absolutePercentage,
-        relativePercentage,
+        absolutePricePercentage,
+        relativePricePercentage,
       };
     }
 
@@ -301,8 +301,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         const change = changes[key];
         return (
           key + ' - ' +
-          'ABS(' + change.absolutePercentage.toPrecision(3) + '%); ' +
-          'REL(' + change.relativePercentage.toPrecision(3) + '%)'
+          'ABS(' + change.absolutePricePercentage.toPrecision(3) + '%); ' +
+          'REL(' + change.relativePricePercentage.toPrecision(3) + '%)'
         );
       }).join('; ')
       : null;

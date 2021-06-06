@@ -22,7 +22,7 @@ export class Trader {
     await this._session.exchange.boot(this._session);
 
     this._startMemoryUsageMonitoring(15 * 1000);
-    this._startExchangeSessionAssetPairsMonitoring(2 * 1000 - 10); // temporary hack so we get the newest data
+    this._startExchangeSessionAssetPairsMonitoring(2 * 1000);
   }
 
   private _startMemoryUsageMonitoring(updateInterval: number) {

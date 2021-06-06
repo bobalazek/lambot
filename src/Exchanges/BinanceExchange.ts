@@ -65,11 +65,11 @@ export class BinanceExchange extends Exchange {
     logger.debug('Fetching asset prices ...');
 
     try {
-      const now = +new Date();
       const response = await this._doRequest({
         method: 'GET',
         url: 'https://api.binance.com/api/v3/ticker/price',
       });
+      const now = +new Date();
 
       const assetPrices: ExchangeAssetPriceSymbolEntryInterface[] = [];
       for (let i = 0; i < response.data.length; i++) {
@@ -94,8 +94,8 @@ export class BinanceExchange extends Exchange {
     const allAssetPairs = this.getSession().getAllAssetPairsSet();
 
     return setInterval(async () => {
-      const now = +new Date();
       const assetPrices = await this.getAssetPrices();
+      const now = +new Date();
 
       for (let i = 0; i < assetPrices.length; i++) {
         const assetData = assetPrices[i];
