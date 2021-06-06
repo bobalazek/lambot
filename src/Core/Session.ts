@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 import { Asset, AssetPair, Assets } from './Asset';
 import { Exchange } from './Exchange';
 import { Order } from './Order';
@@ -123,7 +125,9 @@ export class Session implements SessionInterface {
     const exchangeData = data.exchange;
 
     if (sessionData.status === SessionStatusEnum.ENDED) {
-      logger.critical('The session you are trying to import has already ended. Please create a new one instead.');
+      logger.critical(chalk.red.bold(
+        'The session you are trying to import has already ended. Please create a new one instead.'
+      ));
 
       process.exit(1);
     }

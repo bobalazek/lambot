@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import chalk from 'chalk';
 
 import { ExchangesEnum, ExchangesFactory } from '../Core/Exchanges';
 import { Session, SessionAsset } from '../Core/Session';
@@ -9,7 +10,7 @@ const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
 
 export class SessionManager {
   static async save(session: Session): Promise<string> {
-    logger.info('Saving the session ...');
+    logger.info(chalk.cyan('Saving the session ...'));
 
     const sessionFilePath = this.getPathById(session.id);
 
@@ -30,11 +31,11 @@ export class SessionManager {
   }
 
   static async load(id: string): Promise<Session | null> {
-    logger.info(`Loading session with ID "${id}" ...`);
+    logger.info(chalk.cyan(`Loading session with ID "${id}" ...`));
 
     const sessionFilePath = this.getPathById(id);
     if (!fs.existsSync(sessionFilePath)) {
-      logger.debug(`Loading session with ID "${id}" ...`);
+      logger.info(chalk.cyan(`Loading session with ID "${id}" ...`));
 
       return null;
     }
@@ -50,7 +51,7 @@ export class SessionManager {
     exchangeKey: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
-    logger.info(`Creating a new session with ID "${id}" ...`);
+    logger.info(chalk.cyan(`Creating a new session with ID "${id}" ...`));
 
     const exchange = ExchangesFactory.get(exchangeKey);
     const session = new Session(id, exchange);
@@ -82,7 +83,6 @@ export class SessionManager {
         return sessionLoaded;
       }
 
-      logger.info(`Tried to load session with ID "${id}", but it returned null ...`);
     }
 
     return this.new(id, exchangeKey, sessionAssets);

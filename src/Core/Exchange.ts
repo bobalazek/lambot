@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 import { ApiCredentials } from './ApiCredentials';
 import { AssetPair } from './Asset';
 import { Order, OrderFees } from './Order';
@@ -94,7 +96,9 @@ export class Exchange implements ExchangeInterface {
 
     const sessionAssets = session.assets;
     if (sessionAssets.length === 0) {
-      logger.critical('No assets found for this session!');
+      logger.critical(chalk.red.bold(
+        'No assets found for this session!'
+      ));
 
       process.exit(1);
     }
@@ -104,19 +108,21 @@ export class Exchange implements ExchangeInterface {
       return assetPair.toString(this.assetPairDelimiter);
     }));
 
-    logger.info('I will be trading with the following assets:');
+    logger.info(chalk.bold('I will be trading with the following assets:'));
 
     sessionAssets.forEach((sessionAsset) => {
       const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet();
       sessionAssetAssetPairSet.forEach((assetPairString) => {
         if (!exhangeAssetPairsSet.has(assetPairString)) {
-          logger.critical(`Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`);
+          logger.critical(chalk.red.bold(
+            `Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`
+          ));
 
           process.exit(1);
         }
       });
 
-      logger.info(sessionAsset.toString());
+      logger.info(chalk.bold(sessionAsset.toString()));
     });
 
     await SessionManager.save(session);
@@ -284,26 +290,36 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   getStatusText(time: number = +new Date()): string {
     const newestEntry = this.getNewestEntry();
     if (!newestEntry) {
-      return 'no price set yet';
+      return chalk.italic('no price set yet');
     }
 
     const changes = this.getChanges();
     const changesString = changes
-      ? Object.keys(changes).splice(0, 1).map((key) => {
+      ? Object.keys(changes).splice(0, 1).map((key) => { // as a temporary workaround, we only show the last change
         const change = changes[key];
+
         return (
           key + ' - ' +
-          'ABS(' + change.absolutePricePercentage.toPrecision(3) + '%); ' +
-          'REL(' + change.relativePricePercentage.toPrecision(3) + '%)'
+          'ABS: ' + coloredTextByPercentage(change.absolutePricePercentage)  + '; ' +
+          'REL: ' + coloredTextByPercentage(change.relativePricePercentage)
         );
       }).join('; ')
       : null;
 
     return (
-      newestEntry.price +
+      chalk.bold(newestEntry.price) +
       ' (updated ' + ((time - newestEntry.timestamp) / 1000) + 's ago)' +
       (changesString ? ' (' + changesString + ')' : '')
     );
   }
 }
 
+function coloredTextByPercentage(value: number): string {
+  if (value > 0) {
+    return chalk.green(value.toPrecision(3) + '%');
+  } else if (value < 0) {
+    return chalk.red(value.toPrecision(3) + '%');
+  }
+
+  return value.toPrecision(3) + '%';
+}

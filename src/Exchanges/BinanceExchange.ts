@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import chalk from 'chalk';
 import Websocket from 'ws';
 
 import { ApiCredentials } from '../Core/ApiCredentials';
@@ -12,7 +13,9 @@ export class BinanceExchange extends Exchange {
     super('binance', 'Binance', apiCredentials ,'');
 
     if (!apiCredentials.key || !apiCredentials.secret) {
-      logger.critical('Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!');
+      logger.critical(chalk.red.bold(
+        'Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!'
+      ));
 
       process.exit(1);
     }
@@ -30,7 +33,7 @@ export class BinanceExchange extends Exchange {
   }
 
   async getAssetPairs(): Promise<AssetPair[]> {
-    logger.debug('Fetching asset pairs ...');
+    logger.debug(chalk.italic('Fetching asset pairs ...'));
 
     try {
       const response = await this._doRequest({
@@ -55,14 +58,14 @@ export class BinanceExchange extends Exchange {
 
       return assetPairs;
     } catch (error) {
-      logger.error(error);
+      logger.error(chalk.red(error));
 
       return error;
     }
   }
 
   async getAssetPrices(): Promise<ExchangeAssetPriceSymbolEntryInterface[]> {
-    logger.debug('Fetching asset prices ...');
+    logger.debug(chalk.italic('Fetching asset prices ...'));
 
     try {
       const response = await this._doRequest({
@@ -84,7 +87,7 @@ export class BinanceExchange extends Exchange {
 
       return assetPrices;
     } catch (error) {
-      logger.error(error);
+      logger.error(chalk.red(error));
 
       return error;
     }
@@ -131,7 +134,7 @@ export class BinanceExchange extends Exchange {
       });
 
       ws.on('error', (error) => {
-        logger.error('Binance Websocket error: ' + error.message);
+        logger.error(chalk.red('Binance Websocket error: ' + error.message));
 
         reject(error);
       });
@@ -165,14 +168,18 @@ export class BinanceExchange extends Exchange {
   }
 
   async _doRequest(config: AxiosRequestConfig): Promise<AxiosResponse<any>> {
-    logger.log(`Making a ${config.method} request to ${config.url}`);
+    logger.log(chalk.italic(
+      `Making a ${config.method} request to ${config.url}`
+    ));
 
     const response = await axios(config);
 
     const rateLimitWeightTotal = 1200;
     const rateLimitWeightUsed = parseInt(response.headers['x-mbx-used-weight-1m']);
 
-    logger.log(`You used ${rateLimitWeightUsed} request weight points out of ${rateLimitWeightTotal}`);
+    logger.log(chalk.italic(
+      `You used ${rateLimitWeightUsed} request weight points out of ${rateLimitWeightTotal}`
+    ));
 
     return response;
   }

@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 import { Session } from './Session';
 import logger from '../Utils/Logger';
 
@@ -35,20 +37,20 @@ export class Trader {
         }).join('; ')
       );
 
-      logger.debug(memoryUsageText);
+      logger.info(chalk.cyanBright(memoryUsageText));
     }, updateInterval);
   }
 
   private _startExchangeSessionAssetPairsMonitoring(updateInterval: number) {
     return setInterval(() => {
-      logger.info('Newest price updates:');
+      logger.info(chalk.bold('Newest price updates:'));
 
       const now = +new Date();
 
       this._session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
         const statusText = sessionAssetPairPrice.getStatusText(now);
 
-        logger.info(key + ' - ' + statusText);
+        logger.info(chalk.bold(key) + ' - ' + statusText);
       });
     }, updateInterval);
   }
