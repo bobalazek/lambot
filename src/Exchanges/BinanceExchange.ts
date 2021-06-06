@@ -146,13 +146,13 @@ export class BinanceExchange extends Exchange {
         const now = +new Date();
         const price = parsedData.b; // Bid price; parsedData.a is Ask price
 
-        // Only add a new entry if the last one was added more then the interval ago ...
-        const lastAssetPairPriceEntry = this.getSessionAssetPairPriceEntryLast(asset);
+        // Only add a new entry if the newest one was added more then the interval ago ...
+        const newestAssetPairPriceEntry = this.getSessionAssetPairPriceEntryNewest(asset);
         if (
-          !lastAssetPairPriceEntry ||
+          !newestAssetPairPriceEntry ||
           (
-            lastAssetPairPriceEntry &&
-            now - lastAssetPairPriceEntry.timestamp > updateInterval
+            newestAssetPairPriceEntry &&
+            now - newestAssetPairPriceEntry.timestamp > updateInterval
           )
         ) {
           this.addSessionAssetPairPriceEntry(asset, {

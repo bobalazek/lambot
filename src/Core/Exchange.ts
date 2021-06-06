@@ -22,38 +22,27 @@ export interface ExchangeInterface {
   getSessionAssetPairPrices(): ExchangeAssetPricesMap;
   getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
   addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPriceInterface): ExchangeAssetPriceInterface;
-  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface;
+  getSessionAssetPairPriceEntryNewest(symbol: string): ExchangeAssetPriceEntryInterface;
   addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
-    lastEntryInterval: number
+    newestEntryInterval: number
   ): ExchangeAssetPriceEntryInterface;
 }
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
-  relativePricePercentage: number; // relative to the previous entry
-  absolutePricePercentage: number; // absolute to the currently last entry
+  absolutePricePercentage: number; // absolute to the currently newest entry - ((price - newestPrice) / newestPrice) * 100
+  relativePricePercentage: number; // relative to the previous entry - ((price - prevPrice) / prevPrice) * 100
+  newestPrice: number;
+  price: number;
+  prevPrice: number;
 }
-
-export const ExchangeAssetPriceChangeBreakpoints = {
-  5: '5s',
-  10: '10s',
-  15: '15s',
-  30: '30s',
-  60: '1m',
-  120: '2m',
-  300: '5m',
-  600: '10m',
-  900: '15m',
-  1800: '30m',
-  3600: '1h',
-};
 
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
-  getLastEntry(): ExchangeAssetPriceEntryInterface;
+  getNewestEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface};
   getStatusText(time: number): string;
@@ -180,13 +169,13 @@ export class Exchange implements ExchangeInterface {
     return assetPairPrice;
   }
 
-  getSessionAssetPairPriceEntryLast(symbol: string): ExchangeAssetPriceEntryInterface {
+  getSessionAssetPairPriceEntryNewest(symbol: string): ExchangeAssetPriceEntryInterface {
     const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrice(symbol);
     if (!symbolAssetPrice) {
       return null;
     }
 
-    return symbolAssetPrice.getLastEntry();
+    return symbolAssetPrice.getNewestEntry();
   }
 
   addSessionAssetPairPriceEntry(
@@ -246,7 +235,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries;
   }
 
-  getLastEntry(): ExchangeAssetPriceEntryInterface {
+  getNewestEntry(): ExchangeAssetPriceEntryInterface {
     if (this._entries.length === 0) {
       return null;
     }
@@ -266,23 +255,26 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return null;
     }
 
-    const lastEntry = this._entries[entriesCount - 1];
+    const newestEntry = this._entries[entriesCount - 1];
 
     let changes = {};
-    // We don't need the last one, so add -1 to the loop
+    // We don't need the newest one, so add -1 to the loop
     for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];
-      const nextEntry = this._entries[i + 1];
-      const differenceSeconds = Math.round((lastEntry.timestamp - entry.timestamp) / 1000);
-      const lastEntryPrice = parseFloat(lastEntry.price);
-      const entryPrice = parseFloat(entry.price);
-      const nextEntryPrice = parseFloat(nextEntry.price);
-      const absolutePricePercentage = ((entryPrice - lastEntryPrice) / lastEntryPrice) * 100;
-      const relativePricePercentage = ((entryPrice - nextEntryPrice) / nextEntryPrice) * 100;
+      const prevEntry = this._entries[i + 1];
+      const differenceSeconds = Math.round((newestEntry.timestamp - entry.timestamp) / 1000);
+      const newestPrice = parseFloat(newestEntry.price);
+      const price = parseFloat(entry.price);
+      const prevPrice = parseFloat(prevEntry.price);
+      const absolutePricePercentage = ((price - newestPrice) / newestPrice) * 100;
+      const relativePricePercentage = ((price - prevPrice) / prevPrice) * 100;
 
       changes[differenceSeconds + 's'] = {
         absolutePricePercentage,
         relativePricePercentage,
+        newestPrice,
+        price,
+        prevPrice,
       };
     }
 
@@ -290,8 +282,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   getStatusText(time: number = +new Date()): string {
-    const lastEntry = this.getLastEntry();
-    if (!lastEntry) {
+    const newestEntry = this.getNewestEntry();
+    if (!newestEntry) {
       return 'no price set yet';
     }
 
@@ -308,8 +300,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       : null;
 
     return (
-      lastEntry.price +
-      ' (updated ' + ((time - lastEntry.timestamp) / 1000) + 's ago)' +
+      newestEntry.price +
+      ' (updated ' + ((time - newestEntry.timestamp) / 1000) + 's ago)' +
       (changesString ? ' (' + changesString + ')' : '')
     );
   }

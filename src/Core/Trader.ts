@@ -41,7 +41,7 @@ export class Trader {
 
   private _startExchangeSessionAssetPairsMonitoring(updateInterval: number) {
     return setInterval(() => {
-      logger.info('Last price updates:');
+      logger.info('Newest price updates:');
 
       const now = +new Date();
 
