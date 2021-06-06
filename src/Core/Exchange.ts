@@ -35,9 +35,9 @@ export interface ExchangeInterface {
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
-  absolutePricePercentage: number; // absolute to the currently newest entry - ((price - newestPrice) / newestPrice) * 100
+  absolutePricePercentage: number; // absolute to the currently newest/base entry - ((price - basePrice) / basePrice) * 100
   relativePricePercentage: number; // relative to the previous entry - ((price - prevPrice) / prevPrice) * 100
-  newestPrice: number;
+  basePrice: number;
   price: number;
   prevPrice: number;
 }
@@ -92,7 +92,7 @@ export class Exchange implements ExchangeInterface {
   async boot(session: Session): Promise<boolean> {
     this._session = session;
 
-    logger.info('Booting up the exchange ...');
+    logger.info(chalk.cyan('Booting up the exchange ...'));
 
     const sessionAssets = session.assets;
     if (sessionAssets.length === 0) {
@@ -261,24 +261,32 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return null;
     }
 
-    const newestEntry = this._entries[entriesCount - 1];
+    const baseEntry = this._entries[entriesCount - 1];
 
     let changes = {};
-    // We don't need the newest one, so add -1 to the loop
+    // We don't need the base (in this case the newest) one, so add -1 to the loop
     for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];
-      const prevEntry = this._entries[i + 1];
-      const differenceSeconds = Math.round((newestEntry.timestamp - entry.timestamp) / 1000);
-      const newestPrice = parseFloat(newestEntry.price);
+      const prevEntry = i > 0
+        ? this._entries[i - 1]
+        : null;
+      const differenceSeconds = Math.round((baseEntry.timestamp - entry.timestamp) / 1000);
+
+      const basePrice = parseFloat(baseEntry.price);
       const price = parseFloat(entry.price);
-      const prevPrice = parseFloat(prevEntry.price);
-      const absolutePricePercentage = ((price - newestPrice) / newestPrice) * 100;
-      const relativePricePercentage = ((price - prevPrice) / prevPrice) * 100;
+      const prevPrice = prevEntry
+        ? parseFloat(prevEntry.price)
+        : 0;
+
+      const absolutePricePercentage = ((price - basePrice) / basePrice) * 100;
+      const relativePricePercentage = prevEntry
+        ? ((price - prevPrice) / prevPrice) * 100
+        : 0;
 
       changes[differenceSeconds + 's'] = {
         absolutePricePercentage,
         relativePricePercentage,
-        newestPrice,
+        basePrice,
         price,
         prevPrice,
       };
@@ -296,12 +304,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     const changes = this.getChanges();
     const changesString = changes
       ? Object.keys(changes).splice(0, 1).map((key) => { // as a temporary workaround, we only show the last change
-        const change = changes[key];
-
         return (
           key + ' - ' +
-          'ABS: ' + coloredTextByPercentage(change.absolutePricePercentage)  + '; ' +
-          'REL: ' + coloredTextByPercentage(change.relativePricePercentage)
+          'Absolute: ' + colorTextByPercentage(changes[key].absolutePricePercentage)  + '; ' +
+          'Relative: ' + colorTextByPercentage(changes[key].relativePricePercentage)
         );
       }).join('; ')
       : null;
@@ -314,7 +320,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 }
 
-function coloredTextByPercentage(value: number): string {
+/***** Helpers *****/
+function colorTextByPercentage(value: number): string {
   if (value > 0) {
     return chalk.green(value.toPrecision(3) + '%');
   } else if (value < 0) {

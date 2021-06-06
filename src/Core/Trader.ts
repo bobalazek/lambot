@@ -13,13 +13,15 @@ export class Trader {
   }
 
   async boot() {
-    logger.info(
+    logger.info(chalk.cyan(
       this._isTestMode
         ? 'Trader (in TEST MODE) is starting now ...'
         : 'Trader is starting now ...'
-    );
+    ));
 
-    logger.info(`Session ID: ${this._session.id}; Exchange: ${this._session.exchange.name}`);
+    logger.info(chalk.cyan(
+      `Session ID: ${this._session.id}; Exchange: ${this._session.exchange.name}`
+    ));
 
     await this._session.exchange.boot(this._session);
 
@@ -43,7 +45,7 @@ export class Trader {
 
   private _startExchangeSessionAssetPairsMonitoring(updateInterval: number) {
     return setInterval(() => {
-      logger.info(chalk.bold('Newest price updates:'));
+      logger.info(chalk.bold('Asset pair price updates:'));
 
       const now = +new Date();
 
