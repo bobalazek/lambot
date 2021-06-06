@@ -82,7 +82,6 @@ export class SessionManager {
       if (sessionLoaded) {
         return sessionLoaded;
       }
-
     }
 
     return this.new(id, exchangeKey, sessionAssets);
