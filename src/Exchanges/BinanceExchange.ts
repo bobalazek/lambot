@@ -3,9 +3,11 @@ import chalk from 'chalk';
 import Websocket from 'ws';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
-import { AssetPair, Assets } from '../Core/Asset/Asset';
+import { AssetPair } from '../Core/Asset/AssetPair';
+import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAssetPriceSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
+import { OrderFees } from '../Core/Order/Order';
 import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
@@ -92,6 +94,18 @@ export class BinanceExchange extends Exchange {
 
       return error;
     }
+  }
+
+  async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
+    // TODO: check if we have any BNB in our account,
+    // because only then the fee is 0.075%.
+    // You will also need to enable it in the dashboard
+
+    return new OrderFees(
+      '0.075',
+      '0.075',
+      Assets.BNB
+    );
   }
 
   _startAssetPriceUpdating(updateInterval: number) {

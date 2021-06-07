@@ -1,12 +1,17 @@
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
-import { AssetPair } from '../Asset/Asset';
+import { AssetPair } from '../Asset/AssetPair';
 import { Order, OrderFees } from '../Order/Order';
 import { Session } from '../Session/Session';
 import { ExchangesFactory } from './ExchangesFactory';
 import { SessionManager } from '../Session/SessionManager';
-import { ExchangeAssetPrice, ExchangeAssetPriceEntryInterface, ExchangeAssetPriceInterface, ExchangeAssetPricesMap } from './ExchangeAssetPrice';
+import {
+  ExchangeAssetPrice,
+  ExchangeAssetPriceEntryInterface,
+  ExchangeAssetPriceInterface,
+  ExchangeAssetPricesMap,
+} from './ExchangeAssetPrice';
 import logger from '../../Utils/Logger';
 
 export interface ExchangeInterface {
@@ -85,7 +90,7 @@ export class Exchange implements ExchangeInterface {
     logger.info(chalk.bold('I will be trading with the following assets:'));
 
     sessionAssets.forEach((sessionAsset) => {
-      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet();
+      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet(this.assetPairDelimiter);
       sessionAssetAssetPairSet.forEach((assetPairString) => {
         if (!exhangeAssetPairsSet.has(assetPairString)) {
           logger.critical(chalk.red.bold(
@@ -96,7 +101,7 @@ export class Exchange implements ExchangeInterface {
         }
       });
 
-      logger.info(chalk.bold(sessionAsset.toString()));
+      logger.info(chalk.bold(sessionAsset.toString(this.assetPairDelimiter)));
     });
 
     await SessionManager.save(session);

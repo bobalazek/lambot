@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
-import { AssetPair, Assets } from './Core/Asset/Asset';
+import { AssetPair } from './Core/Asset/AssetPair';
+import { Assets } from './Core/Asset/Assets';
 import { Trader } from './Core/Trader/Trader';
 import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset } from './Core/Session/SessionAsset';
@@ -30,7 +31,6 @@ const sessionId = programOptions.session;
     'binance',
     [
       new SessionAsset(
-        null, // Keep that null, because it will be set in the manager
         Assets.USDT,
         [
           new AssetPair(Assets.ETH, Assets.USDT),

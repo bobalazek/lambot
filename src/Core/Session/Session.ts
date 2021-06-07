@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 
-import { Asset, AssetPair, Assets } from '../Asset/Asset';
+import { Asset } from '../Asset/Asset';
+import { AssetPair } from '../Asset/AssetPair';
+import { Assets } from '../Asset/Assets';
 import { Exchange } from '../Exchange/Exchange';
 import logger from '../../Utils/Logger';
 import { SessionAsset } from './SessionAsset';
@@ -56,7 +58,6 @@ export class Session implements SessionInterface {
   ) {
     this.assets.push(
       new SessionAsset(
-        this,
         asset,
         assetPairs,
         amountTotal,
@@ -75,7 +76,7 @@ export class Session implements SessionInterface {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
-      sessionAsset.getAssetPairsSet().forEach((assetPair) => {
+      sessionAsset.getAssetPairsSet(this.exchange.assetPairDelimiter).forEach((assetPair) => {
         assetPairs.add(assetPair);
       });
     });

@@ -1,5 +1,13 @@
 import chalk from 'chalk';
 
+export interface ExchangeAssetPriceInterface {
+  getEntries(): ExchangeAssetPriceEntryInterface[];
+  getNewestEntry(): ExchangeAssetPriceEntryInterface;
+  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
+  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface};
+  getStatusText(time: number): string;
+}
+
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
@@ -8,14 +16,6 @@ export interface ExchangeAssetPriceChangeInterface {
   basePrice: number;
   price: number;
   prevPrice: number;
-}
-
-export interface ExchangeAssetPriceInterface {
-  getEntries(): ExchangeAssetPriceEntryInterface[];
-  getNewestEntry(): ExchangeAssetPriceEntryInterface;
-  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
-  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface};
-  getStatusText(time: number): string;
 }
 
 export interface ExchangeAssetPriceEntryInterface {
@@ -118,7 +118,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 }
 
 /***** Helpers *****/
-function colorTextByPercentage(value: number): string {
+const colorTextByPercentage = (value: number) => {
   if (value > 0) {
     return chalk.green(value.toPrecision(3) + '%');
   } else if (value < 0) {

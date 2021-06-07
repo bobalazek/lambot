@@ -1,4 +1,5 @@
-import { AssetPair } from '../Asset/Asset';
+import { Asset } from '../Asset/Asset';
+import { AssetPair } from '../Asset/AssetPair';
 import { Exchange } from '../Exchange/Exchange';
 import { Session } from '../Session/Session';
 
@@ -32,6 +33,7 @@ export interface OrderInterface {
 export interface OrderFeesInterface {
   takerFeePercentage: string;
   makerFeePercentage: string;
+  asset: Asset;
 }
 
 export class Order implements OrderInterface {
@@ -70,9 +72,15 @@ export class Order implements OrderInterface {
 export class OrderFees implements OrderFeesInterface {
   takerFeePercentage: string;
   makerFeePercentage: string;
+  asset: Asset;
 
-  constructor(takerFeePercentage: string, makerFeePercentage: string) {
+  constructor(
+    takerFeePercentage: string,
+    makerFeePercentage: string,
+    asset: Asset
+  ) {
     this.takerFeePercentage = takerFeePercentage;
     this.makerFeePercentage = makerFeePercentage;
+    this.asset = asset;
   }
 }
