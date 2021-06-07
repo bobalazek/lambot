@@ -2,9 +2,10 @@ import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
 
-import { ExchangesEnum, ExchangesFactory } from '../Core/Exchanges';
-import { Session, SessionAsset } from '../Core/Session';
-import logger from '../Utils/Logger';
+import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
+import { Session } from './Session';
+import logger from '../../Utils/Logger';
+import { SessionAsset } from './SessionAsset';
 
 const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
 

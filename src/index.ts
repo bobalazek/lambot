@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
-import { AssetPair, Assets } from './Core/Asset';
-import { Trader } from './Core/Trader';
-import { SessionManager } from './Manager/SessionManager';
-import { SessionAsset } from './Core/Session';
+import { AssetPair, Assets } from './Core/Asset/Asset';
+import { Trader } from './Core/Trader/Trader';
+import { SessionManager } from './Core/Session/SessionManager';
+import { SessionAsset } from './Core/Session/SessionAsset';
 
 // Prepare environment variables
 dotenv.config();

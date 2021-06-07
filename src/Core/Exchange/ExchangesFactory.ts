@@ -1,9 +1,6 @@
-import { ApiCredentials } from './ApiCredentials';
+import { ApiCredentials } from '../Api/ApiCredentials';
 import { Exchange } from './Exchange';
-import { BinanceExchange } from '../Exchanges/BinanceExchange';
-
-// Needs to be a separate file from Exchange.ts,
-// else we have a circular dependency
+import { BinanceExchange } from '../../Exchanges/BinanceExchange';
 
 export enum ExchangesEnum {
   // Should be lowercase, the same as the key (in src/Exchanges/*Exchange.ts) for each exchange

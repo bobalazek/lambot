@@ -2,10 +2,11 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import chalk from 'chalk';
 import Websocket from 'ws';
 
-import { ApiCredentials } from '../Core/ApiCredentials';
-import { AssetPair, Assets } from '../Core/Asset';
-import { Exchange, ExchangeAssetPriceSymbolEntryInterface } from '../Core/Exchange';
-import { Session } from '../Core/Session';
+import { ApiCredentials } from '../Core/Api/ApiCredentials';
+import { AssetPair, Assets } from '../Core/Asset/Asset';
+import { Exchange } from '../Core/Exchange/Exchange';
+import { ExchangeAssetPriceSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
+import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
 export class BinanceExchange extends Exchange {

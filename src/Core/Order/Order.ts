@@ -1,6 +1,6 @@
-import { AssetPair } from './Asset';
-import { Exchange } from './Exchange';
-import { Session } from './Session';
+import { AssetPair } from '../Asset/Asset';
+import { Exchange } from '../Exchange/Exchange';
+import { Session } from '../Session/Session';
 
 export enum OrderSideEnum {
   BUY = 'BUY',
@@ -20,7 +20,7 @@ export enum OrderAccountTypeEnum {
 }
 
 export interface OrderInterface {
-  id: string; // Prefix each order with the session id, so we know where it came from.
+  id: string; // Prefix each order with the session id, so we know where it came from. "LAMBOT_{SESSION_ID}_{BUY_OR_SELL}"
   assetPair: AssetPair;
   side: OrderSideEnum;
   amount: string;

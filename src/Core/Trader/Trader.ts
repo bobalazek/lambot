@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
-import { Session } from './Session';
-import logger from '../Utils/Logger';
+import { Session } from '../Session/Session';
+import logger from '../../Utils/Logger';
 
 export class Trader {
   _session: Session;
