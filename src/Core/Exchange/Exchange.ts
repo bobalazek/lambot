@@ -2,7 +2,8 @@ import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { Order, OrderFees, OrderFeesTypeEnum } from '../Order/Order';
+import { Order } from '../Order/Order';
+import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
 import { Session } from '../Session/Session';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangesFactory } from './ExchangesFactory';

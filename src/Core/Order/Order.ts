@@ -1,4 +1,3 @@
-import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { Exchange } from '../Exchange/Exchange';
 import { Session } from '../Session/Session';
@@ -28,16 +27,6 @@ export interface OrderInterface {
   price: string; // only relevant for limit orders
   type: OrderTypeEnum;
   accountType: OrderAccountTypeEnum;
-}
-
-export interface OrderFeesInterface {
-  amountPercentage: number;
-  asset: Asset;
-}
-
-export enum OrderFeesTypeEnum {
-  MAKER = 'MAKER',
-  TAKER = 'TAKER',
 }
 
 export class Order implements OrderInterface {
@@ -70,18 +59,5 @@ export class Order implements OrderInterface {
     this.price = price;
     this.type = type;
     this.accountType = accountType;
-  }
-}
-
-export class OrderFees implements OrderFeesInterface {
-  amountPercentage: number;
-  asset: Asset;
-
-  constructor(
-    amountPercentage: number,
-    asset: Asset
-  ) {
-    this.amountPercentage = amountPercentage;
-    this.asset = asset;
   }
 }

@@ -7,7 +7,7 @@ import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetP
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
-import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/Order';
+import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
 import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
@@ -107,10 +107,7 @@ export class BinanceExchange extends Exchange {
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
 
-    return new OrderFees(
-      0.075,
-      Assets.BNB
-    );
+    return new OrderFees(0.075);
   }
 
   _startAssetPriceUpdating(updateInterval: number) {
