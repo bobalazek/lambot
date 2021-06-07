@@ -3,7 +3,11 @@ import { Asset } from './Asset';
 export interface AssetPairInterface {
   assetBase: Asset;
   assetQuote: Asset;
-  toString(delimiter: string): string;
+  toString(converter: AssetPairStringConverterInterface): string;
+}
+
+export interface AssetPairStringConverterInterface {
+  convert(assetPair: AssetPair): string;
 }
 
 export class AssetPair implements AssetPairInterface {
@@ -15,11 +19,16 @@ export class AssetPair implements AssetPairInterface {
     this.assetQuote = assetQuote;
   }
 
-  toString(delimiter: string): string {
-    return (
-      this.assetBase.symbol +
-      delimiter +
-      this.assetQuote.symbol
-    );
+  toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {
+    return converter.convert(this);
   }
 };
+
+export class AssetPairStringConverterDefault implements AssetPairStringConverterInterface {
+  convert(assetPair: AssetPair): string {
+    return (
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
+    );
+  }
+}

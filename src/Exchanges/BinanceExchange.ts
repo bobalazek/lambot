@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import Websocket from 'ws';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
-import { AssetPair } from '../Core/Asset/AssetPair';
+import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAssetPriceSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
@@ -13,7 +13,12 @@ import logger from '../Utils/Logger';
 
 export class BinanceExchange extends Exchange {
   constructor(apiCredentials: ApiCredentials) {
-    super('binance', 'Binance', apiCredentials ,'');
+    super(
+      'binance',
+      'Binance',
+      apiCredentials,
+      new AssetPairStringConverterDefault()
+    );
 
     if (!apiCredentials.key || !apiCredentials.secret) {
       logger.critical(chalk.red.bold(

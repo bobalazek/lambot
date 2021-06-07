@@ -67,7 +67,7 @@ export class Session implements SessionInterface {
 
     assetPairs.forEach((assetPair) => {
       this.exchange.addSessionAssetPairPrice(
-        assetPair.toString(this.exchange.assetPairDelimiter)
+        assetPair.toString(this.exchange.assetPairConverter)
       );
     });
   }
@@ -76,7 +76,7 @@ export class Session implements SessionInterface {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
-      sessionAsset.getAssetPairsSet(this.exchange.assetPairDelimiter).forEach((assetPair) => {
+      sessionAsset.getAssetPairsSet(this.exchange.assetPairConverter).forEach((assetPair) => {
         assetPairs.add(assetPair);
       });
     });

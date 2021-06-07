@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
-import { AssetPair } from '../Asset/AssetPair';
+import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { Order, OrderFees } from '../Order/Order';
 import { Session } from '../Session/Session';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -18,7 +18,7 @@ export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
-  assetPairDelimiter: string;
+  assetPairConverter: AssetPairStringConverterInterface;
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
@@ -49,7 +49,7 @@ export class Exchange implements ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
-  assetPairDelimiter: string;
+  assetPairConverter: AssetPairStringConverterInterface;
 
   _session: Session;
   _sessionAssetPairPrices: ExchangeAssetPricesMap;
@@ -58,12 +58,12 @@ export class Exchange implements ExchangeInterface {
     key: string,
     name: string,
     apiCredentials: ApiCredentials,
-    assetPairDelimiter: string = ''
+    assetPairConverter: AssetPairStringConverterInterface
   ) {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
-    this.assetPairDelimiter = assetPairDelimiter;
+    this.assetPairConverter = assetPairConverter;
 
     this._sessionAssetPairPrices = new Map();
   }
@@ -84,13 +84,13 @@ export class Exchange implements ExchangeInterface {
 
     const exhangeAssetPairs = await this.getAssetPairs();
     const exhangeAssetPairsSet = new Set(exhangeAssetPairs.map((assetPair) => {
-      return assetPair.toString(this.assetPairDelimiter);
+      return assetPair.toString(this.assetPairConverter);
     }));
 
     logger.info(chalk.bold('I will be trading with the following assets:'));
 
     sessionAssets.forEach((sessionAsset) => {
-      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet(this.assetPairDelimiter);
+      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet(this.assetPairConverter);
       sessionAssetAssetPairSet.forEach((assetPairString) => {
         if (!exhangeAssetPairsSet.has(assetPairString)) {
           logger.critical(chalk.red.bold(
@@ -101,7 +101,7 @@ export class Exchange implements ExchangeInterface {
         }
       });
 
-      logger.info(chalk.bold(sessionAsset.toString(this.assetPairDelimiter)));
+      logger.info(chalk.bold(sessionAsset.toString(this.assetPairConverter)));
     });
 
     await SessionManager.save(session);

@@ -1,5 +1,5 @@
 import { Asset } from '../Asset/Asset';
-import { AssetPair } from '../Asset/AssetPair';
+import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { Order } from '../Order/Order';
 
 export interface SessionAssetInterface {
@@ -7,8 +7,8 @@ export interface SessionAssetInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   amountTotal: string; // How much total resources we want to use for this session?
   amountPerOrder: string; // What's the base amount we want to trade each order?
-  getAssetPairsSet(assetPairDelimiter: string): Set<string>;
-  toString(assetPairDelimiter: string): string;
+  getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
+  toString(assetPairConverter: AssetPairStringConverterInterface): string;
 }
 
 export class SessionAsset implements SessionAssetInterface {
@@ -33,20 +33,20 @@ export class SessionAsset implements SessionAssetInterface {
     this.amountPerOrder = amountPerOrder;
   }
 
-  getAssetPairsSet(assetPairDelimiter: string): Set<string> {
+  getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
-      assetPairs.add(assetPair.toString(assetPairDelimiter));
+      assetPairs.add(assetPair.toString(assetPairConverter));
     });
 
     return assetPairs;
   }
 
-  toString(assetPairDelimiter: string): string {
+  toString(assetPairConverter: AssetPairStringConverterInterface): string {
     const assetString = this.asset.toString();
     const assetPairsString = this.assetPairs.map((assetPair) => {
-      return assetPair.toString(assetPairDelimiter);
+      return assetPair.toString(assetPairConverter);
     }).join(', ');
 
     return (
