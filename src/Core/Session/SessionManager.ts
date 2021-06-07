@@ -4,8 +4,8 @@ import chalk from 'chalk';
 
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
-import logger from '../../Utils/Logger';
 import { SessionAsset } from './SessionAsset';
+import logger from '../../Utils/Logger';
 
 const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
 
@@ -17,8 +17,6 @@ export class SessionManager {
 
     const data = {
       session: session.toExport(),
-      exchange: session.exchange.toExport(),
-      positions: [], // TODO
       createdAt: +new Date(),
       version: 1,
     };
@@ -60,9 +58,7 @@ export class SessionManager {
     sessionAssets.forEach((sessionAsset) => {
       session.addAsset(
         sessionAsset.asset,
-        sessionAsset.assetPairs,
-        sessionAsset.amountTotal,
-        sessionAsset.amountPerOrder
+        sessionAsset.assetPairs
       );
     });
 

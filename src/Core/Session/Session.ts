@@ -47,21 +47,15 @@ export class Session implements SessionInterface {
    *
    * @param asset Which is the base asset we want to do all the trades with?
    * @param assetPairs Which pairs do we want to trade with?
-   * @param amountTotal What is the total amount we want to spend of this asset from this session?
-   * @param amountPerOrder How much of this asset do we want to spend of per order?
    */
   addAsset(
     asset: Asset,
-    assetPairs: AssetPair[],
-    amountTotal: string,
-    amountPerOrder: string
+    assetPairs: AssetPair[]
   ) {
     this.assets.push(
       new SessionAsset(
         asset,
-        assetPairs,
-        amountTotal,
-        amountPerOrder
+        assetPairs
       )
     );
 
@@ -85,10 +79,8 @@ export class Session implements SessionInterface {
   }
 
   toExport(): Object {
-    const assets = [];
-
-    this.assets.forEach((sessionAsset) => {
-      assets.push({
+    const assets = this.assets.map((sessionAsset) => {
+      return {
         asset: sessionAsset.asset.toString(),
         assetPairs: sessionAsset.assetPairs.map((assetPair) => {
           return [
@@ -96,9 +88,7 @@ export class Session implements SessionInterface {
             assetPair.assetQuote.toString(),
           ];
         }),
-        amountTotal: sessionAsset.amountTotal,
-        amountPerOrder: sessionAsset.amountPerOrder,
-      });
+      };
     });
 
     return {
@@ -108,12 +98,13 @@ export class Session implements SessionInterface {
       createdAt: this.createdAt,
       startedAt: this.startedAt,
       endedAt: this.endedAt,
+      exchange: this.exchange.toExport(),
     };
   }
 
   static async fromImport(data: any): Promise<Session> {
     const sessionData = data.session;
-    const exchangeData = data.exchange;
+    const exchangeData = sessionData.exchange;
 
     if (sessionData.status === SessionStatusEnum.ENDED) {
       logger.critical(chalk.red.bold(
@@ -138,8 +129,6 @@ export class Session implements SessionInterface {
             Assets.getBySymbol(assetPair[1])
           );
         }),
-        assetData.amountTotal,
-        assetData.amountPerOrder,
       );
     });
 

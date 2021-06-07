@@ -23,7 +23,7 @@ export interface ExchangeAssetPriceEntryInterface {
   price: string;
 }
 
-export interface ExchangeAssetPriceSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
+export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
   symbol: string;
 }
 
@@ -71,9 +71,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 
       const basePrice = parseFloat(baseEntry.price);
       const price = parseFloat(entry.price);
-      const prevPrice = prevEntry
-        ? parseFloat(prevEntry.price)
-        : 0;
+      const prevPrice = parseFloat(prevEntry?.price);
 
       const absolutePricePercentage = ((price - basePrice) / basePrice) * 100;
       const relativePricePercentage = prevEntry
@@ -97,22 +95,9 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     if (!newestEntry) {
       return chalk.italic('no price set yet');
     }
-
-    const changes = this.getChanges();
-    const changesString = changes
-      ? Object.keys(changes).splice(0, 1).map((key) => { // as a temporary workaround, we only show the last change
-        return (
-          key + ' - ' +
-          'Absolute: ' + colorTextByPercentage(changes[key].absolutePricePercentage)  + '; ' +
-          'Relative: ' + colorTextByPercentage(changes[key].relativePricePercentage)
-        );
-      }).join('; ')
-      : null;
-
     return (
       chalk.bold(newestEntry.price) +
-      ' (updated ' + ((time - newestEntry.timestamp) / 1000) + 's ago)' +
-      (changesString ? ' (' + changesString + ')' : '')
+      ' (updated ' + ((time - newestEntry.timestamp) / 1000) + 's ago)'
     );
   }
 }

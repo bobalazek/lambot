@@ -43,9 +43,7 @@ const sessionId = programOptions.session;
           new AssetPair(Assets.XRP, Assets.USDT),
           new AssetPair(Assets.LUNA, Assets.USDT),
           new AssetPair(Assets.XRP, Assets.USDT),
-        ],
-        '0.1',
-        '0.02'
+        ]
       ),
     ]
   );

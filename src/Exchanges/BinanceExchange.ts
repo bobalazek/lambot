@@ -6,7 +6,7 @@ import { ApiCredentials } from '../Core/Api/ApiCredentials';
 import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
-import { ExchangeAssetPriceSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
+import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { OrderFees } from '../Core/Order/Order';
 import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
@@ -72,7 +72,7 @@ export class BinanceExchange extends Exchange {
     }
   }
 
-  async getAssetPrices(): Promise<ExchangeAssetPriceSymbolEntryInterface[]> {
+  async getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]> {
     logger.debug(chalk.italic('Fetching asset prices ...'));
 
     try {
@@ -82,7 +82,7 @@ export class BinanceExchange extends Exchange {
       });
       const now = +new Date();
 
-      const assetPrices: ExchangeAssetPriceSymbolEntryInterface[] = [];
+      const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
       for (let i = 0; i < response.data.length; i++) {
         const assetData = response.data[i];
 
