@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { Order, OrderFees } from '../Order/Order';
+import { Order, OrderFees, OrderFeesTypeEnum } from '../Order/Order';
 import { Session } from '../Session/Session';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -26,7 +26,7 @@ export interface ExchangeInterface {
   getAccountAssets(): Promise<ExchangeAccountAssetInterface[]>;
   getAssetPairs(): Promise<AssetPair[]>;
   getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]>;
-  getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
+  getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
   getSession(): Session;
   getSessionAssetPairPrices(): ExchangeAssetPricesMap;
   getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
@@ -124,7 +124,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
-  async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
+  async getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 
@@ -180,7 +180,7 @@ export class Exchange implements ExchangeInterface {
     };
   }
 
-  static async fromImport(data: any): Promise<Exchange> {
+  static fromImport(data: any): Exchange {
     return ExchangesFactory.get(data.key, data.apiCredentials);
   }
 }

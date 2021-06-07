@@ -7,7 +7,7 @@ import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetP
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
-import { OrderFees } from '../Core/Order/Order';
+import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/Order';
 import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
@@ -101,14 +101,13 @@ export class BinanceExchange extends Exchange {
     }
   }
 
-  async getAssetFees(symbol: string, amount: string): Promise<OrderFees> {
+  async getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees> {
     // TODO: check if we have any BNB in our account,
-    // because only then the fee is 0.075%.
+    // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
 
     return new OrderFees(
-      '0.075',
-      '0.075',
+      0.075,
       Assets.BNB
     );
   }

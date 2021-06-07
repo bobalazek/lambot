@@ -7,6 +7,7 @@ import { Trader } from './Core/Trader/Trader';
 import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
+import { Strategy } from './Core/Strategy/Strategy';
 
 // Prepare environment variables
 dotenv.config();
@@ -25,31 +26,38 @@ const programOptions = program.opts();
 const isTestMode = !programOptions.production;
 const sessionId = programOptions.session;
 
-// A workaround for the top-lever-await issue
+// A workaround for the top-level-await issue
 (async() => {
+  // Config
+  const sessionConfig = new SessionConfig({});
+  const exchangeKey = 'binance';
+  const sessionAssets = [
+    new SessionAsset(
+      Assets.USDT,
+      [
+        new AssetPair(Assets.ETH, Assets.USDT),
+        new AssetPair(Assets.BTC, Assets.USDT),
+        new AssetPair(Assets.ADA, Assets.USDT),
+        new AssetPair(Assets.DOT, Assets.USDT),
+        new AssetPair(Assets.FIL, Assets.USDT),
+        new AssetPair(Assets.MATIC, Assets.USDT),
+        new AssetPair(Assets.VET, Assets.USDT),
+        new AssetPair(Assets.XRP, Assets.USDT),
+        new AssetPair(Assets.LUNA, Assets.USDT),
+        new AssetPair(Assets.XRP, Assets.USDT),
+      ],
+      new Strategy({
+        orderAmount: '15',
+      })
+    ),
+  ];
+
+  // Init
   const session = await SessionManager.newOrLoad(
     sessionId,
-    new SessionConfig({
-      isTestMode,
-    }),
-    'binance',
-    [
-      new SessionAsset(
-        Assets.USDT,
-        [
-          new AssetPair(Assets.ETH, Assets.USDT),
-          new AssetPair(Assets.BTC, Assets.USDT),
-          new AssetPair(Assets.ADA, Assets.USDT),
-          new AssetPair(Assets.DOT, Assets.USDT),
-          new AssetPair(Assets.FIL, Assets.USDT),
-          new AssetPair(Assets.MATIC, Assets.USDT),
-          new AssetPair(Assets.VET, Assets.USDT),
-          new AssetPair(Assets.XRP, Assets.USDT),
-          new AssetPair(Assets.LUNA, Assets.USDT),
-          new AssetPair(Assets.XRP, Assets.USDT),
-        ]
-      ),
-    ]
+    sessionConfig,
+    exchangeKey,
+    sessionAssets
   );
 
   const trader = new Trader(session, isTestMode);

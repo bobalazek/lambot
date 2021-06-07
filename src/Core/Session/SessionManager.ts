@@ -60,7 +60,8 @@ export class SessionManager {
     sessionAssets.forEach((sessionAsset) => {
       session.addAsset(
         sessionAsset.asset,
-        sessionAsset.assetPairs
+        sessionAsset.assetPairs,
+        sessionAsset.strategy
       );
     });
 
@@ -84,7 +85,12 @@ export class SessionManager {
       }
     }
 
-    return this.new(id, config, exchangeKey, sessionAssets);
+    return this.new(
+      id,
+      config,
+      exchangeKey,
+      sessionAssets
+    );
   }
 
   static getPathById(id: string): string {

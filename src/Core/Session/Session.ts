@@ -7,6 +7,7 @@ import { Exchange } from '../Exchange/Exchange';
 import logger from '../../Utils/Logger';
 import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
+import { Strategy } from '../Strategy/Strategy';
 
 export enum SessionStatusEnum {
   PENDING = 'PENDING',
@@ -52,15 +53,18 @@ export class Session implements SessionInterface {
    *
    * @param asset Which is the base asset we want to do all the trades with?
    * @param assetPairs Which pairs do we want to trade with?
+   * @param strategy What strategy do we want to use?
    */
   addAsset(
     asset: Asset,
-    assetPairs: AssetPair[]
+    assetPairs: AssetPair[],
+    strategy: Strategy
   ) {
     this.assets.push(
       new SessionAsset(
         asset,
-        assetPairs
+        assetPairs,
+        strategy
       )
     );
 
@@ -119,7 +123,7 @@ export class Session implements SessionInterface {
     }
 
     const exchange = await Exchange.fromImport(sessionData.exchange);
-    const config = await SessionConfig.fromImport(sessionData.config);
+    const config = SessionConfig.fromImport(sessionData.config);
     const session = new Session(
       sessionData.id,
       exchange,
@@ -135,6 +139,7 @@ export class Session implements SessionInterface {
             Assets.getBySymbol(assetPair[1])
           );
         }),
+        Strategy.fromImport(assetData.strategy)
       );
     });
 

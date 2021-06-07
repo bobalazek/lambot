@@ -31,9 +31,13 @@ export interface OrderInterface {
 }
 
 export interface OrderFeesInterface {
-  takerFeePercentage: string;
-  makerFeePercentage: string;
+  amountPercentage: number;
   asset: Asset;
+}
+
+export enum OrderFeesTypeEnum {
+  MAKER = 'MAKER',
+  TAKER = 'TAKER',
 }
 
 export class Order implements OrderInterface {
@@ -70,17 +74,14 @@ export class Order implements OrderInterface {
 }
 
 export class OrderFees implements OrderFeesInterface {
-  takerFeePercentage: string;
-  makerFeePercentage: string;
+  amountPercentage: number;
   asset: Asset;
 
   constructor(
-    takerFeePercentage: string,
-    makerFeePercentage: string,
+    amountPercentage: number,
     asset: Asset
   ) {
-    this.takerFeePercentage = takerFeePercentage;
-    this.makerFeePercentage = makerFeePercentage;
+    this.amountPercentage = amountPercentage;
     this.asset = asset;
   }
 }
