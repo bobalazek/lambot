@@ -25,7 +25,7 @@ export interface SessionInterface {
   startedAt: number;
   endedAt: number;
   getAllAssetPairsSet(): Set<string>;
-  toExport(): Object;
+  toExport(): unknown;
 }
 
 export class Session implements SessionInterface {
@@ -87,7 +87,7 @@ export class Session implements SessionInterface {
     return assetPairs;
   }
 
-  toExport(): Object {
+  toExport(): unknown {
     const assets = this.assets.map((sessionAsset) => {
       return {
         asset: sessionAsset.asset.toString(),

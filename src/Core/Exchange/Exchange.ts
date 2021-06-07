@@ -38,7 +38,7 @@ export interface ExchangeInterface {
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
     newestEntryInterval: number
   ): ExchangeAssetPriceEntryInterface;
-  toExport(): Object;
+  toExport(): unknown;
 }
 
 export class Exchange implements ExchangeInterface {
@@ -171,7 +171,7 @@ export class Exchange implements ExchangeInterface {
     return symbolAssetPrice.addEntry(assetPriceDataEntry);
   }
 
-  toExport(): Object {
+  toExport(): unknown {
     return {
       key: this.key,
       apiCredentials: {

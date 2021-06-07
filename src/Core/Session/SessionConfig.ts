@@ -2,7 +2,7 @@ export interface SessionConfigInterface {
   warmupPeriodSeconds: number; // How long do we wait until we actually start trading?
   assetPriceUpdateIntervalSeconds: number; // At which interval we want to update the prices?
   memoryUsageMonitoringIntervalSeconds: number; // At which interval we want to display the memory usage?
-  toExport(): Object;
+  toExport(): unknown;
 }
 
 export class SessionConfig implements SessionConfigInterface {
@@ -20,7 +20,7 @@ export class SessionConfig implements SessionConfigInterface {
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
   }
 
-  toExport(): Object {
+  toExport(): unknown {
     return {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds: this.assetPriceUpdateIntervalSeconds,

@@ -22,7 +22,7 @@ export class AssetPair implements AssetPairInterface {
   toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {
     return converter.convert(this);
   }
-};
+}
 
 export class AssetPairStringConverterDefault implements AssetPairStringConverterInterface {
   convert(assetPair: AssetPair): string {

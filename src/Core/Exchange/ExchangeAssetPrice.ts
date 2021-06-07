@@ -68,7 +68,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 
     const baseEntry = this._entries[entriesCount - 1];
 
-    let changes = new Map<string, ExchangeAssetPriceChangeInterface>();
+    const changes = new Map<string, ExchangeAssetPriceChangeInterface>();
     // We don't need the base (in this case the newest) one, so add -1 to the loop
     for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];

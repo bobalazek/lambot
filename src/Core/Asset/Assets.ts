@@ -54,7 +54,7 @@ export class Assets {
   static readonly SNX = new Asset('SNX', 'Synthetix Network Token');
 
   static getBySymbol(symbol: string): Asset {
-    if (!!this[symbol]) {
+    if (this[symbol]) {
       return this[symbol];
     }
 

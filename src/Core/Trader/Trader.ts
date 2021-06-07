@@ -7,7 +7,7 @@ export class Trader {
   _session: Session;
   _isTestMode: boolean;
 
-  constructor(session: Session, isTestMode: boolean = true) {
+  constructor(session: Session, isTestMode = true) {
     this._session = session;
     this._isTestMode = isTestMode;
   }

@@ -21,7 +21,7 @@ export interface StrategyInterface {
   // Usefull with suden large dips!
   stopLossTimeoutSeconds: number;
 
-  toExport(): Object;
+  toExport(): unknown;
 }
 
 export class Strategy implements StrategyInterface {
@@ -49,10 +49,9 @@ export class Strategy implements StrategyInterface {
     this.trailingTakeProfitSlipPercentage = trailingTakeProfitSlipPercentage;
     this.stopLossPercentage = stopLossPercentage;
     this.stopLossTimeoutSeconds = stopLossTimeoutSeconds;
-    ;
   }
 
-  toExport(): Object {
+  toExport(): unknown {
     return {
       orderAmount: this.orderAmount,
       maximumOpenPositions: this.maximumOpenPositions,
