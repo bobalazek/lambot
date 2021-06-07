@@ -1,5 +1,3 @@
-import { Asset } from '../Asset/Asset';
-
 export interface OrderFeesInterface {
   amountPercentage: number;
 }

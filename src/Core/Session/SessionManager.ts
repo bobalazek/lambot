@@ -5,10 +5,9 @@ import chalk from 'chalk';
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
 import { SessionAsset } from './SessionAsset';
-import logger from '../../Utils/Logger';
 import { SessionConfig } from './SessionConfig';
-
-const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
+import { DATA_SESSIONS_DIR } from '../../constants';
+import logger from '../../Utils/Logger';
 
 export class SessionManager {
   static async save(session: Session): Promise<string> {
@@ -22,6 +21,7 @@ export class SessionManager {
       version: 1,
     };
 
+    fs.mkdirSync(DATA_SESSIONS_DIR, { recursive: true });
     fs.writeFileSync(sessionFilePath, JSON.stringify(data, null, 4), {
       encoding: 'utf8',
       flag: 'w+',

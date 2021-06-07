@@ -97,6 +97,7 @@ export class Session implements SessionInterface {
             assetPair.assetQuote.toString(),
           ];
         }),
+        strategy: sessionAsset.strategy.toExport(),
       };
     });
 
