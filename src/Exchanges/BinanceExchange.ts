@@ -105,6 +105,7 @@ export class BinanceExchange extends Exchange {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
+    // https://www.binance.com/en/fee/trading
 
     return new OrderFees(
       0.075,
