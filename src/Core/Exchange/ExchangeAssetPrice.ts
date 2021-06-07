@@ -4,11 +4,14 @@ export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
   getNewestEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
-  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface};
+  getChanges(): ExchangeAssetPriceChangeMap;
+  processEntries(): void;
   getStatusText(time: number): string;
 }
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
+
+export type ExchangeAssetPriceChangeMap = Map<string, ExchangeAssetPriceChangeInterface>;
 
 export interface ExchangeAssetPriceChangeInterface {
   absolutePricePercentage: number; // absolute to the currently newest/base entry - ((price - basePrice) / basePrice) * 100
@@ -29,6 +32,7 @@ export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAsse
 
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
+  private _changes: ExchangeAssetPriceChangeMap;
 
   constructor() {
     this._entries = [];
@@ -52,15 +56,19 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return entry;
   }
 
-  getChanges(): {[key: string]: ExchangeAssetPriceChangeInterface} {
+  getChanges(): ExchangeAssetPriceChangeMap {
+    return this._changes;
+  }
+
+  processEntries(): void {
     const entriesCount = this._entries.length;
     if (entriesCount < 2) {
-      return null;
+      return;
     }
 
     const baseEntry = this._entries[entriesCount - 1];
 
-    let changes = {};
+    let changes = new Map<string, ExchangeAssetPriceChangeInterface>();
     // We don't need the base (in this case the newest) one, so add -1 to the loop
     for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];
@@ -78,16 +86,16 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         ? ((price - prevPrice) / prevPrice) * 100
         : 0;
 
-      changes[differenceSeconds + 's'] = {
+      changes.set(differenceSeconds + 's', {
         absolutePricePercentage,
         relativePricePercentage,
         basePrice,
         price,
         prevPrice,
-      };
+      });
     }
 
-    return changes;
+    this._changes = changes;
   }
 
   getStatusText(time: number = +new Date()): string {
@@ -100,15 +108,4 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       ' (updated ' + ((time - newestEntry.timestamp) / 1000) + 's ago)'
     );
   }
-}
-
-/***** Helpers *****/
-const colorTextByPercentage = (value: number) => {
-  if (value > 0) {
-    return chalk.green(value.toPrecision(3) + '%');
-  } else if (value < 0) {
-    return chalk.red(value.toPrecision(3) + '%');
-  }
-
-  return value.toPrecision(3) + '%';
 }
