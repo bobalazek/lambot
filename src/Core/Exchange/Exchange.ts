@@ -4,6 +4,7 @@ import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { Order, OrderFees } from '../Order/Order';
 import { Session } from '../Session/Session';
+import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangesFactory } from './ExchangesFactory';
 import { SessionManager } from '../Session/SessionManager';
 import {
@@ -22,7 +23,7 @@ export interface ExchangeInterface {
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
-  getAccountAssets(): Promise<ExchangeAccountAsset[]>;
+  getAccountAssets(): Promise<ExchangeAccountAssetInterface[]>;
   getAssetPairs(): Promise<AssetPair[]>;
   getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]>;
   getAssetFees(symbol: string, amount: string): Promise<OrderFees>;
@@ -36,13 +37,7 @@ export interface ExchangeInterface {
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
     newestEntryInterval: number
   ): ExchangeAssetPriceEntryInterface;
-}
-
-export interface ExchangeAccountAssetInterface {
-  exchange: Exchange;
-  symbol: string;
-  amountFree: string;
-  amountLocked: string;
+  toExport(): Object;
 }
 
 export class Exchange implements ExchangeInterface {
@@ -187,24 +182,5 @@ export class Exchange implements ExchangeInterface {
 
   static async fromImport(data: any): Promise<Exchange> {
     return ExchangesFactory.get(data.key, data.apiCredentials);
-  }
-}
-
-export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
-  exchange: Exchange;
-  symbol: string;
-  amountFree: string;
-  amountLocked: string;
-
-  constructor(
-    exchange: Exchange,
-    symbol: string,
-    amountFree: string = '0',
-    amountLocked: string = '0'
-  ) {
-    this.exchange = exchange;
-    this.symbol = symbol;
-    this.amountFree = amountFree;
-    this.amountLocked = amountLocked;
   }
 }

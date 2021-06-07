@@ -6,6 +6,7 @@ import { Assets } from '../Asset/Assets';
 import { Exchange } from '../Exchange/Exchange';
 import logger from '../../Utils/Logger';
 import { SessionAsset } from './SessionAsset';
+import { SessionConfig } from './SessionConfig';
 
 export enum SessionStatusEnum {
   PENDING = 'PENDING',
@@ -16,26 +17,30 @@ export enum SessionStatusEnum {
 export interface SessionInterface {
   id: string;
   exchange: Exchange;
+  config: SessionConfig;
   assets: SessionAsset[];
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
   endedAt: number;
   getAllAssetPairsSet(): Set<string>;
+  toExport(): Object;
 }
 
 export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
+  config: SessionConfig;
   assets: SessionAsset[];
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
   endedAt: number;
 
-  constructor(id: string, exchange: Exchange) {
+  constructor(id: string, exchange: Exchange, config: SessionConfig) {
     this.id = id;
     this.exchange = exchange;
+    this.config = config;
     this.assets = [];
     this.status = SessionStatusEnum.STARTED;
     this.createdAt = +new Date();
@@ -99,13 +104,12 @@ export class Session implements SessionInterface {
       startedAt: this.startedAt,
       endedAt: this.endedAt,
       exchange: this.exchange.toExport(),
+      config: this.config.toExport(),
     };
   }
 
   static async fromImport(data: any): Promise<Session> {
     const sessionData = data.session;
-    const exchangeData = sessionData.exchange;
-
     if (sessionData.status === SessionStatusEnum.ENDED) {
       logger.critical(chalk.red.bold(
         'The session you are trying to import has already ended. Please create a new one instead.'
@@ -114,10 +118,12 @@ export class Session implements SessionInterface {
       process.exit(1);
     }
 
-    const exchange = await Exchange.fromImport(exchangeData);
+    const exchange = await Exchange.fromImport(sessionData.exchange);
+    const config = await SessionConfig.fromImport(sessionData.config);
     const session = new Session(
       sessionData.id,
-      exchange
+      exchange,
+      config
     );
 
     sessionData.assets.forEach((assetData) => {

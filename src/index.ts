@@ -6,6 +6,7 @@ import { Assets } from './Core/Asset/Assets';
 import { Trader } from './Core/Trader/Trader';
 import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset } from './Core/Session/SessionAsset';
+import { SessionConfig } from './Core/Session/SessionConfig';
 
 // Prepare environment variables
 dotenv.config();
@@ -28,6 +29,9 @@ const sessionId = programOptions.session;
 (async() => {
   const session = await SessionManager.newOrLoad(
     sessionId,
+    new SessionConfig({
+      isTestMode,
+    }),
     'binance',
     [
       new SessionAsset(

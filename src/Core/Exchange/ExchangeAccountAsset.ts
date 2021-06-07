@@ -3,25 +3,27 @@ import { Exchange } from './Exchange';
 export interface ExchangeAccountAssetInterface {
   exchange: Exchange;
   symbol: string;
-  amountFree: string;
-  amountLocked: string;
+  getAmountFree(): Promise<string>;
+  getAmountLocked(): Promise<string>;
 }
 
 export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
   exchange: Exchange;
   symbol: string;
-  amountFree: string;
-  amountLocked: string;
 
   constructor(
     exchange: Exchange,
-    symbol: string,
-    amountFree: string = '0',
-    amountLocked: string = '0'
+    symbol: string
   ) {
     this.exchange = exchange;
     this.symbol = symbol;
-    this.amountFree = amountFree;
-    this.amountLocked = amountLocked;
+  }
+
+  async getAmountFree() {
+    return '0';
+  }
+
+  async getAmountLocked() {
+    return '0';
   }
 }

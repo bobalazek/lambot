@@ -32,7 +32,7 @@ export class BinanceExchange extends Exchange {
   async boot(session: Session): Promise<boolean> {
     await super.boot(session);
 
-    const updateInterval = 2000;
+    const updateInterval = this._session.config.assetPriceUpdateIntervalSeconds * 1000;
 
     // await this._prepareWebsocket(updateInterval);
     this._startAssetPriceUpdating(updateInterval);

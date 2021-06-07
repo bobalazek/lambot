@@ -6,6 +6,7 @@ import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
 import { SessionAsset } from './SessionAsset';
 import logger from '../../Utils/Logger';
+import { SessionConfig } from './SessionConfig';
 
 const DATA_SESSIONS_DIR = path.resolve(__dirname, '..', 'data', 'sessions');
 
@@ -47,13 +48,14 @@ export class SessionManager {
 
   static async new(
     id: string,
+    config: SessionConfig,
     exchangeKey: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
     logger.info(chalk.cyan(`Creating a new session with ID "${id}" ...`));
 
     const exchange = ExchangesFactory.get(exchangeKey);
-    const session = new Session(id, exchange);
+    const session = new Session(id, exchange, config);
 
     sessionAssets.forEach((sessionAsset) => {
       session.addAsset(
@@ -67,6 +69,7 @@ export class SessionManager {
 
   static async newOrLoad(
     id: string,
+    config: SessionConfig,
     exchangeKey: ExchangesEnum | string,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
@@ -81,7 +84,7 @@ export class SessionManager {
       }
     }
 
-    return this.new(id, exchangeKey, sessionAssets);
+    return this.new(id, config, exchangeKey, sessionAssets);
   }
 
   static getPathById(id: string): string {

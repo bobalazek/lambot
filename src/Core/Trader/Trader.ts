@@ -13,6 +13,11 @@ export class Trader {
   }
 
   async boot() {
+    const {
+      memoryUsageMonitoringIntervalSeconds,
+      assetPriceUpdateIntervalSeconds,
+    } = this._session.config;
+
     logger.info(chalk.cyan(
       this._isTestMode
         ? 'Trader (in TEST MODE) is starting now ...'
@@ -25,8 +30,8 @@ export class Trader {
 
     await this._session.exchange.boot(this._session);
 
-    this._startMemoryUsageMonitoring(15 * 1000);
-    this._startExchangeSessionAssetPairsMonitoring(2 * 1000);
+    this._startMemoryUsageMonitoring(memoryUsageMonitoringIntervalSeconds * 1000);
+    this._startExchangeSessionAssetPairsMonitoring(assetPriceUpdateIntervalSeconds * 1000);
   }
 
   private _startMemoryUsageMonitoring(updateInterval: number) {
