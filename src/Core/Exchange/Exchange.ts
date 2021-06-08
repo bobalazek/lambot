@@ -13,6 +13,7 @@ import {
   ExchangeAssetPriceEntryInterface,
   ExchangeAssetPriceInterface,
   ExchangeAssetPricesMap,
+  ExchangeAssetPriceWithSymbolEntryInterface,
 } from './ExchangeAssetPrice';
 import logger from '../../Utils/Logger';
 
@@ -26,7 +27,7 @@ export interface ExchangeInterface {
   addAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAssetInterface[]>;
   getAssetPairs(): Promise<AssetPair[]>;
-  getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]>;
+  getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
   getSession(): Session;
   getSessionAssetPairPrices(): ExchangeAssetPricesMap;
@@ -38,6 +39,7 @@ export interface ExchangeInterface {
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
     newestEntryInterval: number
   ): ExchangeAssetPriceEntryInterface;
+  startSessionAssetPriceUpdating(updateInterval: number): ReturnType<typeof setInterval>;
   toExport(): unknown;
 }
 
@@ -102,6 +104,10 @@ export class Exchange implements ExchangeInterface {
 
     await SessionManager.save(session);
 
+    const updateInterval = this._session.config.assetPriceUpdateIntervalSeconds * 1000;
+
+    this.startSessionAssetPriceUpdating(updateInterval);
+
     return true;
   }
 
@@ -121,7 +127,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPairs() not implemented yet.');
   }
 
-  async getAssetPrices(): Promise<ExchangeAssetPriceEntryInterface[]> {
+  async getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]> {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
@@ -169,6 +175,29 @@ export class Exchange implements ExchangeInterface {
     }
 
     return symbolAssetPrice.addEntry(assetPriceDataEntry);
+  }
+
+  startSessionAssetPriceUpdating(updateInterval: number): ReturnType<typeof setInterval> {
+    const allAssetPairs = this.getSession().getAllAssetPairsSet();
+
+    return setInterval(async () => {
+      const assetPrices = await this.getAssetPrices();
+      const now = +new Date();
+
+      for (let i = 0; i < assetPrices.length; i++) {
+        const assetData = assetPrices[i];
+        if (!allAssetPairs.has(assetData.symbol)) {
+          continue;
+        }
+
+        this.addSessionAssetPairPriceEntry(assetData.symbol, {
+          timestamp: now,
+          price: assetData.price,
+        });
+      }
+
+      // Start our magic here
+    }, updateInterval);
   }
 
   toExport(): unknown {

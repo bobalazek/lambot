@@ -8,7 +8,6 @@ import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
-import { Session } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
 export class BinanceExchange extends Exchange {
@@ -27,17 +26,6 @@ export class BinanceExchange extends Exchange {
 
       process.exit(1);
     }
-  }
-
-  async boot(session: Session): Promise<boolean> {
-    await super.boot(session);
-
-    const updateInterval = this._session.config.assetPriceUpdateIntervalSeconds * 1000;
-
-    // await this._prepareWebsocket(updateInterval);
-    this._startAssetPriceUpdating(updateInterval);
-
-    return true;
   }
 
   async getAssetPairs(): Promise<AssetPair[]> {
@@ -108,27 +96,6 @@ export class BinanceExchange extends Exchange {
     // https://www.binance.com/en/fee/trading
 
     return new OrderFees(0.075);
-  }
-
-  _startAssetPriceUpdating(updateInterval: number) {
-    const allAssetPairs = this.getSession().getAllAssetPairsSet();
-
-    return setInterval(async () => {
-      const assetPrices = await this.getAssetPrices();
-      const now = +new Date();
-
-      for (let i = 0; i < assetPrices.length; i++) {
-        const assetData = assetPrices[i];
-        if (!allAssetPairs.has(assetData.symbol)) {
-          continue;
-        }
-
-        this.addSessionAssetPairPriceEntry(assetData.symbol, {
-          timestamp: now,
-          price: assetData.price,
-        });
-      }
-    }, updateInterval);
   }
 
   async _prepareWebsocket(updateInterval: number) {
