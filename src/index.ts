@@ -29,7 +29,9 @@ const sessionId = programOptions.session;
 // A workaround for the top-level-await issue
 (async() => {
   // Config
-  const sessionConfig = new SessionConfig({});
+  const sessionConfig = new SessionConfig({
+    assetPriceUpdateIntervalSeconds: 2,
+  });
   const exchangeKey = 'binance';
   const sessionAssets = [
     new SessionAsset(
