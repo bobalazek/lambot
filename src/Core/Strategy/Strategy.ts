@@ -10,7 +10,7 @@ export interface StrategyInterface {
 
   // If we have a sudden dip when we are are ready to take profit,
   // should we wait for it to be stable, or sell anyway?
-  takeProfitDipTimeout: number;
+  takeProfitDipTimeoutSeconds: number;
 
   // Should we enable trailing take profit?
   trailingTakeProfitEnabled: boolean;
@@ -36,7 +36,7 @@ export class Strategy implements StrategyInterface {
   orderAmount: string;
   maximumOpenPositions: number;
   takeProfitPercentage: number;
-  takeProfitDipTimeout: number;
+  takeProfitDipTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
   trailingTakeProfitSlipPercentage: number;
   stopLossPercentage: number;
@@ -47,7 +47,7 @@ export class Strategy implements StrategyInterface {
     orderAmount = '1',
     maximumOpenPositions = 1,
     takeProfitPercentage = 5,
-    takeProfitDipTimeout = 0,
+    takeProfitDipTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.25,
     stopLossPercentage = 3,
@@ -57,7 +57,7 @@ export class Strategy implements StrategyInterface {
     this.orderAmount = orderAmount;
     this.maximumOpenPositions = maximumOpenPositions;
     this.takeProfitPercentage = takeProfitPercentage;
-    this.takeProfitDipTimeout = takeProfitDipTimeout;
+    this.takeProfitDipTimeoutSeconds = takeProfitDipTimeoutSeconds;
     this.trailingTakeProfitEnabled = trailingTakeProfitEnabled;
     this.trailingTakeProfitSlipPercentage = trailingTakeProfitSlipPercentage;
     this.stopLossPercentage = stopLossPercentage;
@@ -70,7 +70,7 @@ export class Strategy implements StrategyInterface {
       orderAmount: this.orderAmount,
       maximumOpenPositions: this.maximumOpenPositions,
       takeProfitPercentage: this.takeProfitPercentage,
-      takeProfitDipTimeout: this.takeProfitDipTimeout,
+      takeProfitDipTimeoutSeconds: this.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: this.trailingTakeProfitSlipPercentage,
       stopLossPercentage: this.stopLossPercentage,
@@ -84,7 +84,7 @@ export class Strategy implements StrategyInterface {
       orderAmount: data.orderAmount,
       maximumOpenPositions: data.maximumOpenPositions,
       takeProfitPercentage: data.takeProfitPercentage,
-      takeProfitDipTimeout: data.takeProfitDipTimeout,
+      takeProfitDipTimeoutSeconds: data.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: data.trailingTakeProfitSlipPercentage,
       stopLossPercentage: data.stopLossPercentage,
