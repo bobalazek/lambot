@@ -1,11 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import chalk from 'chalk';
-import Websocket from 'ws';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
 import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
+import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
 import logger from '../Utils/Logger';
@@ -28,7 +28,7 @@ export class BinanceExchange extends Exchange {
     }
   }
 
-  async getAssetPairs(): Promise<AssetPair[]> {
+  async getAssetPairs(): Promise<ExchangeAssetPair[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
     try {
@@ -40,14 +40,33 @@ export class BinanceExchange extends Exchange {
       // TODO: split that into a separate call (getInfo() or something)
       // and cache those pairs locally when we need them.
 
-      const assetPairs: AssetPair[] = [];
+      const assetPairs: ExchangeAssetPair[] = [];
       for (let i = 0; i < response.data.symbols.length; i++) {
         const symbolData = response.data.symbols[i];
 
+        let amountMinimum = '0';
+        let amountMaximum = '0';
+        let priceMinimum = '0';
+        let priceMaximum = '0';
+
+        symbolData.filters.forEach((symbolFilterData) => {
+          if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
+            amountMinimum = symbolFilterData.minQty;
+            amountMaximum = symbolFilterData.maxQty;
+          } else if (symbolFilterData.filterType === 'PRICE_FILTER') {
+            priceMinimum = symbolFilterData.minPrice;
+            priceMaximum = symbolFilterData.maxPrice;
+          }
+        });
+
         assetPairs.push(
-          new AssetPair(
+          new ExchangeAssetPair(
             Assets.getBySymbol(symbolData.baseAsset),
-            Assets.getBySymbol(symbolData.quoteAsset)
+            Assets.getBySymbol(symbolData.quoteAsset),
+            amountMinimum,
+            amountMaximum,
+            priceMinimum,
+            priceMaximum
           )
         );
       }
@@ -61,7 +80,9 @@ export class BinanceExchange extends Exchange {
   }
 
   async getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]> {
-    logger.debug(chalk.italic('Fetching asset prices ...'));
+    logger.debug(chalk.italic(
+      'Fetching asset prices ...'
+    ));
 
     try {
       const response = await this._doRequest({

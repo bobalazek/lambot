@@ -27,6 +27,8 @@ export class SessionManager {
       flag: 'w+',
     });
 
+    logger.debug(`Session saved to "${sessionFilePath}"`);
+
     return sessionFilePath;
   }
 
@@ -35,13 +37,15 @@ export class SessionManager {
 
     const sessionFilePath = this.getPathById(id);
     if (!fs.existsSync(sessionFilePath)) {
-      logger.info(chalk.cyan(`Loading session with ID "${id}" ...`));
+      logger.info(chalk.cyan(`Session with ID "${id}" does not exist.`));
 
       return null;
     }
 
     const contents = fs.readFileSync(sessionFilePath, 'utf8');
     const data = JSON.parse(contents);
+
+    logger.debug(`Session loaded from "${sessionFilePath}"`);
 
     return Session.fromImport(data);
   }

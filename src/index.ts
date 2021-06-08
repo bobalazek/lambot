@@ -16,8 +16,8 @@ dotenv.config();
 const program = new Command();
 program
   .version('0.1')
-  .option('-p, --production', 'Use actual production credentials', false)
-  .requiredOption('-s, --session <session>', 'Want to continue a session? Leave blank if you want to start a new one.')
+  .option('-p, --production', 'Does actual trading with your account.', false)
+  .requiredOption('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
   .parse(process.argv)
 ;
 const programOptions = program.opts();
@@ -60,6 +60,5 @@ const sessionId = programOptions.session;
     sessionAssets
   );
 
-  const manager = new Manager(session, isTestMode);
-  await manager.boot();
+  await Manager.boot(session, isTestMode);
 })();

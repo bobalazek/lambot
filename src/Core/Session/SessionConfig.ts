@@ -1,7 +1,7 @@
 export interface SessionConfigInterface {
   warmupPeriodSeconds: number; // How long do we wait until we actually start trading?
   assetPriceUpdateIntervalSeconds: number; // At which interval we want to update the prices?
-  memoryUsageMonitoringIntervalSeconds: number; // At which interval we want to display the memory usage?
+  memoryUsageMonitoringIntervalSeconds: number; // At which interval we want to display the memory usage? Set to 0 if disabled
   toExport(): unknown;
 }
 

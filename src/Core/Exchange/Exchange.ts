@@ -1,11 +1,12 @@
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
-import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
+import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { Order } from '../Order/Order';
 import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
 import { Session } from '../Session/Session';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
+import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
 import { ExchangesFactory } from './ExchangesFactory';
 import { SessionManager } from '../Session/SessionManager';
 import {
@@ -26,7 +27,7 @@ export interface ExchangeInterface {
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
   getAccountAssets(): Promise<ExchangeAccountAssetInterface[]>;
-  getAssetPairs(): Promise<AssetPair[]>;
+  getAssetPairs(): Promise<ExchangeAssetPairInterface[]>;
   getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
   getSession(): Session;
@@ -70,7 +71,9 @@ export class Exchange implements ExchangeInterface {
   async boot(session: Session): Promise<boolean> {
     this._session = session;
 
-    logger.info(chalk.cyan('Booting up the exchange ...'));
+    logger.info(chalk.cyan(
+      'Booting up the exchange ...'
+    ));
 
     const sessionAssets = session.assets;
     if (sessionAssets.length === 0) {
@@ -82,25 +85,53 @@ export class Exchange implements ExchangeInterface {
     }
 
     const exhangeAssetPairs = await this.getAssetPairs();
-    const exhangeAssetPairsSet = new Set(exhangeAssetPairs.map((assetPair) => {
-      return assetPair.toString(this.assetPairConverter);
+    const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
+      const key = assetPair.toString(this.assetPairConverter);
+      return [key, assetPair];
     }));
 
-    logger.info(chalk.bold('I will be trading with the following assets:'));
+    logger.info(chalk.bold(
+      'I will be trading with the following assets:'
+    ));
 
+    // Do session asset validations
     sessionAssets.forEach((sessionAsset) => {
       const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet(this.assetPairConverter);
       sessionAssetAssetPairSet.forEach((assetPairString) => {
-        if (!exhangeAssetPairsSet.has(assetPairString)) {
+        // Check if that pair exists on the exchange
+        if (!exhangeAssetPairsMap.has(assetPairString)) {
           logger.critical(chalk.red.bold(
             `Oh dear. We did not seem to have found the "${assetPairString}" asset pair on the exchange.`
           ));
 
           process.exit(1);
         }
+
+        // Check if our order amount is too small or big
+        const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairString);
+        const orderAmount = parseFloat(sessionAsset.strategy.orderAmount);
+        if (parseFloat(exhangeAssetPair.amountMaximum) < orderAmount) {
+          logger.critical(chalk.red.bold(
+            `The order amount for "${assetPairString}" is too big for this exchange asset. ` +
+            `You specified: "${sessionAsset.strategy.orderAmount}". ` +
+            `Maximum: "${exhangeAssetPair.amountMaximum}"`
+          ));
+
+          process.exit(1);
+        } else if (parseFloat(exhangeAssetPair.amountMinimum) > orderAmount) {
+          logger.critical(chalk.red.bold(
+            `The order amount for "${assetPairString}" is too small for this exchange asset. ` +
+            `You specified: "${sessionAsset.strategy.orderAmount}". ` +
+            `Minimum: "${exhangeAssetPair.amountMinimum}"`
+          ));
+
+          process.exit(1);
+        }
       });
 
-      logger.info(chalk.bold(sessionAsset.toString(this.assetPairConverter)));
+      logger.info(chalk.bold(
+        sessionAsset.toString(this.assetPairConverter)
+      ));
     });
 
     await SessionManager.save(session);
@@ -124,7 +155,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAccountAssets() not implemented yet.');
   }
 
-  async getAssetPairs(): Promise<AssetPair[]> {
+  async getAssetPairs(): Promise<ExchangeAssetPair[]> {
     throw new Error('getAssetPairs() not implemented yet.');
   }
 

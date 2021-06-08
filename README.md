@@ -7,6 +7,22 @@ Yes, you read that right. This Bot could possibly catapult you to the moon, so y
 * First you need to build the bot: `yarn build`
 * Now you can run it: `node dist/main.js`
 
+## Concepts
+
+### Exchange
+
+That one is pretty self expainatory.
+
+### Session
+
+A session or a round would basically just be a wrapper for everything we do.
+
+#### Session Asset
+
+A session asset consists of one base asset (the one you want to earn profit in) and asset pairs.
+Asset pairs in this case are the assets you want to trade the current asset with.
+For example: You have a base asset USDT and you want to trade with USDTBTC, USSDTETH, ...
+
 ## TODO
 
 * Jest tests

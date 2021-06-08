@@ -4,35 +4,40 @@ import { Session } from './Session/Session';
 import logger from '../Utils/Logger';
 
 export class Manager {
-  _session: Session;
-  _isTestMode: boolean;
+  public static session: Session;
+  public static isTestMode: boolean;
 
-  constructor(session: Session, isTestMode = true) {
-    this._session = session;
-    this._isTestMode = isTestMode;
-  }
+  public static async boot(
+    session: Session,
+    isTestMode = true
+  ) {
+    this.session = session;
+    this.isTestMode = isTestMode;
 
-  async boot() {
     const {
       memoryUsageMonitoringIntervalSeconds,
-    } = this._session.config;
+    } = this.session.config;
 
     logger.info(chalk.cyan(
-      this._isTestMode
+      this.isTestMode
         ? 'Trader (in TEST MODE) is starting now ...'
         : 'Trader is starting now ...'
     ));
 
     logger.info(chalk.cyan(
-      `Session ID: ${this._session.id}; Exchange: ${this._session.exchange.name}`
+      `Session ID: ${this.session.id}; Exchange: ${this.session.exchange.name}`
     ));
 
-    await this._session.exchange.boot(this._session);
+    await this.session.exchange.boot(this.session);
 
-    this._startMemoryUsageMonitoring(memoryUsageMonitoringIntervalSeconds * 1000);
+    if (memoryUsageMonitoringIntervalSeconds) {
+      this._startMemoryUsageMonitoring(
+        memoryUsageMonitoringIntervalSeconds * 1000
+      );
+    }
   }
 
-  private _startMemoryUsageMonitoring(updateInterval: number) {
+  private static _startMemoryUsageMonitoring(updateInterval: number) {
     return setInterval(() => {
       const memoryUsage = process.memoryUsage();
       const memoryUsageText = (
