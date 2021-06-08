@@ -30,16 +30,17 @@ export interface ExchangeInterface {
   getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
   getSession(): Session;
-  getSessionAssetPairPrices(): ExchangeAssetPricesMap;
+  getSessionAssetPairPricesMap(): ExchangeAssetPricesMap;
   getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
-  addSessionAssetPairPrice(symbol: string, assetPairPrice: ExchangeAssetPriceInterface): ExchangeAssetPriceInterface;
-  getSessionAssetPairPriceEntryNewest(symbol: string): ExchangeAssetPriceEntryInterface;
+  addSessionAssetPairPrice(
+    symbol: string,
+    assetPairPrice: ExchangeAssetPriceInterface
+  ): ExchangeAssetPriceInterface;
   addSessionAssetPairPriceEntry(
     symbol: string,
-    assetPriceDataEntry: ExchangeAssetPriceEntryInterface,
-    newestEntryInterval: number
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
   ): ExchangeAssetPriceEntryInterface;
-  startSessionAssetPriceUpdating(updateInterval: number): ReturnType<typeof setInterval>;
+  startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval>;
   toExport(): unknown;
 }
 
@@ -106,7 +107,7 @@ export class Exchange implements ExchangeInterface {
 
     const updateInterval = this._session.config.assetPriceUpdateIntervalSeconds * 1000;
 
-    this.startSessionAssetPriceUpdating(updateInterval);
+    this.startSessionAssetPriceUpdatingInterval(updateInterval);
 
     return true;
   }
@@ -139,7 +140,7 @@ export class Exchange implements ExchangeInterface {
     return this._session;
   }
 
-  getSessionAssetPairPrices(): ExchangeAssetPricesMap {
+  getSessionAssetPairPricesMap(): ExchangeAssetPricesMap {
     return this._sessionAssetPairPrices;
   }
 
@@ -156,15 +157,6 @@ export class Exchange implements ExchangeInterface {
     return assetPairPrice;
   }
 
-  getSessionAssetPairPriceEntryNewest(symbol: string): ExchangeAssetPriceEntryInterface {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrice(symbol);
-    if (!symbolAssetPrice) {
-      return null;
-    }
-
-    return symbolAssetPrice.getNewestEntry();
-  }
-
   addSessionAssetPairPriceEntry(
     symbol: string,
     assetPriceDataEntry: ExchangeAssetPriceEntryInterface
@@ -177,7 +169,7 @@ export class Exchange implements ExchangeInterface {
     return symbolAssetPrice.addEntry(assetPriceDataEntry);
   }
 
-  startSessionAssetPriceUpdating(updateInterval: number): ReturnType<typeof setInterval> {
+  startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval> {
     const allAssetPairs = this.getSession().getAllAssetPairsSet();
 
     return setInterval(async () => {
@@ -196,7 +188,15 @@ export class Exchange implements ExchangeInterface {
         });
       }
 
-      // Start our magic here
+      // Now that we updated our prices, let's process the entries!
+      logger.info(chalk.bold('Asset pair price updates:'));
+      this._sessionAssetPairPrices.forEach((exchangeAssetPrice, key) => {
+        exchangeAssetPrice.processEntries();
+
+        const statusText = exchangeAssetPrice.getStatusText(now);
+
+        logger.info(chalk.bold(key) + ' - ' + statusText);
+      });
     }, updateInterval);
   }
 

@@ -3,7 +3,7 @@ import { Command } from 'commander';
 
 import { AssetPair } from './Core/Asset/AssetPair';
 import { Assets } from './Core/Asset/Assets';
-import { Trader } from './Core/Trader/Trader';
+import { Manager } from './Core/Manager';
 import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
@@ -60,7 +60,6 @@ const sessionId = programOptions.session;
     sessionAssets
   );
 
-  const trader = new Trader(session, isTestMode);
-
-  trader.boot();
+  const manager = new Manager(session, isTestMode);
+  await manager.boot();
 })();

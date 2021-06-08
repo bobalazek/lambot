@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 
-import { Session } from '../Session/Session';
-import logger from '../../Utils/Logger';
+import { Session } from './Session/Session';
+import logger from '../Utils/Logger';
 
-export class Trader {
+export class Manager {
   _session: Session;
   _isTestMode: boolean;
 
@@ -15,7 +15,6 @@ export class Trader {
   async boot() {
     const {
       memoryUsageMonitoringIntervalSeconds,
-      assetPriceUpdateIntervalSeconds,
     } = this._session.config;
 
     logger.info(chalk.cyan(
@@ -31,7 +30,6 @@ export class Trader {
     await this._session.exchange.boot(this._session);
 
     this._startMemoryUsageMonitoring(memoryUsageMonitoringIntervalSeconds * 1000);
-    this._startExchangeSessionAssetPairsMonitoring(assetPriceUpdateIntervalSeconds * 1000);
   }
 
   private _startMemoryUsageMonitoring(updateInterval: number) {
@@ -45,20 +43,6 @@ export class Trader {
       );
 
       logger.info(chalk.cyanBright(memoryUsageText));
-    }, updateInterval);
-  }
-
-  private _startExchangeSessionAssetPairsMonitoring(updateInterval: number) {
-    return setInterval(() => {
-      logger.info(chalk.bold('Asset pair price updates:'));
-
-      const now = +new Date();
-
-      this._session.exchange.getSessionAssetPairPrices().forEach((sessionAssetPairPrice, key) => {
-        const statusText = sessionAssetPairPrice.getStatusText(now);
-
-        logger.info(chalk.bold(key) + ' - ' + statusText);
-      });
     }, updateInterval);
   }
 }

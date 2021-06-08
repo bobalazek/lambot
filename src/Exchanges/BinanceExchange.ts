@@ -98,59 +98,6 @@ export class BinanceExchange extends Exchange {
     return new OrderFees(0.075);
   }
 
-  async _prepareWebsocket(updateInterval: number) {
-    return new Promise((resolve, reject) => {
-      logger.info('Starting binance websocket ...');
-
-      const ws = new Websocket(`wss://stream.binance.com:9443/ws/!bookTicker`);
-      const allAssetPairs = this.getSession().getAllAssetPairsSet();
-
-      ws.on('open', () => {
-        logger.info('Binance Websocket open');
-
-        resolve(true);
-      });
-
-      ws.on('close', (error) => {
-        logger.info('Binance Websocket closed');
-
-        reject(error);
-      });
-
-      ws.on('error', (error) => {
-        logger.error(chalk.red('Binance Websocket error: ' + error.message));
-
-        reject(error);
-      });
-
-      ws.on('message', (data) => {
-        const parsedData = JSON.parse(data.toString());
-        const asset = parsedData.s;
-        if (!allAssetPairs.has(asset)) {
-          return;
-        }
-
-        const now = +new Date();
-        const price = parsedData.b; // Bid price; parsedData.a is Ask price
-
-        // Only add a new entry if the newest one was added more then the interval ago ...
-        const newestAssetPairPriceEntry = this.getSessionAssetPairPriceEntryNewest(asset);
-        if (
-          !newestAssetPairPriceEntry ||
-          (
-            newestAssetPairPriceEntry &&
-            now - newestAssetPairPriceEntry.timestamp > updateInterval
-          )
-        ) {
-          this.addSessionAssetPairPriceEntry(asset, {
-            timestamp: now,
-            price: price,
-          });
-        }
-      });
-    });
-  }
-
   async _doRequest(config: AxiosRequestConfig): Promise<AxiosResponse<any>> {
     logger.log(chalk.italic(
       `Making a ${config.method} request to ${config.url}`
