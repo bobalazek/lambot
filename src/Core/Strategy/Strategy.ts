@@ -5,7 +5,7 @@ export interface StrategyInterface {
   // How many open positions are we allowed to have for this asset?
   maximumOpenPositions: number;
 
-  //How much do we want to get profit, until we trigger a sell?
+  // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
   // Should we enable trailing take profit?
@@ -21,6 +21,10 @@ export interface StrategyInterface {
   // Usefull with suden large dips!
   stopLossTimeoutSeconds: number;
 
+  // How much percentage can the price rise after a dip, until we want to trigger a buy order?
+  // This is mostly used so we follow the dip down, and once it starts getting back up, we buy!
+  buyDipSlipPercentage: number;
+
   toExport(): unknown;
 }
 
@@ -32,15 +36,17 @@ export class Strategy implements StrategyInterface {
   trailingTakeProfitSlipPercentage: number;
   stopLossPercentage: number;
   stopLossTimeoutSeconds: number;
+  buyDipSlipPercentage: number;
 
   constructor({
     orderAmount = '1',
     maximumOpenPositions = 1,
     takeProfitPercentage = 5,
     trailingTakeProfitEnabled = true,
-    trailingTakeProfitSlipPercentage = 0.5,
+    trailingTakeProfitSlipPercentage = 0.25,
     stopLossPercentage = 3,
-    stopLossTimeoutSeconds = 30
+    stopLossTimeoutSeconds = 30,
+    buyDipSlipPercentage = 0.25,
   }) {
     this.orderAmount = orderAmount;
     this.maximumOpenPositions = maximumOpenPositions;
@@ -49,6 +55,7 @@ export class Strategy implements StrategyInterface {
     this.trailingTakeProfitSlipPercentage = trailingTakeProfitSlipPercentage;
     this.stopLossPercentage = stopLossPercentage;
     this.stopLossTimeoutSeconds = stopLossTimeoutSeconds;
+    this.buyDipSlipPercentage = buyDipSlipPercentage;
   }
 
   toExport(): unknown {
@@ -60,6 +67,7 @@ export class Strategy implements StrategyInterface {
       trailingTakeProfitSlipPercentage: this.trailingTakeProfitSlipPercentage,
       stopLossPercentage: this.stopLossPercentage,
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
+      buyDipSlipPercentage: this.buyDipSlipPercentage,
     };
   }
 
@@ -72,6 +80,7 @@ export class Strategy implements StrategyInterface {
       trailingTakeProfitSlipPercentage: data.trailingTakeProfitSlipPercentage,
       stopLossPercentage: data.stopLossPercentage,
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
+      buyDipSlipPercentage: data.buyDipSlipPercentage,
     });
   }
 }

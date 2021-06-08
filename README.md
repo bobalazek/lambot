@@ -2,10 +2,18 @@
 
 Yes, you read that right. This Bot could possibly catapult you to the moon, so you can start living your Lambo lifestyle!
 
-# Commands
+## Commands
 
 * First you need to build the bot: `yarn build`
 * Now you can run it: `node dist/main.js`
+
+## TODO
+
+* Jest tests
+* Messaging app (like telegram) notifications when buy/sell/position updates ...
+* In ExchangeAssetPrice add getLastPeakEntry() and getLastDipEntry().
+  * Also add getTrend() (POSITIVE or NEGATIVE or NEUTRAL)
+    * This will probably also need to consider if the change is too small to be considered a trend
 
 
 ## Disclaimer
