@@ -2,10 +2,6 @@ import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { Order } from '../Order/Order';
-import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
-import { Session } from '../Session/Session';
-import { SessionManager } from '../Session/SessionManager';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
@@ -15,8 +11,12 @@ import {
 } from './ExchangeAssetPrice';
 import { ExchangesFactory } from './ExchangesFactory';
 import { ExchangeValidator } from './ExchangeValidator';
-import logger from '../../Utils/Logger';
+import { Session } from '../Session/Session';
+import { SessionManager } from '../Session/SessionManager';
+import { Order } from '../Order/Order';
+import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
 import { asyncForEach } from '../../Utils/Helpers';
+import logger from '../../Utils/Logger';
 
 export interface ExchangeInterface {
   key: string;
