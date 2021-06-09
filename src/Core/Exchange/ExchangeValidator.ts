@@ -9,10 +9,9 @@ export class ExchangeValidator {
       'Starting session and exchange validation ...'
     ));
 
-    const session = exchange.getSession();
     const {
       assetPriceUpdateIntervalSeconds
-    } = session.config;
+    } = exchange.session.config;
 
     if (assetPriceUpdateIntervalSeconds < 1) {
       logger.critical(chalk.red.bold(
@@ -22,7 +21,7 @@ export class ExchangeValidator {
       process.exit(1);
     }
 
-    const sessionAssets = session.assets;
+    const sessionAssets = exchange.session.assets;
     if (sessionAssets.length === 0) {
       logger.critical(chalk.red.bold(
         'No assets found for this session!'

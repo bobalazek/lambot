@@ -8,15 +8,9 @@ import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
+import { ExchangeAssetPriceWithSymbolEntryInterface } from './ExchangeAssetPrice';
 import { ExchangesFactory } from './ExchangesFactory';
 import { ExchangeValidator } from './ExchangeValidator';
-import {
-  ExchangeAssetPrice,
-  ExchangeAssetPriceEntryInterface,
-  ExchangeAssetPriceInterface,
-  ExchangeAssetPricesMap,
-  ExchangeAssetPriceWithSymbolEntryInterface,
-} from './ExchangeAssetPrice';
 import logger from '../../Utils/Logger';
 
 export interface ExchangeInterface {
@@ -24,6 +18,7 @@ export interface ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
+  session: Session;
   boot(session: Session): Promise<boolean>;
   getAccountOrders(): Promise<Order[]>;
   addAccountOrder(order: Order): Promise<Order>;
@@ -31,18 +26,6 @@ export interface ExchangeInterface {
   getAssetPairs(): Promise<ExchangeAssetPairInterface[]>;
   getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
-  getSession(): Session;
-  // TODO: move those bits below in session?
-  getSessionAssetPairPricesMap(): ExchangeAssetPricesMap;
-  getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
-  addSessionAssetPairPrice(
-    symbol: string,
-    assetPairPrice: ExchangeAssetPriceInterface
-  ): ExchangeAssetPriceInterface;
-  addSessionAssetPairPriceEntry(
-    symbol: string,
-    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
-  ): ExchangeAssetPriceEntryInterface;
   startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval>;
   toExport(): unknown;
 }
@@ -52,9 +35,7 @@ export class Exchange implements ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
-
-  _session: Session;
-  _sessionAssetPairPrices: ExchangeAssetPricesMap;
+  session: Session;
 
   constructor(
     key: string,
@@ -66,12 +47,10 @@ export class Exchange implements ExchangeInterface {
     this.name = name;
     this.apiCredentials = apiCredentials;
     this.assetPairConverter = assetPairConverter;
-
-    this._sessionAssetPairPrices = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
-    this._session = session;
+    this.session = session;
 
     logger.info(chalk.cyan(
       'Booting up the exchange ...'
@@ -124,41 +103,8 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetFees() not implemented yet.');
   }
 
-  getSession(): Session {
-    return this._session;
-  }
-
-  getSessionAssetPairPricesMap(): ExchangeAssetPricesMap {
-    return this._sessionAssetPairPrices;
-  }
-
-  getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface {
-    return this._sessionAssetPairPrices.get(symbol);
-  }
-
-  addSessionAssetPairPrice(
-    symbol: string,
-    assetPairPrice: ExchangeAssetPrice = new ExchangeAssetPrice()
-  ): ExchangeAssetPrice {
-    this._sessionAssetPairPrices.set(symbol, assetPairPrice);
-
-    return assetPairPrice;
-  }
-
-  addSessionAssetPairPriceEntry(
-    symbol: string,
-    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
-  ): ExchangeAssetPriceEntryInterface {
-    const symbolAssetPrice = <ExchangeAssetPrice>this.getSessionAssetPairPrice(symbol);
-    if (!symbolAssetPrice) {
-      return null;
-    }
-
-    return symbolAssetPrice.addEntry(assetPriceDataEntry);
-  }
-
   startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval> {
-    const allAssetPairs = this.getSession().getAllAssetPairsSet();
+    const assetPairsList = this.session.getAssetPairsList();
 
     return setInterval(async () => {
       const assetPrices = await this.getAssetPrices();
@@ -166,11 +112,11 @@ export class Exchange implements ExchangeInterface {
 
       for (let i = 0; i < assetPrices.length; i++) {
         const assetData = assetPrices[i];
-        if (!allAssetPairs.has(assetData.symbol)) {
+        if (!assetPairsList.has(assetData.symbol)) {
           continue;
         }
 
-        this.addSessionAssetPairPriceEntry(assetData.symbol, {
+        this.session.addAssetPairPriceEntry(assetData.symbol, {
           timestamp: now,
           price: assetData.price,
         });
@@ -178,7 +124,7 @@ export class Exchange implements ExchangeInterface {
 
       // Now that we updated our prices, let's process the entries!
       logger.info(chalk.bold('Asset pair price updates:'));
-      this._sessionAssetPairPrices.forEach((exchangeAssetPrice, key) => {
+      this.session.assetPairPrices.forEach((exchangeAssetPrice, key) => {
         exchangeAssetPrice.processEntries();
 
         const statusText = exchangeAssetPrice.getStatusText(now);

@@ -4,10 +4,16 @@ import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { Assets } from '../Asset/Assets';
 import { Exchange } from '../Exchange/Exchange';
-import logger from '../../Utils/Logger';
 import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
 import { Strategy } from '../Strategy/Strategy';
+import {
+  ExchangeAssetPrice,
+  ExchangeAssetPriceEntryInterface,
+  ExchangeAssetPriceInterface,
+  ExchangeAssetPricesMap,
+} from '../Exchange/ExchangeAssetPrice';
+import logger from '../../Utils/Logger';
 
 export enum SessionStatusEnum {
   PENDING = 'PENDING',
@@ -24,7 +30,16 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
-  getAllAssetPairsSet(): Set<string>;
+  assetPairPrices: ExchangeAssetPricesMap;
+  getAssetPairsList(): Set<string>;
+  addAssetPairPrice(
+    symbol: string,
+    assetPairPrice: ExchangeAssetPriceInterface
+  ): ExchangeAssetPriceInterface;
+  addAssetPairPriceEntry(
+    symbol: string,
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
+  ): ExchangeAssetPriceEntryInterface;
   toExport(): unknown;
 }
 
@@ -37,6 +52,7 @@ export class Session implements SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
+  assetPairPrices: ExchangeAssetPricesMap;
 
   constructor(id: string, exchange: Exchange, config: SessionConfig) {
     this.id = id;
@@ -46,6 +62,7 @@ export class Session implements SessionInterface {
     this.status = SessionStatusEnum.STARTED;
     this.createdAt = +new Date();
     this.startedAt = +new Date();
+    this.assetPairPrices = new Map();
   }
 
   /**
@@ -69,13 +86,13 @@ export class Session implements SessionInterface {
     );
 
     assetPairs.forEach((assetPair) => {
-      this.exchange.addSessionAssetPairPrice(
+      this.addAssetPairPrice(
         assetPair.toString(this.exchange.assetPairConverter)
       );
     });
   }
 
-  getAllAssetPairsSet(): Set<string> {
+  getAssetPairsList(): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
@@ -85,6 +102,27 @@ export class Session implements SessionInterface {
     });
 
     return assetPairs;
+  }
+
+  addAssetPairPrice(
+    symbol: string,
+    assetPairPrice: ExchangeAssetPrice = new ExchangeAssetPrice()
+  ): ExchangeAssetPrice {
+    this.assetPairPrices.set(symbol, assetPairPrice);
+
+    return assetPairPrice;
+  }
+
+  addAssetPairPriceEntry(
+    symbol: string,
+    assetPriceDataEntry: ExchangeAssetPriceEntryInterface
+  ): ExchangeAssetPriceEntryInterface {
+    const symbolAssetPrice = this.assetPairPrices.get(symbol);
+    if (!symbolAssetPrice) {
+      return null;
+    }
+
+    return symbolAssetPrice.addEntry(assetPriceDataEntry);
   }
 
   toExport() {
