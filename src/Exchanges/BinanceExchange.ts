@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import qs from 'qs';
 import crypto from 'crypto';
 import chalk from 'chalk';
@@ -12,6 +12,7 @@ import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
 import logger from '../Utils/Logger';
+import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -36,8 +37,15 @@ export class BinanceExchange extends Exchange {
     }
   }
 
-  async getAccountAssets(): Promise<ExchangeAccountAssetInterface[]> {
+  /***** API Data fetching ******/
+  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]> {
     logger.debug(chalk.italic('Fetching account assets ...'));
+
+    if (type !== ExchangeAccountTypeEnum.SPOT) {
+      logger.critical(chalk.red.bold('Currently only the SPOT account is ready prepared.'));
+
+      process.exit(1);
+    }
 
     try {
       const response = await this._doRequest(
@@ -159,6 +167,7 @@ export class BinanceExchange extends Exchange {
     return new OrderFees(0.075);
   }
 
+  /***** Helpers *****/
   async _doRequest(
     method: RequestMethodEnum,
     url: string,

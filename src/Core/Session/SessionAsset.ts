@@ -28,9 +28,6 @@ export class SessionAsset implements SessionAssetInterface {
     this.asset = asset;
     this.assetPairs = assetPairs;
     this.strategy = strategy;
-
-    // TODO: check if strategy is valid, like for example on binance,
-    // for USDT, the minimum order is 10
   }
 
   getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string> {

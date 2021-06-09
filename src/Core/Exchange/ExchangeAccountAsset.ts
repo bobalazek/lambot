@@ -6,6 +6,8 @@ export interface ExchangeAccountAssetInterface {
   amountLocked: string;
 }
 
+export type ExchangeAccountAssetsMap = Map<string, ExchangeAccountAssetInterface>;
+
 export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
   asset: Asset;
   amountFree: string;
