@@ -187,9 +187,9 @@ export class BinanceExchange extends Exchange {
       params.recvWindow = 5000;
       params.timestamp = timestamp;
 
-      const signatureData = method === RequestMethodEnum.GET
-        ? qs.stringify(params)
-        : qs.stringify(data);
+      const signatureData = method === RequestMethodEnum.POST
+        ? qs.stringify(data)
+        : qs.stringify(params);
 
       const signature = crypto
         .createHmac('sha256', this.apiCredentials.secret)
