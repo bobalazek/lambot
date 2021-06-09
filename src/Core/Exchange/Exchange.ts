@@ -32,6 +32,7 @@ export interface ExchangeInterface {
   getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees>;
   getSession(): Session;
+  // TODO: move those bits below in session?
   getSessionAssetPairPricesMap(): ExchangeAssetPricesMap;
   getSessionAssetPairPrice(symbol: string): ExchangeAssetPriceInterface;
   addSessionAssetPairPrice(

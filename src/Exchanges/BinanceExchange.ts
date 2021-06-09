@@ -1,14 +1,22 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import qs from 'qs';
+import crypto from 'crypto';
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
-import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
+import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
+import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from '../Core/Exchange/ExchangeAccountAsset';
 import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
 import logger from '../Utils/Logger';
+
+enum RequestMethodEnum {
+  GET = 'GET',
+  POST = 'POST',
+};
 
 export class BinanceExchange extends Exchange {
   constructor(apiCredentials: ApiCredentials) {
@@ -28,14 +36,46 @@ export class BinanceExchange extends Exchange {
     }
   }
 
+  async getAccountAssets(): Promise<ExchangeAccountAssetInterface[]> {
+    logger.debug(chalk.italic('Fetching account assets ...'));
+
+    try {
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/api/v3/account',
+        {},
+        true
+      );
+
+      const accountAssets: ExchangeAccountAsset[] = [];
+      for (let i = 0; i < response.data.balances.length; i++) {
+        const balanceData = response.data.balances[i];
+
+        accountAssets.push(
+          new ExchangeAccountAsset(
+            Assets.getBySymbol(balanceData.asset),
+            balanceData.free,
+            balanceData.locked
+          )
+        );
+      }
+
+      return accountAssets;
+    } catch (error) {
+      logger.error(chalk.red(error));
+
+      return error;
+    }
+  }
+
   async getAssetPairs(): Promise<ExchangeAssetPair[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
     try {
-      const response = await this._doRequest({
-        method: 'GET',
-        url: 'https://api.binance.com/api/v3/exchangeInfo',
-      });
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/api/v3/exchangeInfo'
+      );
 
       // TODO: split that into a separate call (getInfo() or something)
       // and cache those pairs locally when we need them.
@@ -85,10 +125,10 @@ export class BinanceExchange extends Exchange {
     ));
 
     try {
-      const response = await this._doRequest({
-        method: 'GET',
-        url: 'https://api.binance.com/api/v3/ticker/price',
-      });
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/api/v3/ticker/price'
+      );
       const now = +new Date();
 
       const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
@@ -119,10 +159,66 @@ export class BinanceExchange extends Exchange {
     return new OrderFees(0.075);
   }
 
-  async _doRequest(config: AxiosRequestConfig): Promise<AxiosResponse<any>> {
+  async _doRequest(
+    method: RequestMethodEnum,
+    url: string,
+    dataOrParams: any = null,
+    signed: boolean = false
+  ): Promise<AxiosResponse<any>> {
     logger.log(chalk.italic(
-      `Making a ${config.method} request to ${config.url}`
+      `Making a ${method} request to ${url}`
     ));
+
+    let params: any = {};
+    let data: any = {};
+    let headers: any = {};
+
+    if (dataOrParams && method === RequestMethodEnum.GET) {
+      params = dataOrParams;
+    } else if (dataOrParams && method === RequestMethodEnum.POST) {
+      data = dataOrParams;
+    }
+
+    if (signed) {
+      const timestamp = +new Date();
+
+      headers['X-MBX-APIKEY'] = this.apiCredentials.key;
+
+      params.recvWindow = 5000;
+      params.timestamp = timestamp;
+
+      const signatureData = method === RequestMethodEnum.GET
+        ? qs.stringify(params)
+        : qs.stringify(data);
+
+      const signature = crypto
+        .createHmac('sha256', this.apiCredentials.secret)
+        .update(signatureData)
+        .digest('hex');
+
+      if (method === RequestMethodEnum.POST) {
+        data.signature = signature;
+      } else {
+        params.signature = signature;
+      }
+    }
+
+    const config: any = {
+      method,
+      url,
+    };
+
+    if (Object.keys(params).length !== 0) {
+      config.params = params;
+    }
+
+    if (Object.keys(data).length !== 0) {
+      config.data = data;
+    }
+
+    if (Object.keys(headers).length !== 0) {
+      config.headers = headers;
+    }
 
     const response = await axios(config);
 

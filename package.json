@@ -4,9 +4,9 @@
   "main": "dist/app.js",
   "license": "ISC",
   "scripts": {
-    "start": "webpack serve --open --config webpack.dev.js",
+    "dev": "webpack --config webpack.dev.js --progress --watch",
+    "watch": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js --progress",
-    "build:watch": "webpack --config webpack.prod.js --progress --watch",
     "eslint": "eslint . --ext .js,.jsx,.ts,.tsx --quiet"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "commander": "^7.2.0",
     "dotenv": "^10.0.0",
     "eslint": "^7.28.0",
+    "qs": "^6.10.1",
     "ts-loader": "^9.2.2",
     "ts-node": "^10.0.0",
     "tslint": "^6.1.3",
