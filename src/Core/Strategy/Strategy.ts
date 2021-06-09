@@ -18,6 +18,9 @@ export interface StrategyInterface {
   // How much can the value dip (from the highest point) until we actually sell?
   trailingTakeProfitSlipPercentage: number;
 
+  // Should we enable stop loss?
+  stopLossEnabled: boolean;
+
   // How much can we lose until we trigger a sell?
   stopLossPercentage: number;
 
@@ -39,6 +42,7 @@ export class Strategy implements StrategyInterface {
   takeProfitDipTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
   trailingTakeProfitSlipPercentage: number;
+  stopLossEnabled: boolean;
   stopLossPercentage: number;
   stopLossTimeoutSeconds: number;
   buyDipSlipPercentage: number;
@@ -50,6 +54,7 @@ export class Strategy implements StrategyInterface {
     takeProfitDipTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.25,
+    stopLossEnabled = true,
     stopLossPercentage = 3,
     stopLossTimeoutSeconds = 30,
     buyDipSlipPercentage = 0.25,
@@ -60,6 +65,7 @@ export class Strategy implements StrategyInterface {
     this.takeProfitDipTimeoutSeconds = takeProfitDipTimeoutSeconds;
     this.trailingTakeProfitEnabled = trailingTakeProfitEnabled;
     this.trailingTakeProfitSlipPercentage = trailingTakeProfitSlipPercentage;
+    this.stopLossEnabled = stopLossEnabled;
     this.stopLossPercentage = stopLossPercentage;
     this.stopLossTimeoutSeconds = stopLossTimeoutSeconds;
     this.buyDipSlipPercentage = buyDipSlipPercentage;
@@ -73,6 +79,7 @@ export class Strategy implements StrategyInterface {
       takeProfitDipTimeoutSeconds: this.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: this.trailingTakeProfitSlipPercentage,
+      stopLossEnabled: this.stopLossEnabled,
       stopLossPercentage: this.stopLossPercentage,
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
       buyDipSlipPercentage: this.buyDipSlipPercentage,
@@ -87,6 +94,7 @@ export class Strategy implements StrategyInterface {
       takeProfitDipTimeoutSeconds: data.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: data.trailingTakeProfitSlipPercentage,
+      stopLossEnabled: data.stopLossEnabled,
       stopLossPercentage: data.stopLossPercentage,
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
       buyDipSlipPercentage: data.buyDipSlipPercentage,
