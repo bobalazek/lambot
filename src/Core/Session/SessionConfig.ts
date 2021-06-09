@@ -20,7 +20,7 @@ export class SessionConfig implements SessionConfigInterface {
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
   }
 
-  toExport(): unknown {
+  toExport() {
     return {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds: this.assetPriceUpdateIntervalSeconds,

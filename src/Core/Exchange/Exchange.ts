@@ -187,7 +187,7 @@ export class Exchange implements ExchangeInterface {
     }, updateInterval);
   }
 
-  toExport(): unknown {
+  toExport() {
     return {
       key: this.key,
       apiCredentials: {

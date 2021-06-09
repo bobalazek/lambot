@@ -87,7 +87,7 @@ export class Session implements SessionInterface {
     return assetPairs;
   }
 
-  toExport(): unknown {
+  toExport() {
     const assets = this.assets.map((sessionAsset) => {
       return {
         asset: sessionAsset.asset.toString(),

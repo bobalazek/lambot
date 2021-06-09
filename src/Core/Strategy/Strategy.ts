@@ -65,7 +65,7 @@ export class Strategy implements StrategyInterface {
     this.buyDipSlipPercentage = buyDipSlipPercentage;
   }
 
-  toExport(): unknown {
+  toExport() {
     return {
       orderAmount: this.orderAmount,
       maximumOpenPositions: this.maximumOpenPositions,

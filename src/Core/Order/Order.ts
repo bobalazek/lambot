@@ -59,7 +59,7 @@ export class Order implements OrderInterface {
     this.exchangeResponse = null;
   }
 
-  toExport(): unknown {
+  toExport() {
     return {
       id: this.id,
       assetPair: [
