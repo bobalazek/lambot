@@ -88,7 +88,6 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     const newestEntryIndex = entriesCount - 1;
-    const newestEntry = this._entries[newestEntryIndex];
 
     let peakEntryIndex = -1;
     let peakEntryPrice = 0;
@@ -118,7 +117,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       });
 
       if (prevEntry) {
-        // TODO: valley still not working
+        // TODO: can we optimize this mess?
         const prevDirection = Math.sign(changes[i - 1].relativePricePercentage);
         const direction = Math.sign(relativePricePercentage);
         if (direction !== prevDirection) {
@@ -140,8 +139,14 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         }
 
         if (
-          direction < 0 &&
-          price <= valleyEntryPrice
+          direction <= 0 &&
+          (
+            valleyEntryIndex === -1 ||
+            (
+              valleyEntryIndex !== -1 &&
+              price <= valleyEntryPrice
+            )
+          )
         ) {
           valleyEntryIndex = i;
           valleyEntryPrice = price;

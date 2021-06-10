@@ -5,12 +5,12 @@ import { ExchangeAssetPrice, ExchangeAssetPriceEntryTypeEnum } from '../../../sr
 describe('ExchangePosition', () => {
   let exchangeAssetPrice: ExchangeAssetPrice;
 
-  beforeAll(() => {
-    exchangeAssetPrice = new ExchangeAssetPrice()
+  beforeEach(() => {
+    exchangeAssetPrice = new ExchangeAssetPrice();
   });
 
   it('should add a new entry correctly', () => {
-    const timestamp = +new Date();
+    const timestamp = 1000;
     const price = '0.1';
 
     exchangeAssetPrice.addEntry({
@@ -25,45 +25,75 @@ describe('ExchangePosition', () => {
     expect(exchangeAssetPriceEntries[0].price).toBe(price);
   });
 
-  it('should processes and returns the entries correctly', () => {
+  it('should process and return the entry times (newest, last peak & valley) correctly', () => {
     const entries = [
-      {timestamp: 1000, price: '1.0'},
-      {timestamp: 1001, price: '1.2'},
-      {timestamp: 1002, price: '1.4'},
-      {timestamp: 1003, price: '1.5'},
-      {timestamp: 1004, price: '1.2'},
-      {timestamp: 1005, price: '0.8'},
-      {timestamp: 1006, price: '1.6'},
-      {timestamp: 1007, price: '1.2'},
-      {timestamp: 1008, price: '1.0'},
-      {timestamp: 1009, price: '1.0'},
-      {timestamp: 1010, price: '1.4'},
-      {timestamp: 1011, price: '1.4'},
-      {timestamp: 1012, price: '1.2'},
-      {timestamp: 1013, price: '0.9'},
-      {timestamp: 1014, price: '0.9'},
-      {timestamp: 1015, price: '1.1'},
+      { timestamp: 1000, price: '1.0' },
+      { timestamp: 2000, price: '1.2' },
+      { timestamp: 3000, price: '1.4' },
+      { timestamp: 4000, price: '1.5' },
+      { timestamp: 5000, price: '1.2' },
+      { timestamp: 6000, price: '0.8' },
+      { timestamp: 7000, price: '1.6' },
+      { timestamp: 8000, price: '1.2' },
+      { timestamp: 9000, price: '1.0' },
+      { timestamp: 10000, price: '1.0' },
+      { timestamp: 11000, price: '1.4' },
+      { timestamp: 12000, price: '1.4' },
+      { timestamp: 13000, price: '1.2' },
+      { timestamp: 14000, price: '0.9' },
+      { timestamp: 15000, price: '0.9' },
+      { timestamp: 16000, price: '1.1' },
     ];
 
     entries.forEach((entry) => {
       exchangeAssetPrice.addEntry(entry);
     });
 
+    expect(exchangeAssetPrice.getEntries()).toHaveLength(entries.length);
+
     exchangeAssetPrice.processEntries();
 
     // Newest entry
     const newestEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.NEWEST);
-    expect(newestEntry.timestamp).toBe(1015);
+    expect(newestEntry.timestamp).toBe(16000);
     expect(newestEntry.price).toBe('1.1');
 
     // Last peak entry
     const lastPeakEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_PEAK);
-    expect(lastPeakEntry.timestamp).toBe(1011);
+    expect(lastPeakEntry.timestamp).toBe(12000);
     expect(lastPeakEntry.price).toBe('1.4');
 
     // Last valley entry
     const lastValleyEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_VALLEY);
-    expect(lastValleyEntry.timestamp).toBe(1014);
+    expect(lastValleyEntry.timestamp).toBe(15000);
     expect(lastValleyEntry.price).toBe('0.9');
+  });
+
+  it('should cleanup the entries correctly', () => {
+    const entries = [
+      { timestamp: 1000, price: '1.0' },
+      { timestamp: 2000, price: '1.2' },
+      { timestamp: 3000, price: '1.4' },
+      { timestamp: 4000, price: '1.5' },
+      { timestamp: 5000, price: '1.2' },
+      { timestamp: 6000, price: '0.8' },
+      { timestamp: 7000, price: '1.6' },
+    ];
+
+    entries.forEach((entry) => {
+      exchangeAssetPrice.addEntry(entry);
+    });
+
+    expect(exchangeAssetPrice.getEntries()).toHaveLength(entries.length);
+
+    exchangeAssetPrice.cleanupEntries(0.5);
+
+    expect(exchangeAssetPrice.getEntries()).toHaveLength(3);
+
+    exchangeAssetPrice.addEntry({ timestamp: 8000, price: '1.5' });
+
+    exchangeAssetPrice.cleanupEntries(0.5);
+
+    expect(exchangeAssetPrice.getEntries()).toHaveLength(2);
   });
 });
