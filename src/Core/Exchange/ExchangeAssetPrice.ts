@@ -13,9 +13,7 @@ export interface ExchangeAssetPriceInterface {
 }
 
 export interface ExchangeAssetPriceChangeInterface {
-  absolutePricePercentage: number; // absolute to the currently newest/base entry - ((price - basePrice) / basePrice) * 100
   relativePricePercentage: number; // relative to the previous entry - ((price - prevPrice) / prevPrice) * 100
-  basePrice: number;
   price: number;
   prevPrice: number;
 }
@@ -91,9 +89,9 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return;
     }
 
-    const baseEntryIndex = entriesCount - 1;
-    const baseEntry = this._entries[baseEntryIndex];
-    const basePrice = parseFloat(baseEntry.price);
+    const newestEntryIndex = entriesCount - 1;
+    const newestEntry = this._entries[newestEntryIndex];
+    const newestPrice = parseFloat(newestEntry.price);
 
     let peakEntryData = {
       index: -1,
@@ -105,33 +103,32 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     };
 
     const changes = new Map<string, ExchangeAssetPriceChangeInterface>();
-    // We don't need the base (in this case the newest) one,
-    // because that's the one we are comparing against
-    for (let i = 0; i < baseEntryIndex; i++) {
+    // We don't need the newest one because that's the one we are comparing against
+    for (let i = 0; i < newestEntryIndex; i++) {
       const entry = this._entries[i];
       const prevEntryIndex = i - 1;
       const prevEntry = i > 0
         ? this._entries[prevEntryIndex]
         : null;
-      const differenceSeconds = Math.round((baseEntry.timestamp - entry.timestamp) / 1000);
+      const differenceSeconds = Math.round((newestEntry.timestamp - entry.timestamp) / 1000);
 
       const price = parseFloat(entry.price);
       const prevPrice = parseFloat(prevEntry?.price);
 
-      const absolutePricePercentage = calculatePercentage(price, basePrice);
       const relativePricePercentage = prevEntry
         ? calculatePercentage(price, prevPrice)
         : 0;
 
       changes.set(differenceSeconds + 's', {
-        absolutePricePercentage,
         relativePricePercentage,
-        basePrice,
         price,
         prevPrice,
       });
 
       if (relativePricePercentage) {
+        // TODO: nor really taking the most recent peak/valley into account yet
+        // only the peak/valley overall
+
         if (
           relativePricePercentage > 0 &&
           price >= peakEntryData.price
