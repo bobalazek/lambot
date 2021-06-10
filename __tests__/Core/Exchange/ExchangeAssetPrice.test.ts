@@ -25,7 +25,7 @@ describe('ExchangePosition', () => {
     expect(exchangeAssetPriceEntries[0].price).toBe(price);
   });
 
-  it('should process and return the entry times (newest, last peak & valley) correctly', () => {
+  it('should process and return the entry times (newest, last peak & trough) correctly', () => {
     const entries = [
       { timestamp: 1000, price: '1.0' },
       { timestamp: 2000, price: '1.2' },
@@ -63,10 +63,10 @@ describe('ExchangePosition', () => {
     expect(lastPeakEntry.timestamp).toBe(12000);
     expect(lastPeakEntry.price).toBe('1.4');
 
-    // Last valley entry
-    const lastValleyEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_VALLEY);
-    expect(lastValleyEntry.timestamp).toBe(15000);
-    expect(lastValleyEntry.price).toBe('0.9');
+    // Last trough entry
+    const lastTroughEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_TROUGH);
+    expect(lastTroughEntry.timestamp).toBe(15000);
+    expect(lastTroughEntry.price).toBe('0.9');
   });
 
   it('should cleanup the entries correctly', () => {
