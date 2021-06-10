@@ -52,6 +52,14 @@ export class Assets {
   static readonly MKR = new Asset('MKR', 'Maker');
   static readonly ATOM = new Asset('ATOM', 'Cosmos');
   static readonly SNX = new Asset('SNX', 'Synthetix Network Token');
+  static readonly WAVES = new Asset('WAVES', 'Waves');
+  static readonly XLM = new Asset('XLM', 'Stellar Lumens');
+  static readonly MRK = new Asset('MRK', 'MARK.SPACE');
+  static readonly FTT = new Asset('FTT', 'FTX Token');
+  static readonly RUNE = new Asset('RUNE', 'ThorChain');
+  static readonly HBAR = new Asset('HBAR', 'Hedera Hashgraph');
+  static readonly TFUEL = new Asset('TFUEL', 'Theta Fuel');
+  static readonly DCR = new Asset('DCR', 'Decred');
 
   static getBySymbol(symbol: string): Asset {
     if (this[symbol]) {
