@@ -27,7 +27,7 @@ For example: You have a base asset USDT and you want to trade with USDTBTC, USSD
 
 * Jest tests
 * Messaging app (like telegram) notifications when buy/sell/position updates ...
-* In ExchangeAssetPrice add getLastPeakEntry() and getLastDipEntry().
+* In ExchangeAssetPrice add getLastPeakEntry() and getLastValleyEntry().
   * Also add getTrend() (POSITIVE or NEGATIVE or NEUTRAL)
     * This will probably also need to consider if the change is too small to be considered a trend
 

@@ -31,7 +31,7 @@ export type ExchangeAssetPriceChangeMap = Map<string, ExchangeAssetPriceChangeIn
 export enum ExchangeAssetPriceEntryTypeEnum {
   NEWEST,
   LAST_PEAK,
-  LAST_DIP,
+  LAST_VALLEY,
 }
 
 export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
@@ -42,12 +42,12 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
   private _changes: ExchangeAssetPriceChangeMap;
   private _lastPeakEntryIndex: number;
-  private _lastDipEntryIndex: number;
+  private _lastValleyEntryIndex: number;
 
   constructor() {
     this._entries = [];
     this._lastPeakEntryIndex = -1;
-    this._lastDipEntryIndex = -1;
+    this._lastValleyEntryIndex = -1;
   }
 
   getEntries(): ExchangeAssetPriceEntryInterface[] {
@@ -65,9 +65,9 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return this._lastPeakEntryIndex !== -1
         ? this._entries[this._lastPeakEntryIndex]
         : null;
-    } else if (type === ExchangeAssetPriceEntryTypeEnum.LAST_DIP) {
-      return this._lastDipEntryIndex !== -1
-        ? this._entries[this._lastDipEntryIndex]
+    } else if (type === ExchangeAssetPriceEntryTypeEnum.LAST_VALLEY) {
+      return this._lastValleyEntryIndex !== -1
+        ? this._entries[this._lastValleyEntryIndex]
         : null;
     }
 
@@ -98,8 +98,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       index: -1,
       price: 0,
     };
-    // Assume that we are currently in the dip. Should stabilize after an entry or two
-    let dipEntryData = {
+    // Assume that we are currently in the valley. Should stabilize after an entry or two
+    let valleyEntryData = {
       index: baseEntryIndex,
       price: basePrice,
     };
@@ -138,8 +138,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         };
       }
 
-      if (price < dipEntryData.price) {
-        dipEntryData = {
+      if (price < valleyEntryData.price) {
+        valleyEntryData = {
           index: i,
           price,
         };
@@ -148,7 +148,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 
     this._changes = changes;
     this._lastPeakEntryIndex = peakEntryData.index;
-    this._lastDipEntryIndex = dipEntryData.index;
+    this._lastValleyEntryIndex = valleyEntryData.index;
   }
 
   getPriceText(time: number = +new Date()): string {
@@ -160,7 +160,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     const entryNewestPrice = entryNewest.price;
     const entryNewestTimeAgo = time - entryNewest.timestamp;
     const entyLastPeak = this.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_PEAK);
-    const entyLastDip = this.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_DIP);
+    const entyLastValley = this.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_VALLEY);
 
     let string = chalk.bold(entryNewestPrice);
 
@@ -179,15 +179,15 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         : ` (📈 ${chalk.red(entryLastPeakPercentage.toPrecision(3))}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
     }
 
-    if (entyLastDip) {
-      const entryLastDipTimeAgo = time - entyLastDip.timestamp;
-      const entryLastDipPercentage = calculatePercentage(
+    if (entyLastValley) {
+      const entryLastValleyTimeAgo = time - entyLastValley.timestamp;
+      const entryLastValleyPercentage = calculatePercentage(
         parseFloat(entryNewestPrice),
-        parseFloat(entyLastDip.price)
+        parseFloat(entyLastValley.price)
       );
-      string += entryLastDipPercentage === 0
-        ? ` (📉 ${chalk.red('we are in the dip')})`
-        : ` (📉 ${chalk.green('+' + entryLastDipPercentage.toPrecision(3))}; ${Math.round(entryLastDipTimeAgo / 1000)}s ago)`;
+      string += entryLastValleyPercentage === 0
+        ? ` (📉 ${chalk.red('we are in the valley')})`
+        : ` (📉 ${chalk.green('+' + entryLastValleyPercentage.toPrecision(3))}; ${Math.round(entryLastValleyTimeAgo / 1000)}s ago)`;
     }
 
     return string;
