@@ -26,6 +26,7 @@ export interface ExchangeInterface {
   session: Session;
   trader: Trader;
   boot(session: Session): Promise<boolean>;
+  start(): Promise<boolean>;
   getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]>;
@@ -101,10 +102,13 @@ export class Exchange implements ExchangeInterface {
     // Save the session
     await SessionManager.save(session);
 
-    // Start the trader
-    this.trader = new Trader(session);
-
     return true;
+  }
+
+  async start(): Promise<boolean> {
+    this.trader = new Trader(this.session);
+
+    return true
   }
 
   /***** API Data fetching ******/

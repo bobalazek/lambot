@@ -14,6 +14,7 @@ import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from '../Core/Exchange/E
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
 import logger from '../Utils/Logger';
+import { Session } from '../Core/Session/Session';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -21,6 +22,7 @@ enum RequestMethodEnum {
 };
 
 export class BinanceExchange extends Exchange {
+  private _timeOffset: number;
   private _symbolAssetPairsMap: Map<string, [string, string]>;
 
   constructor(apiCredentials: ApiCredentials) {
@@ -38,6 +40,17 @@ export class BinanceExchange extends Exchange {
 
       process.exit(1);
     }
+
+    this._timeOffset = 0;
+    this._symbolAssetPairsMap = new Map();
+  }
+
+  async boot(session: Session): Promise<boolean> {
+    super.boot(session);
+
+    await this._setTimeOffset();
+
+    return true;
   }
 
   /***** API Data fetching ******/
@@ -100,9 +113,9 @@ export class BinanceExchange extends Exchange {
 
       return orders;
     } catch (error) {
-      logger.error(chalk.red(error));
+      logger.error(chalk.red(error.response.data.msg));
 
-      return error;
+      throw new Error(error);
     }
   }
 
@@ -138,9 +151,9 @@ export class BinanceExchange extends Exchange {
 
       return accountAssets;
     } catch (error) {
-      logger.error(chalk.red(error));
+      logger.error(chalk.red(error.response.data.msg));
 
-      return error;
+      throw new Error(error);
     }
   }
 
@@ -194,9 +207,9 @@ export class BinanceExchange extends Exchange {
 
       return assetPairs;
     } catch (error) {
-      logger.error(chalk.red(error));
+      logger.error(chalk.red(error.response.data.msg));
 
-      return error;
+      throw new Error(error);
     }
   }
 
@@ -225,9 +238,9 @@ export class BinanceExchange extends Exchange {
 
       return assetPrices;
     } catch (error) {
-      logger.error(chalk.red(error));
+      logger.error(chalk.red(error.response.data.msg));
 
-      return error;
+      throw new Error(error);
     }
   }
 
@@ -245,6 +258,15 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** Helpers *****/
+  async _setTimeOffset(): Promise<void> {
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/time',
+    );
+
+    this._timeOffset = response.data.serverTime - +new Date();
+  }
+
   async _doRequest(
     method: RequestMethodEnum,
     url: string,
@@ -266,7 +288,7 @@ export class BinanceExchange extends Exchange {
     }
 
     if (signed) {
-      const timestamp = +new Date();
+      const timestamp = +new Date() + this._timeOffset;
 
       headers['X-MBX-APIKEY'] = this.apiCredentials.key;
 

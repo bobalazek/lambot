@@ -29,6 +29,7 @@ export class Manager {
     ));
 
     await this.session.exchange.boot(this.session);
+    await this.session.exchange.start();
 
     if (memoryUsageMonitoringIntervalSeconds) {
       this._startMemoryUsageMonitoring(

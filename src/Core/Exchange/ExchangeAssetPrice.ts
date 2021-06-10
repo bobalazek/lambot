@@ -99,10 +99,9 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       index: -1,
       price: 0,
     };
-    // Assume that we are currently in the valley. Should stabilize after an entry or two
     let valleyEntryData = {
-      index: baseEntryIndex,
-      price: basePrice,
+      index: -1,
+      price: 0,
     };
 
     const changes = new Map<string, ExchangeAssetPriceChangeInterface>();
@@ -132,19 +131,29 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         prevPrice,
       });
 
-      // TODO: only take the very last peak into account
-      if (price >= peakEntryData.price) {
-        peakEntryData = {
-          index: i,
-          price,
-        };
-      }
+      if (relativePricePercentage) {
+        if (
+          relativePricePercentage > 0 &&
+          price >= peakEntryData.price
+        ) {
+          peakEntryData = {
+            index: i,
+            price,
+          };
+        }
 
-      if (price <= valleyEntryData.price) {
-        valleyEntryData = {
-          index: i,
-          price,
-        };
+        if (
+          relativePricePercentage < 0 &&
+          (
+            valleyEntryData.index === -1 ||
+            price <= valleyEntryData.price
+          )
+        ) {
+          valleyEntryData = {
+            index: i,
+            price,
+          };
+        }
       }
     }
 
@@ -183,7 +192,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         parseFloat(entyLastPeak.price)
       );
       string += entryLastPeakPercentage === 0
-        ? ` (📈 ${chalk.green('we are on the peak')})`
+        ? ` (📈 ${chalk.green('we are going up!')})`
         : ` (📈 ${chalk.red(entryLastPeakPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
     }
 
@@ -194,7 +203,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         parseFloat(entyLastValley.price)
       );
       string += entryLastValleyPercentage === 0
-        ? ` (📉 ${chalk.red('we are in the valley')})`
+        ? ` (📉 ${chalk.red('we are going down!')})`
         : ` (📉 ${chalk.green('+' + entryLastValleyPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastValleyTimeAgo / 1000)}s ago)`;
     }
 
