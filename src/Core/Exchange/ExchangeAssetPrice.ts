@@ -8,6 +8,7 @@ export interface ExchangeAssetPriceInterface {
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeMap;
   processEntries(): void;
+  cleanupEntries(): void;
   getPriceText(time: number): string;
 }
 
@@ -131,14 +132,14 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         prevPrice,
       });
 
-      if (price > peakEntryData.price) {
+      if (price >= peakEntryData.price) {
         peakEntryData = {
           index: i,
           price,
         };
       }
 
-      if (price < valleyEntryData.price) {
+      if (price <= valleyEntryData.price) {
         valleyEntryData = {
           index: i,
           price,
@@ -149,6 +150,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._changes = changes;
     this._lastPeakEntryIndex = peakEntryData.index;
     this._lastValleyEntryIndex = valleyEntryData.index;
+  }
+
+  cleanupEntries(): void {
+    // TODO
   }
 
   getPriceText(time: number = +new Date()): string {

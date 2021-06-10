@@ -15,6 +15,7 @@ import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { Order } from '../Order/Order';
 import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
+import { Trader } from '../Trader/Trader';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 
@@ -26,8 +27,8 @@ export interface ExchangeInterface {
   accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
+  trader: Trader;
   boot(session: Session): Promise<boolean>;
-  startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval>;
   getAccountOrders(type: ExchangeAccountTypeEnum): Promise<Order[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: Order): Promise<Order>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]>;
@@ -49,6 +50,7 @@ export class Exchange implements ExchangeInterface {
   accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
+  trader: Trader;
 
   constructor(
     key: string,
@@ -102,53 +104,10 @@ export class Exchange implements ExchangeInterface {
     // Save the session
     await SessionManager.save(session);
 
-    // Start the price update interval
-    const {
-      assetPriceUpdateIntervalSeconds,
-    } = session.config;
-    this.startSessionAssetPriceUpdatingInterval(assetPriceUpdateIntervalSeconds * 1000);
+    // Start the trader
+    this.trader = new Trader(session);
 
     return true;
-  }
-
-  startSessionAssetPriceUpdatingInterval(updateInterval: number): ReturnType<typeof setInterval> {
-    const assetPairsList = this.session.getAssetPairsList();
-
-    return setInterval(async () => {
-      const assetPrices = await this.getAssetPrices();
-      const now = +new Date();
-
-      for (let i = 0; i < assetPrices.length; i++) {
-        const assetData = assetPrices[i];
-        if (!assetPairsList.has(assetData.symbol)) {
-          continue;
-        }
-
-        const assetPrice = this.assetPairPrices.get(assetData.symbol);
-        if (!assetPrice) {
-          logger.info(chalk.red.bold(
-            `Assset price for symbol "${assetData.symbol}" not found.`
-          ));
-
-          process.exit(1);
-        }
-
-        assetPrice.addEntry({
-          timestamp: now,
-          price: assetData.price,
-        });
-      }
-
-      // Now that we updated our prices, let's process the entries!
-      logger.info(chalk.bold('Asset pair price updates:'));
-      this.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        exchangeAssetPrice.processEntries();
-
-        const priceText = exchangeAssetPrice.getPriceText(now);
-
-        logger.info(chalk.bold(key) + ' - ' + priceText);
-      });
-    }, updateInterval);
   }
 
   /***** API Data fetching ******/
