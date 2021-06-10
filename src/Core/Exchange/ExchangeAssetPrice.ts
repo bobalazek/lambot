@@ -6,7 +6,7 @@ export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
   getEntry(type: ExchangeAssetPriceEntryTypeEnum): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
-  getChanges(): ExchangeAssetPriceChangeMap;
+  getChanges(): ExchangeAssetPriceChangeInterface[];
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(time: number): string;
@@ -25,8 +25,6 @@ export interface ExchangeAssetPriceEntryInterface {
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
-export type ExchangeAssetPriceChangeMap = Map<string, ExchangeAssetPriceChangeInterface>;
-
 export enum ExchangeAssetPriceEntryTypeEnum {
   NEWEST,
   LAST_PEAK,
@@ -39,7 +37,7 @@ export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAsse
 
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
-  private _changes: ExchangeAssetPriceChangeMap;
+  private _changes: ExchangeAssetPriceChangeInterface[];
   private _lastPeakEntryIndex: number;
   private _lastValleyEntryIndex: number;
 
@@ -79,7 +77,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return entry;
   }
 
-  getChanges(): ExchangeAssetPriceChangeMap {
+  getChanges(): ExchangeAssetPriceChangeInterface[] {
     return this._changes;
   }
 
@@ -91,18 +89,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
 
     const newestEntryIndex = entriesCount - 1;
     const newestEntry = this._entries[newestEntryIndex];
-    const newestPrice = parseFloat(newestEntry.price);
 
-    let peakEntryData = {
-      index: -1,
-      price: 0,
-    };
-    let valleyEntryData = {
-      index: -1,
-      price: 0,
-    };
+    let peakEntryIndex = -1;
+    let peakEntryPrice = 0;
+    let valleyEntryIndex = -1;
+    let valleyEntryPrice = 0;
 
-    const changes = new Map<string, ExchangeAssetPriceChangeInterface>();
+    const changes: ExchangeAssetPriceChangeInterface[] = [];
     // We don't need the newest one because that's the one we are comparing against
     for (let i = 0; i < newestEntryIndex; i++) {
       const entry = this._entries[i];
@@ -110,7 +103,6 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       const prevEntry = i > 0
         ? this._entries[prevEntryIndex]
         : null;
-      const differenceSeconds = Math.round((newestEntry.timestamp - entry.timestamp) / 1000);
 
       const price = parseFloat(entry.price);
       const prevPrice = parseFloat(prevEntry?.price);
@@ -119,44 +111,47 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         ? calculatePercentage(price, prevPrice)
         : 0;
 
-      changes.set(differenceSeconds + 's', {
+      changes.push({
         relativePricePercentage,
         price,
         prevPrice,
       });
 
-      if (relativePricePercentage) {
-        // TODO: nor really taking the most recent peak/valley into account yet
-        // only the peak/valley overall
-
-        if (
-          relativePricePercentage > 0 &&
-          price >= peakEntryData.price
-        ) {
-          peakEntryData = {
-            index: i,
-            price,
-          };
+      if (prevEntry) {
+        // TODO: valley still not working
+        const prevDirection = Math.sign(changes[i - 1].relativePricePercentage);
+        const direction = Math.sign(relativePricePercentage);
+        if (direction !== prevDirection) {
+          if (direction < 0 && prevDirection > 0) {
+            peakEntryIndex = -1;
+            peakEntryPrice = 0;
+          } else if (direction > 0 && prevDirection < 0) {
+            valleyEntryIndex = -1;
+            valleyEntryPrice = 0;
+          }
         }
 
         if (
-          relativePricePercentage < 0 &&
-          (
-            valleyEntryData.index === -1 ||
-            price <= valleyEntryData.price
-          )
+          direction >= 0 &&
+          price >= peakEntryPrice
         ) {
-          valleyEntryData = {
-            index: i,
-            price,
-          };
+          peakEntryIndex = i;
+          peakEntryPrice = price;
+        }
+
+        if (
+          direction < 0 &&
+          price <= valleyEntryPrice
+        ) {
+          valleyEntryIndex = i;
+          valleyEntryPrice = price;
         }
       }
     }
 
     this._changes = changes;
-    this._lastPeakEntryIndex = peakEntryData.index;
-    this._lastValleyEntryIndex = valleyEntryData.index;
+    this._lastPeakEntryIndex = peakEntryIndex;
+    this._lastValleyEntryIndex = valleyEntryIndex;
   }
 
   cleanupEntries(ratio: number = 0.5): void {

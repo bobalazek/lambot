@@ -7,9 +7,12 @@
     "dev": "webpack --config webpack.dev.js --progress --watch",
     "watch": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js --progress",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
     "eslint": "eslint . --ext .js,.jsx,.ts,.tsx --quiet"
   },
   "dependencies": {
+    "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
     "@types/ws": "^7.4.4",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
@@ -20,7 +23,9 @@
     "commander": "^7.2.0",
     "dotenv": "^10.0.0",
     "eslint": "^7.28.0",
+    "jest": "^27.0.4",
     "qs": "^6.10.1",
+    "ts-jest": "^27.0.3",
     "ts-loader": "^9.2.2",
     "ts-node": "^10.0.0",
     "tslint": "^6.1.3",
