@@ -1,5 +1,6 @@
 import { AssetPair } from '../Asset/AssetPair';
 import { Assets } from '../Asset/Assets';
+import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 
 export interface OrderInterface {
   id: string; // Prefix each order with the session id, so we know where it came from. "LAMBOT_{SESSION_ID}_{BUY_OR_SELL}"
@@ -8,7 +9,7 @@ export interface OrderInterface {
   amount: string;
   price: string; // only relevant for limit orders
   type: OrderTypeEnum;
-  accountType: OrderAccountTypeEnum;
+  accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
   toExport(): unknown;
 }
@@ -23,13 +24,6 @@ export enum OrderTypeEnum {
   MARKET = 'MARKET',
 }
 
-export enum OrderAccountTypeEnum {
-  SPOT = 'SPOT',
-  FUTURES = 'FUTURES',
-  MARGIN = 'MARGIN',
-  OPTIONS = 'OPTIONS',
-}
-
 export class Order implements OrderInterface {
   id: string;
   assetPair: AssetPair;
@@ -37,7 +31,7 @@ export class Order implements OrderInterface {
   amount: string;
   price: string;
   type: OrderTypeEnum;
-  accountType: OrderAccountTypeEnum;
+  accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
 
   constructor(
@@ -47,7 +41,8 @@ export class Order implements OrderInterface {
     amount: string,
     price: string = null,
     type: OrderTypeEnum = OrderTypeEnum.MARKET,
-    accountType: OrderAccountTypeEnum = OrderAccountTypeEnum.SPOT
+    accountType: ExchangeAccountTypeEnum = ExchangeAccountTypeEnum.SPOT,
+    exchangeResponse: unknown = null
   ) {
     this.id = id;
     this.assetPair = assetPair;
@@ -56,7 +51,7 @@ export class Order implements OrderInterface {
     this.price = price;
     this.type = type;
     this.accountType = accountType;
-    this.exchangeResponse = null;
+    this.exchangeResponse = exchangeResponse;
   }
 
   toExport() {

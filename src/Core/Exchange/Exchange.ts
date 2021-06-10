@@ -29,7 +29,7 @@ export interface ExchangeInterface {
   session: Session;
   trader: Trader;
   boot(session: Session): Promise<boolean>;
-  getAccountOrders(type: ExchangeAccountTypeEnum): Promise<Order[]>;
+  getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<Order[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: Order): Promise<Order>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeAssetPairInterface[]>;
@@ -111,7 +111,7 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum): Promise<Order[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<Order[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 

@@ -8,7 +8,7 @@ export interface ExchangeAssetPriceInterface {
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeMap;
   processEntries(): void;
-  cleanupEntries(): void;
+  cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(time: number): string;
 }
 
@@ -152,8 +152,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._lastValleyEntryIndex = valleyEntryData.index;
   }
 
-  cleanupEntries(): void {
-    // TODO
+  cleanupEntries(ratio: number = 0.5): void {
+    this._entries.splice(0, Math.round(this._entries.length * ratio));
+
+    this.processEntries();
   }
 
   getPriceText(time: number = +new Date()): string {
@@ -181,7 +183,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       );
       string += entryLastPeakPercentage === 0
         ? ` (📈 ${chalk.green('we are on the peak')})`
-        : ` (📈 ${chalk.red(entryLastPeakPercentage.toPrecision(3))}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
+        : ` (📈 ${chalk.red(entryLastPeakPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
     }
 
     if (entyLastValley) {
@@ -192,7 +194,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       );
       string += entryLastValleyPercentage === 0
         ? ` (📉 ${chalk.red('we are in the valley')})`
-        : ` (📉 ${chalk.green('+' + entryLastValleyPercentage.toPrecision(3))}; ${Math.round(entryLastValleyTimeAgo / 1000)}s ago)`;
+        : ` (📉 ${chalk.green('+' + entryLastValleyPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastValleyTimeAgo / 1000)}s ago)`;
     }
 
     return string;

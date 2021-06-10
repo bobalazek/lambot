@@ -67,6 +67,13 @@ export class Trader implements TraderInterface {
 
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });
+
+      // Cleanup entries if processing time takes too long
+      if (processingTime > 200) {
+        session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
+          exchangeAssetPrice.cleanupEntries(0.5);
+        });
+      }
     }, updateInterval);
   }
 }

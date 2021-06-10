@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
-import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
+import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from '../Core/Exchange/ExchangeAccountAsset';
@@ -13,6 +13,8 @@ import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/Exc
 import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
 import logger from '../Utils/Logger';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
+import { Order } from '../Core/Order/Order';
+import { Asset } from '../Core/Asset/Asset';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -20,6 +22,8 @@ enum RequestMethodEnum {
 };
 
 export class BinanceExchange extends Exchange {
+  private _symbolAssetPairsMap: Map<string, [string, string]>;
+
   constructor(apiCredentials: ApiCredentials) {
     super(
       'binance',
@@ -38,11 +42,76 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** API Data fetching ******/
+  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string = null): Promise<Order[]> {
+    logger.debug(chalk.italic('Fetching account orders ...'));
+
+    if (type !== ExchangeAccountTypeEnum.SPOT) {
+      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
+
+      process.exit(1);
+    }
+
+    // TODO: we will probably want to cache the orders somewhere?
+
+    try {
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        // 'https://api.binance.com/api/v3/allOrders', // rather all? That one then does require the symbol
+        'https://api.binance.com/api/v3/openOrders',
+        {
+          symbol,
+          // limit: 1000, in case we want to use the allOrders endpoint
+          // startTime: 0,
+          // endTime: 0,
+        },
+        true
+      );
+
+      const orders: Order[] = [];
+      for (let i = 0; i < response.data.length; i++) {
+        const orderData = response.data[i];
+
+        if (!this._symbolAssetPairsMap.has(orderData.symbol)) {
+          logger.critical(chalk.red.bold(
+            'Could not find the symbol in the asset pairs array. ' +
+            'Make sure getAssetPairs() was called before.'
+          ));
+
+          process.exit(1);
+        }
+
+        const assetPairArray = this._symbolAssetPairsMap.get(orderData.symbol);
+
+        orders.push(
+          new Order(
+            orderData.clientOrderId ?? orderData.orderId,
+            new AssetPair(
+              Assets.getBySymbol(assetPairArray[0]),
+              Assets.getBySymbol(assetPairArray[1])
+            ),
+            orderData.side,
+            orderData.origQty,
+            orderData.price,
+            orderData.type,
+            type,
+            orderData
+          )
+        );
+      }
+
+      return orders;
+    } catch (error) {
+      logger.error(chalk.red(error));
+
+      return error;
+    }
+  }
+
   async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]> {
     logger.debug(chalk.italic('Fetching account assets ...'));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold('Currently only the SPOT account is ready prepared.'));
+      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
 
       process.exit(1);
     }
@@ -116,6 +185,11 @@ export class BinanceExchange extends Exchange {
             priceMinimum,
             priceMaximum
           )
+        );
+
+        this._symbolAssetPairsMap.set(
+          symbolData.symbol,
+          [symbolData.baseAsset, symbolData.quoteAsset]
         );
       }
 

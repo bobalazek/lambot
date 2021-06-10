@@ -8,6 +8,9 @@ export type ExchangeAccountsMap = Map<string, ExchangeAccountInterface>;
 
 export enum ExchangeAccountTypeEnum {
   SPOT = 'SPOT',
+  FUTURES = 'FUTURES',
+  MARGIN = 'MARGIN',
+  OPTIONS = 'OPTIONS',
 }
 
 export class ExchangeAccount implements ExchangeAccountInterface {
