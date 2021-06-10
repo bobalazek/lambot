@@ -1,4 +1,4 @@
-import { OrderInterface } from '../Order/Order';
+import { ExchangeOrderInterface } from '../Exchange/ExchangeOrder';
 
 export enum PositionTypeEnum {
   LONG = 'LONG',
@@ -16,16 +16,16 @@ export interface PositionInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
   type: PositionTypeEnum;
   status: PositionStatusEnum;
-  buyOrder: OrderInterface;
-  sellOrder: OrderInterface;
+  buyOrder: ExchangeOrderInterface;
+  sellOrder: ExchangeOrderInterface;
 }
 
 export class Position {
   id: string;
   type: PositionTypeEnum;
   status: PositionStatusEnum;
-  buyOrder: OrderInterface;
-  sellOrder: OrderInterface;
+  buyOrder: ExchangeOrderInterface;
+  sellOrder: ExchangeOrderInterface;
 
   constructor(id: string, type: PositionTypeEnum, status: PositionStatusEnum) {
     this.id = id;

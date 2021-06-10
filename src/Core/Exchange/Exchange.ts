@@ -5,16 +5,13 @@ import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
-import {
-  ExchangeAssetPricesMap,
-  ExchangeAssetPriceWithSymbolEntryInterface,
-} from './ExchangeAssetPrice';
+import { ExchangeAssetPricesMap, ExchangeAssetPriceWithSymbolEntryInterface } from './ExchangeAssetPrice';
+import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
 import { ExchangeValidator } from './ExchangeValidator';
 import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
-import { Order } from '../Order/Order';
-import { OrderFees, OrderFeesTypeEnum } from '../Order/OrderFees';
+import { ExchangeOrder } from './ExchangeOrder';
 import { Trader } from '../Trader/Trader';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
@@ -29,16 +26,16 @@ export interface ExchangeInterface {
   session: Session;
   trader: Trader;
   boot(session: Session): Promise<boolean>;
-  getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<Order[]>;
-  addAccountOrder(type: ExchangeAccountTypeEnum, order: Order): Promise<Order>;
+  getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]>;
+  addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeAssetPairInterface[]>;
   getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]>;
   getAssetFees(
     symbol: string,
     amount: string,
-    orderFeesType: OrderFeesTypeEnum
-  ): Promise<OrderFees>;
+    orderFeesType: ExchangeOrderFeesTypeEnum
+  ): Promise<ExchangeOrderFees>;
   toExport(): unknown;
 }
 
@@ -111,11 +108,11 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<Order[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 
-  async addAccountOrder(type: ExchangeAccountTypeEnum, order: Order): Promise<Order> {
+  async addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
     throw new Error('addAccountOrder() not implemented yet.');
   }
 
@@ -131,7 +128,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
-  async getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees> {
+  async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeOrderFees> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 

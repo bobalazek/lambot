@@ -1,6 +1,6 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { Order } from '../Order/Order';
+import { ExchangeOrder } from '../Exchange/ExchangeOrder';
 import { Strategy } from '../Strategy/Strategy';
 
 export interface SessionAssetInterface {
@@ -16,7 +16,7 @@ export class SessionAsset implements SessionAssetInterface {
   assetPairs: AssetPair[];
   strategy: Strategy;
 
-  _orders: Order[];
+  _orders: ExchangeOrder[];
   _amountFree: string; // How much free funds do we still have to use?
   _amountLocked: string; // How much funds are currently in order?
 

@@ -10,11 +10,10 @@ import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from '../Core/Exchange/ExchangeAccountAsset';
 import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
-import { OrderFees, OrderFeesTypeEnum } from '../Core/Order/OrderFees';
-import logger from '../Utils/Logger';
+import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
-import { Order } from '../Core/Order/Order';
-import { Asset } from '../Core/Asset/Asset';
+import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
+import logger from '../Utils/Logger';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -42,7 +41,7 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string = null): Promise<Order[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string = null): Promise<ExchangeOrder[]> {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
@@ -67,7 +66,7 @@ export class BinanceExchange extends Exchange {
         true
       );
 
-      const orders: Order[] = [];
+      const orders: ExchangeOrder[] = [];
       for (let i = 0; i < response.data.length; i++) {
         const orderData = response.data[i];
 
@@ -83,7 +82,7 @@ export class BinanceExchange extends Exchange {
         const assetPairArray = this._symbolAssetPairsMap.get(orderData.symbol);
 
         orders.push(
-          new Order(
+          new ExchangeOrder(
             orderData.clientOrderId ?? orderData.orderId,
             new AssetPair(
               Assets.getBySymbol(assetPairArray[0]),
@@ -232,13 +231,17 @@ export class BinanceExchange extends Exchange {
     }
   }
 
-  async getAssetFees(symbol: string, amount: string, orderFeesType: OrderFeesTypeEnum): Promise<OrderFees> {
+  async getAssetFees(
+    symbol: string,
+    amount: string,
+    orderFeesType: ExchangeOrderFeesTypeEnum
+  ): Promise<ExchangeOrderFees> {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
 
-    return new OrderFees(0.075);
+    return new ExchangeOrderFees(0.075);
   }
 
   /***** Helpers *****/

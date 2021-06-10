@@ -1,46 +1,46 @@
 import { AssetPair } from '../Asset/AssetPair';
 import { Assets } from '../Asset/Assets';
-import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
+import { ExchangeAccountTypeEnum } from './ExchangeAccount';
 
-export interface OrderInterface {
+export interface ExchangeOrderInterface {
   id: string; // Prefix each order with the session id, so we know where it came from. "LAMBOT_{SESSION_ID}_{BUY_OR_SELL}"
   assetPair: AssetPair;
-  side: OrderSideEnum;
+  side: ExchangeOrderSideEnum;
   amount: string;
   price: string; // only relevant for limit orders
-  type: OrderTypeEnum;
+  type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
   toExport(): unknown;
 }
 
-export enum OrderSideEnum {
+export enum ExchangeOrderSideEnum {
   BUY = 'BUY',
   SELL = 'SELL',
 }
 
-export enum OrderTypeEnum {
+export enum ExchangeOrderTypeEnum {
   LIMIT = 'LIMIT',
   MARKET = 'MARKET',
 }
 
-export class Order implements OrderInterface {
+export class ExchangeOrder implements ExchangeOrderInterface {
   id: string;
   assetPair: AssetPair;
-  side: OrderSideEnum;
+  side: ExchangeOrderSideEnum;
   amount: string;
   price: string;
-  type: OrderTypeEnum;
+  type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
 
   constructor(
     id: string,
     assetPair: AssetPair,
-    side: OrderSideEnum,
+    side: ExchangeOrderSideEnum,
     amount: string,
     price: string = null,
-    type: OrderTypeEnum = OrderTypeEnum.MARKET,
+    type: ExchangeOrderTypeEnum = ExchangeOrderTypeEnum.MARKET,
     accountType: ExchangeAccountTypeEnum = ExchangeAccountTypeEnum.SPOT,
     exchangeResponse: unknown = null
   ) {
@@ -70,8 +70,8 @@ export class Order implements OrderInterface {
     };
   }
 
-  static fromImport(data: any): Order {
-    const order = new Order(
+  static fromImport(data: any): ExchangeOrder {
+    const order = new ExchangeOrder(
       data.id,
       new AssetPair(
         Assets.getBySymbol(data.assetPair[0]),

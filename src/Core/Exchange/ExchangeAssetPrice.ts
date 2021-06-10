@@ -132,6 +132,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         prevPrice,
       });
 
+      // TODO: only take the very last peak into account
       if (price >= peakEntryData.price) {
         peakEntryData = {
           index: i,

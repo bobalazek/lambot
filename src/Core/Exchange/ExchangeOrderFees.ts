@@ -1,13 +1,13 @@
-export interface OrderFeesInterface {
+export interface ExchangeOrderFeesInterface {
   amountPercentage: number;
 }
 
-export enum OrderFeesTypeEnum {
+export enum ExchangeOrderFeesTypeEnum {
   MAKER = 'MAKER',
   TAKER = 'TAKER',
 }
 
-export class OrderFees implements OrderFeesInterface {
+export class ExchangeOrderFees implements ExchangeOrderFeesInterface {
   amountPercentage: number;
 
   constructor(amountPercentage: number) {
