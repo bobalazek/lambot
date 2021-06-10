@@ -60,6 +60,10 @@ export class Assets {
   static readonly HBAR = new Asset('HBAR', 'Hedera Hashgraph');
   static readonly TFUEL = new Asset('TFUEL', 'Theta Fuel');
   static readonly DCR = new Asset('DCR', 'Decred');
+  static readonly AMP = new Asset('AMP', 'Amp');
+  static readonly HT = new Asset('HT', 'Huobi Token');
+  static readonly EGLD = new Asset('EGLD', 'Elrond');
+  static readonly NU = new Asset('NU', 'NuCypher');
 
   static getBySymbol(symbol: string): Asset {
     if (this[symbol]) {

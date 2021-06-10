@@ -5,6 +5,9 @@ export interface StrategyInterface {
   // How many open positions are we allowed to have for this asset?
   maximumOpenPositions: number;
 
+  // At least how much volume does that asset need so we can consider a buy?
+  minimumDailyVolume: number;
+
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
@@ -38,6 +41,7 @@ export interface StrategyInterface {
 export class Strategy implements StrategyInterface {
   orderAmount: string;
   maximumOpenPositions: number;
+  minimumDailyVolume: number;
   takeProfitPercentage: number;
   takeProfitDipTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
@@ -50,6 +54,7 @@ export class Strategy implements StrategyInterface {
   constructor({
     orderAmount = '1',
     maximumOpenPositions = 1,
+    minimumDailyVolume = 0,
     takeProfitPercentage = 5,
     takeProfitDipTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
@@ -61,6 +66,7 @@ export class Strategy implements StrategyInterface {
   }) {
     this.orderAmount = orderAmount;
     this.maximumOpenPositions = maximumOpenPositions;
+    this.minimumDailyVolume = minimumDailyVolume;
     this.takeProfitPercentage = takeProfitPercentage;
     this.takeProfitDipTimeoutSeconds = takeProfitDipTimeoutSeconds;
     this.trailingTakeProfitEnabled = trailingTakeProfitEnabled;
@@ -75,6 +81,7 @@ export class Strategy implements StrategyInterface {
     return {
       orderAmount: this.orderAmount,
       maximumOpenPositions: this.maximumOpenPositions,
+      minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitDipTimeoutSeconds: this.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
@@ -90,6 +97,7 @@ export class Strategy implements StrategyInterface {
     return new Strategy({
       orderAmount: data.orderAmount,
       maximumOpenPositions: data.maximumOpenPositions,
+      minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitDipTimeoutSeconds: data.takeProfitDipTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,

@@ -144,9 +144,9 @@ export class Exchange implements ExchangeInterface {
       this.assetPairPrices.forEach((exchangeAssetPrice, key) => {
         exchangeAssetPrice.processEntries();
 
-        const statusText = exchangeAssetPrice.getStatusText(now);
+        const priceText = exchangeAssetPrice.getPriceText(now);
 
-        logger.info(chalk.bold(key) + ' - ' + statusText);
+        logger.info(chalk.bold(key) + ' - ' + priceText);
       });
     }, updateInterval);
   }
