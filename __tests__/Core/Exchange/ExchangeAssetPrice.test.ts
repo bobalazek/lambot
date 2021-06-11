@@ -73,7 +73,7 @@ describe('ExchangePosition', () => {
     expect(exchangeAssetPriceEntries[0].price).toBe(price);
   });
 
-  it('should process and return the entry types (newest/last peak/trough) correctly', () => {
+  it('should process the entries correctly', () => {
     entries.forEach((entry) => {
       exchangeAssetPrice.addEntry(entry);
     });
@@ -100,6 +100,42 @@ describe('ExchangePosition', () => {
     const lastTroughEntry = exchangeAssetPrice.getLastTroughEntry();
     expect(lastTroughEntry.timestamp).toBe(19000);
     expect(lastTroughEntry.price).toBe('0.9');
+  });
+
+  it('should return the correct peak if last item is a peak', () => {
+    entries.forEach((entry) => {
+      exchangeAssetPrice.addEntry(entry);
+    });
+
+    const timestamp = 21000;
+    const price = '2.0';
+
+    exchangeAssetPrice.addEntry({ timestamp, price });
+
+    exchangeAssetPrice.processEntries();
+
+    // Last peak entry
+    const lastPeakEntry = exchangeAssetPrice.getLastPeakEntry();
+    expect(lastPeakEntry.timestamp).toBe(timestamp);
+    expect(lastPeakEntry.price).toBe(price);
+  });
+
+  it('should return the correct trough if last item is a trough', () => {
+    entries.forEach((entry) => {
+      exchangeAssetPrice.addEntry(entry);
+    });
+
+    const timestamp = 21000;
+    const price = '0.1';
+
+    exchangeAssetPrice.addEntry({ timestamp, price });
+
+    exchangeAssetPrice.processEntries();
+
+    // Last trough entry
+    const lastTroughEntry = exchangeAssetPrice.getLastTroughEntry();
+    expect(lastTroughEntry.timestamp).toBe(timestamp);
+    expect(lastTroughEntry.price).toBe(price);
   });
 
   it('should process and return the price text correctly', () => {
