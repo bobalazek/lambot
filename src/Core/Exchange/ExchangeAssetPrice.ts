@@ -189,9 +189,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         parseFloat(entryNewestPrice),
         parseFloat(entryLastPeak.price)
       );
+      const percentage = entryLastPeakPercentage.toPrecision(3) + '%';
       string += entryLastPeakPercentage === 0
         ? ` (📈 ${chalk.green('we are going up!')})`
-        : ` (📈 ${chalk.red(entryLastPeakPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
+        : ` (📈 ${chalk.red(percentage)}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
     }
 
     if (entryLastTrough) {
@@ -200,9 +201,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         parseFloat(entryNewestPrice),
         parseFloat(entryLastTrough.price)
       );
+      const percentage = (entryLastTroughPercentage > 0 ? '+' : '') + entryLastTroughPercentage.toPrecision(3) + '%';
       string += entryLastTroughPercentage === 0
         ? ` (📉 ${chalk.red('we are going down!')})`
-        : ` (📉 ${chalk.green('+' + entryLastTroughPercentage.toPrecision(3) + '%')}; ${Math.round(entryLastTroughTimeAgo / 1000)}s ago)`;
+        : ` (📉 ${chalk.green(percentage)}; ${Math.round(entryLastTroughTimeAgo / 1000)}s ago)`;
     }
 
     return string;
