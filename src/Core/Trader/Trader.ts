@@ -63,7 +63,7 @@ export class Trader implements TraderInterface {
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        const priceText = exchangeAssetPrice.getPriceText(now);
+        const priceText = exchangeAssetPrice.getPriceText(now, 5000);
 
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });

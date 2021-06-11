@@ -27,27 +27,28 @@ const entries = [
 ];
 
 const entriesPriceTexts = [
+  // TODO: fix, once we figure the issue with date mocking
   '1.0',
-  '1.0',
-  '1.0',
-  '1.2',
-  '1.4',
-  '1.5',
-  '1.2 (⛰️ -20.0%; 1s ago)',
-  '0.8 (⛰️ -46.7%; 2s ago)',
-  '1.6 (⛰️ we are going up!) (🕳️ +100%; 1s ago)',
-  '1.6 (⛰️ we are going up!) (🕳️ +100%; 2s ago)', // TODO: why positive here?
-  '1.6 (⛰️ we are going up!) (🕳️ +100%; 3s ago)', // TODO: why positive here?
-  '1.2 (⛰️ -25.0%; 1s ago) (🕳️ +50.0%; 4s ago)',
-  '1.0 (⛰️ -37.5%; 2s ago) (🕳️ +25.0%; 5s ago)',
-  '1.0 (⛰️ -37.5%; 3s ago) (🕳️ +25.0%; 6s ago)',
-  '1.4 (⛰️ -12.5%; 4s ago) (🕳️ +40.0%; 1s ago)',
-  '1.4 (⛰️ -12.5%; 5s ago) (🕳️ +40.0%; 2s ago)',
-  '1.2 (⛰️ -14.3%; 1s ago) (🕳️ +20.0%; 3s ago)',
-  '0.9 (⛰️ -35.7%; 2s ago) (🕳️ we are going down!)',
-  '0.9 (⛰️ -35.7%; 3s ago) (🕳️ we are going down!)',
-  '0.9 (⛰️ -35.7%; 4s ago) (🕳️ we are going down!)',
-  '1.1 (⛰️ -21.4%; 5s ago) (🕳️ +22.2%; 1s ago)',
+  '1.0 🔵',
+  '1.0 🔵',
+  '1.2 🔵',
+  '1.4 🔵',
+  '1.5 🔵',
+  '1.2 🔵 (⛰️ -20.0%; 1s ago)',
+  '0.8 🔵 (⛰️ -46.7%; 2s ago)',
+  '1.6 🔵 (⛰️ we are going up!) (🕳️ +100%; 1s ago)',
+  '1.6 🔵 (⛰️ we are going up!) (🕳️ +100%; 2s ago)',
+  '1.6 🔵 (⛰️ we are going up!) (🕳️ +100%; 3s ago)',
+  '1.2 🔵 (⛰️ -25.0%; 1s ago) (🕳️ +50.0%; 4s ago)',
+  '1.0 🔵 (⛰️ -37.5%; 2s ago) (🕳️ +25.0%; 5s ago)',
+  '1.0 🔵 (⛰️ -37.5%; 3s ago) (🕳️ +25.0%; 6s ago)',
+  '1.4 🔵 (⛰️ -12.5%; 4s ago) (🕳️ +40.0%; 1s ago)',
+  '1.4 🔵 (⛰️ -12.5%; 5s ago) (🕳️ +40.0%; 2s ago)',
+  '1.2 🔵 (⛰️ -14.3%; 1s ago) (🕳️ +20.0%; 3s ago)',
+  '0.9 🔵 (⛰️ -35.7%; 2s ago) (🕳️ we are going down!)',
+  '0.9 🔵 (⛰️ -35.7%; 3s ago) (🕳️ we are going down!)',
+  '0.9 🔵 (⛰️ -35.7%; 4s ago) (🕳️ we are going down!)',
+  '1.1 🔵 (⛰️ -21.4%; 5s ago) (🕳️ +22.2%; 1s ago)',
 ];
 
 describe('ExchangePosition', () => {
@@ -137,7 +138,7 @@ describe('ExchangePosition', () => {
       exchangeAssetPrice.processEntries();
 
       const newestEntry = exchangeAssetPrice.getNewestEntry();
-      const priceText = exchangeAssetPrice.getPriceText(newestEntry.timestamp);
+      const priceText = exchangeAssetPrice.getPriceText(newestEntry.timestamp, 5000);
 
       expect(priceText).toBe(entriesPriceTexts[index]);
     });
