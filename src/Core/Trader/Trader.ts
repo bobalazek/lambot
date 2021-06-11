@@ -25,6 +25,7 @@ export class Trader implements TraderInterface {
       assetPriceUpdateIntervalSeconds,
     } = session.config;
     const updateInterval = assetPriceUpdateIntervalSeconds * 1000;
+    const trendIntervalTime = updateInterval; // TODO: a separate config?
     const assetPairsList = session.getAssetPairsList();
 
     return setInterval(async () => {
@@ -59,8 +60,6 @@ export class Trader implements TraderInterface {
       });
       const processingTime = Date.now() - now;
       logger.debug(`Processing took ${processingTime}ms.`);
-
-      const trendIntervalTime = 2000; // TODO: should be configurable
 
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
