@@ -4,6 +4,8 @@ import { calculatePercentage } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
+  getEntriesPeakIndexes(): number[];
+  getEntriesTroughIndexes(): number[];
   getNewestEntry(): ExchangeAssetPriceEntryInterface;
   getLastPeakEntry(): ExchangeAssetPriceEntryInterface;
   getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
@@ -47,6 +49,14 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries;
   }
 
+  getEntriesPeakIndexes(): number[] {
+    return this._entriesPeakIndexes;
+  }
+
+  getEntriesTroughIndexes(): number[] {
+    return this._entriesTroughIndexes;
+  }
+
   getNewestEntry(): ExchangeAssetPriceEntryInterface {
     if (this._entries.length === 0) {
       return null;
@@ -87,11 +97,14 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return;
     }
 
+    const initialEntry = this._entries[0];
+    const initialPrice = parseFloat(initialEntry.price);
+
     this._entriesPeakIndexes = [];
     this._entriesTroughIndexes = [];
 
     const changes: ExchangeAssetPriceChangeInterface[] = [];
-    for (let i = 0; i < entriesCount - 1; i++) {
+    for (let i = 0; i < entriesCount; i++) {
       const entry = this._entries[i];
       const prevEntry = i > 0
         ? this._entries[i - 1]
@@ -150,6 +163,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
           price < nextPrice &&
           relativePricePercentage <= 0
         ) {
+          if (
+            price === initialPrice &&
+            this._entriesTroughIndexes.length === 0
+          ) {
+            continue;
+          }
+
           const baseIndex = i;
           // Previous entries could also be troughs, so let's see how far back they go!
           const additionalIndexes: number[] = [];
