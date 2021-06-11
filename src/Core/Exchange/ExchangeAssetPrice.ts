@@ -115,19 +115,62 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       });
 
       if (prevEntry) {
+        // TODO: figure out a better way to do this
+        // I'm aware that the performance is rather terrible,
+        // but will need a good idea on how to fix it
         const prevRelativePricePercentage = changes[i - 1].relativePricePercentage;
         if (
           price < prevPrice &&
           prevRelativePricePercentage >= 0
         ) {
-          this._entriesPeakIndexes.push(i - 1);
+          const baseIndex = i - 1;
+          // Previous entries could also be peaks, so let's see how far back they go!
+          const additionalIndexes: number[] = [];
+          let loopIndex = baseIndex;
+          while (loopIndex >= 0) {
+            loopIndex--;
+            const loopEntry = this._entries[loopIndex];
+            if (
+              !loopEntry ||
+              parseFloat(loopEntry.price) !== prevPrice
+            ) {
+              break;
+            }
+            additionalIndexes.push(loopIndex);
+          }
+
+          if (additionalIndexes.length) {
+            this._entriesPeakIndexes.push(...additionalIndexes.reverse());
+          }
+
+          this._entriesPeakIndexes.push(baseIndex);
         }
 
         if (
           price < nextPrice &&
           relativePricePercentage <= 0
         ) {
-          this._entriesTroughIndexes.push(i);
+          const baseIndex = i;
+          // Previous entries could also be troughs, so let's see how far back they go!
+          const additionalIndexes: number[] = [];
+          let loopIndex = baseIndex;
+          while (loopIndex >= 0) {
+            loopIndex--;
+            const loopEntry = this._entries[loopIndex];
+            if (
+              !loopEntry ||
+              parseFloat(loopEntry.price) !== price
+            ) {
+              break;
+            }
+            additionalIndexes.push(loopIndex);
+          }
+
+          if (additionalIndexes.length) {
+            this._entriesTroughIndexes.push(...additionalIndexes.reverse());
+          }
+
+          this._entriesTroughIndexes.push(baseIndex);
         }
       }
     }

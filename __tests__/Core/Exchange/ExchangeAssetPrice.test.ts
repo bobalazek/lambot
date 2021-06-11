@@ -5,22 +5,25 @@ import { ExchangeAssetPrice } from '../../../src/Core/Exchange/ExchangeAssetPric
 const entries = [
   { timestamp: 0, price: '1.0' },
   { timestamp: 1000, price: '1.0' },
-  { timestamp: 2000, price: '1.2' },
-  { timestamp: 3000, price: '1.4' },
-  { timestamp: 4000, price: '1.5' },
-  { timestamp: 5000, price: '1.2' },
-  { timestamp: 6000, price: '0.8' },
-  { timestamp: 7000, price: '1.6' },
-  { timestamp: 8000, price: '1.2' },
-  { timestamp: 9000, price: '1.0' },
-  { timestamp: 10000, price: '1.0' },
-  { timestamp: 11000, price: '1.4' },
-  { timestamp: 12000, price: '1.4' },
-  { timestamp: 13000, price: '1.2' },
-  { timestamp: 14000, price: '0.9' },
-  { timestamp: 15000, price: '0.9' },
-  { timestamp: 16000, price: '0.9' },
-  { timestamp: 17000, price: '1.1' },
+  { timestamp: 2000, price: '1.0' },
+  { timestamp: 3000, price: '1.2' },
+  { timestamp: 4000, price: '1.4' },
+  { timestamp: 5000, price: '1.5' },
+  { timestamp: 6000, price: '1.2' },
+  { timestamp: 7000, price: '0.8' },
+  { timestamp: 8000, price: '1.6' },
+  { timestamp: 9000, price: '1.6' },
+  { timestamp: 10000, price: '1.6' },
+  { timestamp: 11000, price: '1.2' },
+  { timestamp: 12000, price: '1.0' },
+  { timestamp: 13000, price: '1.0' },
+  { timestamp: 14000, price: '1.4' },
+  { timestamp: 15000, price: '1.4' },
+  { timestamp: 16000, price: '1.2' },
+  { timestamp: 17000, price: '0.9' },
+  { timestamp: 18000, price: '0.9' },
+  { timestamp: 19000, price: '0.9' },
+  { timestamp: 20000, price: '1.1' },
 ];
 
 const entriesPriceTexts = [
@@ -78,17 +81,17 @@ describe('ExchangePosition', () => {
 
     // Newest entry
     const newestEntry = exchangeAssetPrice.getNewestEntry();
-    expect(newestEntry.timestamp).toBe(17000);
+    expect(newestEntry.timestamp).toBe(20000);
     expect(newestEntry.price).toBe('1.1');
 
     // Last peak entry
     const lastPeakEntry = exchangeAssetPrice.getLastPeakEntry();
-    expect(lastPeakEntry.timestamp).toBe(12000);
+    expect(lastPeakEntry.timestamp).toBe(15000);
     expect(lastPeakEntry.price).toBe('1.4');
 
     // Last trough entry
     const lastTroughEntry = exchangeAssetPrice.getLastTroughEntry();
-    expect(lastTroughEntry.timestamp).toBe(16000);
+    expect(lastTroughEntry.timestamp).toBe(19000);
     expect(lastTroughEntry.price).toBe('0.9');
   });
 
@@ -114,7 +117,7 @@ describe('ExchangePosition', () => {
 
     exchangeAssetPrice.cleanupEntries(0.5);
 
-    expect(exchangeAssetPrice.getEntries()).toHaveLength(9);
+    expect(exchangeAssetPrice.getEntries()).toHaveLength(10);
 
     exchangeAssetPrice.addEntry({ timestamp: 18000, price: '1.5' });
 
