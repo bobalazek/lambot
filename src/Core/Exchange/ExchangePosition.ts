@@ -16,6 +16,7 @@ export interface ExchangePositionInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
   type: ExchangePositionTypeEnum;
   status: ExchangePositionStatusEnum;
+  timestamp: number;
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
 }
@@ -24,12 +25,19 @@ export class ExchangePosition {
   id: string;
   type: ExchangePositionTypeEnum;
   status: ExchangePositionStatusEnum;
+  timestamp: number;
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
 
-  constructor(id: string, type: ExchangePositionTypeEnum, status: ExchangePositionStatusEnum) {
+  constructor(
+    id: string,
+    type: ExchangePositionTypeEnum,
+    status: ExchangePositionStatusEnum,
+    timestamp: number = +new Date()
+  ) {
     this.id = id;
     this.type = type;
     this.status = status;
+    this.timestamp = timestamp;
   }
 }

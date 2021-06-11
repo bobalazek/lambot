@@ -34,13 +34,13 @@ export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAsse
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
   private _changes: ExchangeAssetPriceChangeInterface[];
-  private _lastPeakEntryIndex: number;
-  private _lastTroughEntryIndex: number;
+  private _entriesPeakIndexes: Array<number>;
+  private _entriesTroughIndexes: Array<number>;
 
   constructor() {
     this._entries = [];
-    this._lastPeakEntryIndex = -1;
-    this._lastTroughEntryIndex = -1;
+    this._entriesPeakIndexes = [];
+    this._entriesTroughIndexes = [];
   }
 
   getEntries(): ExchangeAssetPriceEntryInterface[] {
@@ -56,23 +56,19 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   getLastPeakEntry(): ExchangeAssetPriceEntryInterface {
-    if (this._entries.length === 0) {
+    if (this._entriesPeakIndexes.length === 0) {
       return null;
     }
 
-    return this._lastPeakEntryIndex !== -1
-      ? this._entries[this._lastPeakEntryIndex]
-      : null;
+    return this._entries[this._entriesPeakIndexes[this._entriesPeakIndexes.length - 1]];
   }
 
   getLastTroughEntry(): ExchangeAssetPriceEntryInterface {
-    if (this._entries.length === 0) {
+    if (this._entriesTroughIndexes.length === 0) {
       return null;
     }
 
-    return this._lastTroughEntryIndex !== -1
-      ? this._entries[this._lastTroughEntryIndex]
-      : null;
+    return this._entries[this._entriesTroughIndexes[this._entriesTroughIndexes.length - 1]];
   }
 
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface {
@@ -91,21 +87,22 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return;
     }
 
-    let peakEntryIndex = -1;
-    let peakEntryPrice = 0;
-    let troughEntryIndex = -1;
-    let troughEntryPrice = 0;
+    this._entriesPeakIndexes = [];
+    this._entriesTroughIndexes = [];
 
     const changes: ExchangeAssetPriceChangeInterface[] = [];
     for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];
-      const prevEntryIndex = i - 1;
       const prevEntry = i > 0
-        ? this._entries[prevEntryIndex]
+        ? this._entries[i - 1]
+        : null;
+      const nextEntry = i < entriesCount - 1
+        ? this._entries[i + 1]
         : null;
 
       const price = parseFloat(entry.price);
       const prevPrice = parseFloat(prevEntry?.price);
+      const nextPrice = parseFloat(nextEntry?.price);
 
       const relativePricePercentage = prevEntry
         ? calculatePercentage(price, prevPrice)
@@ -118,46 +115,24 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       });
 
       if (prevEntry) {
-        // TODO: can we optimize this mess?
-        const prevDirection = Math.sign(changes[i - 1].relativePricePercentage);
-        const direction = Math.sign(relativePricePercentage);
-        if (direction !== prevDirection) {
-          if (direction < 0 && prevDirection > 0) {
-            peakEntryIndex = -1;
-            peakEntryPrice = 0;
-          } else if (direction > 0 && prevDirection < 0) {
-            troughEntryIndex = -1;
-            troughEntryPrice = 0;
-          }
+        const prevRelativePricePercentage = changes[i - 1].relativePricePercentage;
+        if (
+          price < prevPrice &&
+          prevRelativePricePercentage >= 0
+        ) {
+          this._entriesPeakIndexes.push(i - 1);
         }
 
         if (
-          direction >= 0 &&
-          price >= peakEntryPrice
+          price < nextPrice &&
+          relativePricePercentage <= 0
         ) {
-          peakEntryIndex = i;
-          peakEntryPrice = price;
-        }
-
-        if (
-          direction <= 0 &&
-          (
-            troughEntryIndex === -1 ||
-            (
-              troughEntryIndex !== -1 &&
-              price <= troughEntryPrice
-            )
-          )
-        ) {
-          troughEntryIndex = i;
-          troughEntryPrice = price;
+          this._entriesTroughIndexes.push(i);
         }
       }
     }
 
     this._changes = changes;
-    this._lastPeakEntryIndex = peakEntryIndex;
-    this._lastTroughEntryIndex = troughEntryIndex;
   }
 
   cleanupEntries(ratio: number = 0.5): void {
@@ -191,8 +166,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       );
       const percentage = entryLastPeakPercentage.toPrecision(3) + '%';
       string += entryLastPeakPercentage === 0
-        ? ` (📈 ${chalk.green('we are going up!')})`
-        : ` (📈 ${chalk.red(percentage)}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
+        ? ` (⛰️ ${chalk.green('we are going up!')})`
+        : ` (⛰️ ${chalk.red(percentage)}; ${Math.round(entryLastPeakTimeAgo / 1000)}s ago)`;
     }
 
     if (entryLastTrough) {
@@ -203,8 +178,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       );
       const percentage = (entryLastTroughPercentage > 0 ? '+' : '') + entryLastTroughPercentage.toPrecision(3) + '%';
       string += entryLastTroughPercentage === 0
-        ? ` (📉 ${chalk.red('we are going down!')})`
-        : ` (📉 ${chalk.green(percentage)}; ${Math.round(entryLastTroughTimeAgo / 1000)}s ago)`;
+        ? ` (🕳️ ${chalk.red('we are going down!')})`
+        : ` (🕳️ ${chalk.green(percentage)}; ${Math.round(entryLastTroughTimeAgo / 1000)}s ago)`;
     }
 
     return string;
