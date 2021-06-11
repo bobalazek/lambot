@@ -4,8 +4,8 @@
   "main": "dist/app.js",
   "license": "ISC",
   "scripts": {
-    "dev": "webpack --config webpack.dev.js --progress --watch",
-    "watch": "webpack serve --open --config webpack.dev.js",
+    "watch": "webpack --config webpack.dev.js --progress --watch",
+    "watch:server": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js --progress",
     "test": "jest",
     "test:watch": "jest --watchAll",

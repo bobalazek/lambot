@@ -4,7 +4,9 @@ import { calculatePercentage } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
-  getEntry(type: ExchangeAssetPriceEntryTypeEnum): ExchangeAssetPriceEntryInterface;
+  getNewestEntry(): ExchangeAssetPriceEntryInterface;
+  getLastPeakEntry(): ExchangeAssetPriceEntryInterface;
+  getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeInterface[];
   processEntries(): void;
@@ -24,12 +26,6 @@ export interface ExchangeAssetPriceEntryInterface {
 }
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
-
-export enum ExchangeAssetPriceEntryTypeEnum {
-  NEWEST,
-  LAST_PEAK,
-  LAST_TROUGH,
-}
 
 export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
   symbol: string;
@@ -51,24 +47,32 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries;
   }
 
-  getEntry(type: ExchangeAssetPriceEntryTypeEnum): ExchangeAssetPriceEntryInterface {
+  getNewestEntry(): ExchangeAssetPriceEntryInterface {
     if (this._entries.length === 0) {
       return null;
     }
 
-    if (type === ExchangeAssetPriceEntryTypeEnum.NEWEST) {
-      return this._entries[this._entries.length - 1];
-    } else if (type === ExchangeAssetPriceEntryTypeEnum.LAST_PEAK) {
-      return this._lastPeakEntryIndex !== -1
-        ? this._entries[this._lastPeakEntryIndex]
-        : null;
-    } else if (type === ExchangeAssetPriceEntryTypeEnum.LAST_TROUGH) {
-      return this._lastTroughEntryIndex !== -1
-        ? this._entries[this._lastTroughEntryIndex]
-        : null;
+    return this._entries[this._entries.length - 1];
+  }
+
+  getLastPeakEntry(): ExchangeAssetPriceEntryInterface {
+    if (this._entries.length === 0) {
+      return null;
     }
 
-    return null;
+    return this._lastPeakEntryIndex !== -1
+      ? this._entries[this._lastPeakEntryIndex]
+      : null;
+  }
+
+  getLastTroughEntry(): ExchangeAssetPriceEntryInterface {
+    if (this._entries.length === 0) {
+      return null;
+    }
+
+    return this._lastTroughEntryIndex !== -1
+      ? this._entries[this._lastTroughEntryIndex]
+      : null;
   }
 
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface {
@@ -87,16 +91,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return;
     }
 
-    const newestEntryIndex = entriesCount - 1;
-
     let peakEntryIndex = -1;
     let peakEntryPrice = 0;
     let troughEntryIndex = -1;
     let troughEntryPrice = 0;
 
     const changes: ExchangeAssetPriceChangeInterface[] = [];
-    // We don't need the newest one because that's the one we are comparing against
-    for (let i = 0; i < newestEntryIndex; i++) {
+    for (let i = 0; i < entriesCount - 1; i++) {
       const entry = this._entries[i];
       const prevEntryIndex = i - 1;
       const prevEntry = i > 0
@@ -166,15 +167,15 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   getPriceText(time: number = +new Date()): string {
-    const entryNewest = this.getEntry(ExchangeAssetPriceEntryTypeEnum.NEWEST);
+    const entryNewest = this.getNewestEntry();
     if (!entryNewest) {
       return chalk.italic('no price set yet');
     }
 
     const entryNewestPrice = entryNewest.price;
     const entryNewestTimeAgo = time - entryNewest.timestamp;
-    const entryLastPeak = this.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_PEAK);
-    const entryLastTrough = this.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_TROUGH);
+    const entryLastPeak = this.getLastPeakEntry();
+    const entryLastTrough = this.getLastTroughEntry();
 
     let string = chalk.bold(entryNewestPrice);
 

@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { ExchangeAssetPrice, ExchangeAssetPriceEntryTypeEnum } from '../../../src/Core/Exchange/ExchangeAssetPrice';
+import { ExchangeAssetPrice } from '../../../src/Core/Exchange/ExchangeAssetPrice';
 
 describe('ExchangePosition', () => {
   let exchangeAssetPrice: ExchangeAssetPrice;
@@ -54,17 +54,17 @@ describe('ExchangePosition', () => {
     exchangeAssetPrice.processEntries();
 
     // Newest entry
-    const newestEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.NEWEST);
+    const newestEntry = exchangeAssetPrice.getNewestEntry();
     expect(newestEntry.timestamp).toBe(16000);
     expect(newestEntry.price).toBe('1.1');
 
     // Last peak entry
-    const lastPeakEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_PEAK);
+    const lastPeakEntry = exchangeAssetPrice.getLastPeakEntry();
     expect(lastPeakEntry.timestamp).toBe(12000);
     expect(lastPeakEntry.price).toBe('1.4');
 
     // Last trough entry
-    const lastTroughEntry = exchangeAssetPrice.getEntry(ExchangeAssetPriceEntryTypeEnum.LAST_TROUGH);
+    const lastTroughEntry = exchangeAssetPrice.getLastTroughEntry();
     expect(lastTroughEntry.timestamp).toBe(15000);
     expect(lastTroughEntry.price).toBe('0.9');
   });
