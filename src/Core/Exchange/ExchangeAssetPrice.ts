@@ -220,7 +220,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   cleanupEntries(ratio: number = 0.5): void {
-    this._entries.splice(0, Math.round(this._entries.length * ratio));
+    this._entries.splice(0, Math.ceil(this._entries.length * ratio));
 
     this.processEntries();
   }

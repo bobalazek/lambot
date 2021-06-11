@@ -61,13 +61,9 @@ describe('ExchangePosition', () => {
     const timestamp = 1000;
     const price = '0.1';
 
-    exchangeAssetPrice.addEntry({
-      timestamp,
-      price,
-    });
+    exchangeAssetPrice.addEntry({ timestamp, price });
 
     const exchangeAssetPriceEntries = exchangeAssetPrice.getEntries();
-
     expect(exchangeAssetPriceEntries).toHaveLength(1);
     expect(exchangeAssetPriceEntries[0].timestamp).toBe(timestamp);
     expect(exchangeAssetPriceEntries[0].price).toBe(price);
@@ -79,7 +75,6 @@ describe('ExchangePosition', () => {
     });
 
     expect(exchangeAssetPrice.getEntries()).toHaveLength(entries.length);
-
     exchangeAssetPrice.processEntries();
 
     // Check if the correct indexes were found
@@ -111,7 +106,6 @@ describe('ExchangePosition', () => {
     const price = '2.0';
 
     exchangeAssetPrice.addEntry({ timestamp, price });
-
     exchangeAssetPrice.processEntries();
 
     // Last peak entry
@@ -129,7 +123,6 @@ describe('ExchangePosition', () => {
     const price = '0.1';
 
     exchangeAssetPrice.addEntry({ timestamp, price });
-
     exchangeAssetPrice.processEntries();
 
     // Last trough entry
@@ -144,7 +137,6 @@ describe('ExchangePosition', () => {
       exchangeAssetPrice.processEntries();
 
       const newestEntry = exchangeAssetPrice.getNewestEntry();
-
       const priceText = exchangeAssetPrice.getPriceText(newestEntry.timestamp);
 
       expect(priceText).toBe(entriesPriceTexts[index]);
@@ -157,15 +149,11 @@ describe('ExchangePosition', () => {
     });
 
     expect(exchangeAssetPrice.getEntries()).toHaveLength(entries.length);
-
     exchangeAssetPrice.cleanupEntries(0.5);
-
     expect(exchangeAssetPrice.getEntries()).toHaveLength(10);
 
-    exchangeAssetPrice.addEntry({ timestamp: 18000, price: '1.5' });
-
+    exchangeAssetPrice.addEntry({ timestamp: 21000, price: '1.5' });
     exchangeAssetPrice.cleanupEntries(0.5);
-
     expect(exchangeAssetPrice.getEntries()).toHaveLength(5);
   });
 });
