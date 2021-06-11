@@ -33,7 +33,7 @@ export class ExchangePosition {
     id: string,
     type: ExchangePositionTypeEnum,
     status: ExchangePositionStatusEnum,
-    timestamp: number = +new Date()
+    timestamp: number = Date.now()
   ) {
     this.id = id;
     this.type = type;

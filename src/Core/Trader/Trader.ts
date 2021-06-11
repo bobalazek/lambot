@@ -29,7 +29,7 @@ export class Trader implements TraderInterface {
 
     return setInterval(async () => {
       const assetPrices = await session.exchange.getAssetPrices();
-      const now = +new Date();
+      const now = Date.now();
 
       for (let i = 0; i < assetPrices.length; i++) {
         const assetData = assetPrices[i];
@@ -57,13 +57,15 @@ export class Trader implements TraderInterface {
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
         exchangeAssetPrice.processEntries();
       });
-      const processingTime = (+new Date()) - now;
+      const processingTime = Date.now() - now;
       logger.debug(`Processing took ${processingTime}ms.`);
+
+      const trendIntervalTime = 2000; // TODO: should be configurable
 
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        const priceText = exchangeAssetPrice.getPriceText(now, 5000);
+        const priceText = exchangeAssetPrice.getPriceText(now, trendIntervalTime);
 
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });

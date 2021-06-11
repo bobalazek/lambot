@@ -223,7 +223,7 @@ export class BinanceExchange extends Exchange {
         RequestMethodEnum.GET,
         'https://api.binance.com/api/v3/ticker/price'
       );
-      const now = +new Date();
+      const now = Date.now();
 
       const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
       for (let i = 0; i < response.data.length; i++) {
@@ -264,7 +264,7 @@ export class BinanceExchange extends Exchange {
       'https://api.binance.com/api/v3/time',
     );
 
-    this._timeOffset = response.data.serverTime - +new Date();
+    this._timeOffset = response.data.serverTime - Date.now();
   }
 
   async _doRequest(
@@ -288,7 +288,7 @@ export class BinanceExchange extends Exchange {
     }
 
     if (signed) {
-      const timestamp = +new Date() + this._timeOffset;
+      const timestamp = Date.now() + this._timeOffset;
 
       headers['X-MBX-APIKEY'] = this.apiCredentials.key;
 

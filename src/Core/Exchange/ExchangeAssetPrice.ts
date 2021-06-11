@@ -114,21 +114,26 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return null;
     }
 
-    const now = +new Date();
+    const now = Date.now();
 
     const percentages: number[] = [];
     for (let i = 0; i < changes.reverse().length; i++) {
       const change = changes[i];
-      if (now - change.timestamp > intervalTime) {
+      if (now - change.timestamp >= intervalTime) {
         break;
       }
 
       percentages.push(change.relativePricePercentage);
     }
 
+    const percentagesCount = percentages.length;
+    if (percentagesCount === 0) {
+      return null;
+    }
+
     const trendPercentage = percentages.reduce((a, b) => {
       return a + b;
-    }, 0);
+    }, 0) / percentagesCount;
 
     if (trendPercentage > 0) {
       return ExchangeAssetPriceTrendEnum.UPTREND;
@@ -275,8 +280,8 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   getPriceText(
-    time: number = +new Date(),
-    trendIntervalTime: number = 5000
+    time: number = Date.now(),
+    trendIntervalTime: number = 2000
   ): string {
     const entryNewest = this.getNewestEntry();
     if (!entryNewest) {

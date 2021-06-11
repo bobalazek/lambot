@@ -17,7 +17,7 @@ export class SessionManager {
 
     const data = {
       session: session.toExport(),
-      createdAt: +new Date(),
+      createdAt: Date.now(),
       version: 1,
     };
 

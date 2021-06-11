@@ -45,8 +45,8 @@ export class Session implements SessionInterface {
     this.config = config;
     this.assets = [];
     this.status = SessionStatusEnum.STARTED;
-    this.createdAt = +new Date();
-    this.startedAt = +new Date();
+    this.createdAt = Date.now();
+    this.startedAt = Date.now();
   }
 
   /**
