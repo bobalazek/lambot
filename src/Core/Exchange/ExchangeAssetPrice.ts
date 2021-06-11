@@ -193,6 +193,27 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
           this._entriesTroughIndexes.push(baseIndex);
         }
       }
+
+      // If the last item, add the peak/trough if the last item is less/more than the last one
+      if (i === entriesCount - 1) {
+        const newestEntry = this.getNewestEntry();
+        const lastPeakEntry = this.getLastPeakEntry();
+        const lastTroughEntry = this.getLastTroughEntry();
+
+        if (
+          lastPeakEntry &&
+          parseFloat(lastPeakEntry.price) <= parseFloat(newestEntry.price)
+        ) {
+          this._entriesPeakIndexes.push(i);
+        }
+
+        if (
+          lastTroughEntry &&
+          parseFloat(lastTroughEntry.price) >= parseFloat(newestEntry.price)
+        ) {
+          this._entriesTroughIndexes.push(i);
+        }
+      }
     }
 
     this._changes = changes;
