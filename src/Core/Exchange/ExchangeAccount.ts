@@ -8,8 +8,6 @@ export interface ExchangeAccountInterface {
   toExport(): unknown;
 }
 
-export type ExchangeAccountsMap = Map<string, ExchangeAccountInterface>;
-
 export enum ExchangeAccountTypeEnum {
   SPOT = 'SPOT',
   FUTURES = 'FUTURES',

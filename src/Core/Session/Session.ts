@@ -4,10 +4,11 @@ import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { Assets } from '../Asset/Assets';
 import { Exchange } from '../Exchange/Exchange';
+import { ExchangeAssetPrice } from '../Exchange/ExchangeAssetPrice';
+import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
 import { Strategy } from '../Strategy/Strategy';
-import { ExchangeAssetPrice } from '../Exchange/ExchangeAssetPrice';
 import logger from '../../Utils/Logger';
 
 export enum SessionStatusEnum {
@@ -19,6 +20,7 @@ export enum SessionStatusEnum {
 export interface SessionInterface {
   id: string;
   exchange: Exchange;
+  exchangeAccountType: ExchangeAccountTypeEnum;
   config: SessionConfig;
   assets: SessionAsset[];
   status: SessionStatusEnum;
@@ -32,6 +34,7 @@ export interface SessionInterface {
 export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
+  exchangeAccountType: ExchangeAccountTypeEnum;
   config: SessionConfig;
   assets: SessionAsset[];
   status: SessionStatusEnum;
@@ -39,9 +42,15 @@ export class Session implements SessionInterface {
   startedAt: number;
   endedAt: number;
 
-  constructor(id: string, exchange: Exchange, config: SessionConfig) {
+  constructor(
+    id: string,
+    exchange: Exchange,
+    exchangeAccountType: ExchangeAccountTypeEnum,
+    config: SessionConfig
+  ) {
     this.id = id;
     this.exchange = exchange;
+    this.exchangeAccountType = exchangeAccountType;
     this.config = config;
     this.assets = [];
     this.status = SessionStatusEnum.STARTED;
@@ -91,22 +100,21 @@ export class Session implements SessionInterface {
 
   /***** Export/Import *****/
   toExport() {
-    const assets = this.assets.map((sessionAsset) => {
-      return {
-        asset: sessionAsset.asset.toString(),
-        assetPairs: sessionAsset.assetPairs.map((assetPair) => {
-          return [
-            assetPair.assetBase.toString(),
-            assetPair.assetQuote.toString(),
-          ];
-        }),
-        strategy: sessionAsset.strategy.toExport(),
-      };
-    });
-
     return {
       id: this.id,
-      assets,
+      exchangeAccountType: this.exchangeAccountType,
+      assets: this.assets.map((sessionAsset) => {
+        return {
+          asset: sessionAsset.asset.toString(),
+          assetPairs: sessionAsset.assetPairs.map((assetPair) => {
+            return [
+              assetPair.assetBase.toString(),
+              assetPair.assetQuote.toString(),
+            ];
+          }),
+          strategy: sessionAsset.strategy.toExport(),
+        };
+      }),
       status: this.status,
       createdAt: this.createdAt,
       startedAt: this.startedAt,
@@ -131,6 +139,7 @@ export class Session implements SessionInterface {
     const session = new Session(
       sessionData.id,
       exchange,
+      data.exchangeAccountType,
       config
     );
 

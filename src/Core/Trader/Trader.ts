@@ -79,15 +79,19 @@ export class Trader implements TraderInterface {
       }
 
       // Actually start checking if we can do any trades
-      this.checkForAvailableTrades();
+      await this.checkForAvailableTrades();
     }, updateInterval);
   }
 
-  checkForAvailableTrades() {
+  async checkForAvailableTrades(): Promise<boolean> {
     const {
       session,
     } = this;
 
-    // TODO
+    session.assets.forEach((sessionAsset) => {
+      // TODO
+    });
+
+    return true;
   }
 }

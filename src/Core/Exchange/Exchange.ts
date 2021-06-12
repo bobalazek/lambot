@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
+import { ExchangeAccount, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
 import { ExchangeAssetPricesMap, ExchangeAssetPriceWithSymbolEntryInterface } from './ExchangeAssetPrice';
@@ -21,7 +21,7 @@ export interface ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
-  accounts: ExchangeAccountsMap;
+  account: ExchangeAccount;
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
   trader: Trader;
@@ -45,8 +45,8 @@ export class Exchange implements ExchangeInterface {
   name: string;
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
-  accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
+  account: ExchangeAccount;
   session: Session;
   trader: Trader;
 
@@ -60,7 +60,6 @@ export class Exchange implements ExchangeInterface {
     this.name = name;
     this.apiCredentials = apiCredentials;
     this.assetPairConverter = assetPairConverter;
-    this.accounts = new Map();
     this.assetPairPrices = new Map();
   }
 
@@ -74,20 +73,14 @@ export class Exchange implements ExchangeInterface {
     // Validate
     await ExchangeValidator.validate(this);
 
-    // Setup accounts
-    const accountTypes = [
-      ExchangeAccountTypeEnum.SPOT,
-    ];
-    await asyncForEach(accountTypes, async (accountType) => {
-      const exchangeAccount = new ExchangeAccount(accountType);
-      const exchangeAccountAssets = await this.getAccountAssets(accountType);
-      exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
-        const key = exchangeAccountAsset.asset.toString();
-        exchangeAccount.assets.set(key, exchangeAccountAsset);
-      });
-
-      this.accounts.set(accountType, exchangeAccount);
+    // Setup account
+    const exchangeAccount = new ExchangeAccount(session.exchangeAccountType);
+    const exchangeAccountAssets = await this.getAccountAssets(session.exchangeAccountType);
+    exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
+      const key = exchangeAccountAsset.asset.toString();
+      exchangeAccount.assets.set(key, exchangeAccountAsset);
     });
+    this.account = exchangeAccount;
 
     // Show which assets we will be trading with this session
     logger.info(chalk.bold(
