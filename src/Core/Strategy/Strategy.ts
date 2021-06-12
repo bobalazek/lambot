@@ -77,6 +77,7 @@ export class Strategy implements StrategyInterface {
     this.buyTroughSlipPercentage = buyTroughSlipPercentage;
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       orderAmount: this.orderAmount,

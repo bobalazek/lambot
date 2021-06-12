@@ -30,6 +30,7 @@ export class Trader implements TraderInterface {
     const assetPairsList = session.getAssetPairsList();
 
     return setInterval(async () => {
+      // Update the current asset prices
       const assetPrices = await session.exchange.getAssetPrices();
       const now = Date.now();
 
@@ -76,6 +77,17 @@ export class Trader implements TraderInterface {
           exchangeAssetPrice.cleanupEntries(0.5);
         });
       }
+
+      // Actually start checking if we can do any trades
+      this.checkForAvailableTrades();
     }, updateInterval);
+  }
+
+  checkForAvailableTrades() {
+    const {
+      session,
+    } = this;
+
+    // TODO
   }
 }

@@ -54,6 +54,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     this.exchangeResponse = exchangeResponse;
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       id: this.id,

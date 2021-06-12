@@ -24,6 +24,7 @@ export class SessionConfig implements SessionConfigInterface {
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
