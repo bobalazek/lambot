@@ -11,10 +11,10 @@ export interface ExchangeAssetPriceInterface {
   getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeInterface[];
-  getTrend(intervalTime: number): ExchangeAssetPriceTrendEnum;
+  getTrend(now: number, intervalTime: number): ExchangeAssetPriceTrendEnum;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
-  getPriceText(time: number, trendIntervalTime: number): string;
+  getPriceText(now: number, trendIntervalTime: number): string;
 }
 
 export interface ExchangeAssetPriceChangeInterface {
@@ -105,7 +105,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._changes;
   }
 
-  getTrend(intervalTime: number): ExchangeAssetPriceTrendEnum {
+  getTrend(
+    now: number = Date.now(),
+    intervalTime: number = 1000
+  ): ExchangeAssetPriceTrendEnum {
     const changes = this.getChanges();
     if (
       !changes ||
@@ -113,8 +116,6 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     ) {
       return null;
     }
-
-    const now = Date.now();
 
     const percentages: number[] = [];
     for (let i = 0; i < changes.reverse().length; i++) {
@@ -280,7 +281,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   }
 
   getPriceText(
-    time: number = Date.now(),
+    now: number = Date.now(),
     trendIntervalTime: number = 2000
   ): string {
     const entryNewest = this.getNewestEntry();
@@ -289,10 +290,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     const entryNewestPrice = entryNewest.price;
-    const entryNewestTimeAgo = time - entryNewest.timestamp;
+    const entryNewestTimeAgo = now - entryNewest.timestamp;
     const entryLastPeak = this.getLastPeakEntry();
     const entryLastTrough = this.getLastTroughEntry();
-    const trend = this.getTrend(trendIntervalTime);
+    const trend = this.getTrend(
+      now,
+      trendIntervalTime
+    );
 
     let string = chalk.bold(entryNewestPrice);
 
@@ -305,7 +309,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     if (entryLastPeak) {
-      const entryLastPeakTimeAgo = time - entryLastPeak.timestamp;
+      const entryLastPeakTimeAgo = now - entryLastPeak.timestamp;
       const entryLastPeakPercentage = calculatePercentage(
         parseFloat(entryNewestPrice),
         parseFloat(entryLastPeak.price)
@@ -317,7 +321,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     if (entryLastTrough) {
-      const entryLastTroughTimeAgo = time - entryLastTrough.timestamp;
+      const entryLastTroughTimeAgo = now - entryLastTrough.timestamp;
       const entryLastTroughPercentage = calculatePercentage(
         parseFloat(entryNewestPrice),
         parseFloat(entryLastTrough.price)

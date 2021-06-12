@@ -23,9 +23,10 @@ export class Trader implements TraderInterface {
     } = this;
     const {
       assetPriceUpdateIntervalSeconds,
+      trendIntervalSeconds,
     } = session.config;
     const updateInterval = assetPriceUpdateIntervalSeconds * 1000;
-    const trendIntervalTime = updateInterval; // TODO: a separate config?
+    const trendIntervalTime = trendIntervalSeconds * 1000;
     const assetPairsList = session.getAssetPairsList();
 
     return setInterval(async () => {

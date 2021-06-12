@@ -10,12 +10,21 @@ export class ExchangeValidator {
     ));
 
     const {
-      assetPriceUpdateIntervalSeconds
+      assetPriceUpdateIntervalSeconds,
+      trendIntervalSeconds,
     } = exchange.session.config;
 
     if (assetPriceUpdateIntervalSeconds < 1) {
       logger.critical(chalk.red.bold(
         `You cannot set the asset price update interval to less than 1!`
+      ));
+
+      process.exit(1);
+    }
+
+    if (trendIntervalSeconds < 1) {
+      logger.critical(chalk.red.bold(
+        `You cannot set the trend interval to less than 1!`
       ));
 
       process.exit(1);
