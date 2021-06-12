@@ -77,7 +77,7 @@ export class Exchange implements ExchangeInterface {
     const exchangeAccount = new ExchangeAccount(session.exchangeAccountType);
     const exchangeAccountAssets = await this.getAccountAssets(session.exchangeAccountType);
     exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
-      const key = exchangeAccountAsset.asset.toString();
+      const key = exchangeAccountAsset.asset.symbol;
       exchangeAccount.assets.set(key, exchangeAccountAsset);
     });
     this.account = exchangeAccount;

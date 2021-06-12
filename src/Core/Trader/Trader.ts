@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 
 import { Session } from '../Session/Session';
+import { ExchangeOrder } from '../Exchange/ExchangeOrder';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
@@ -78,20 +79,54 @@ export class Trader implements TraderInterface {
         });
       }
 
-      // Actually start checking if we can do any trades
-      await this.checkForAvailableTrades();
+      // Actually start checking if we can do any orders
+      const orders = await this._getOrders();
+      this._executeOrders(orders);
     }, updateInterval);
   }
 
-  async checkForAvailableTrades(): Promise<boolean> {
+  async _getOrders(): Promise<ExchangeOrder[]> {
     const {
       session,
     } = this;
+    const {
+      positions,
+    } = session.exchange.account;
+
+    logger.debug('Starting to get orders ...');
+
+    const orders: ExchangeOrder[] = [];
 
     session.assets.forEach((sessionAsset) => {
+      const {
+        strategy,
+      } = sessionAsset;
+
       // TODO
     });
 
-    return true;
+    return orders;
+  }
+
+  async _executeOrders(orders: ExchangeOrder[]): Promise<ExchangeOrder[]> {
+    logger.debug('Starting to execute orders ...');
+
+    if (orders.length === 0) {
+      logger.debug('No orders found.');
+
+      return [];
+    }
+
+    const executedOrders: ExchangeOrder[] = [];
+
+    orders.forEach((order) => {
+      logger.debug(`Executing order "${order.toString()}" ...`);
+
+      // TODO
+
+      executedOrders.push(order);
+    });
+
+    return executedOrders;
   }
 }

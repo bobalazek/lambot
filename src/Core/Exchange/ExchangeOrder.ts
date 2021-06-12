@@ -11,6 +11,7 @@ export interface ExchangeOrderInterface {
   type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
+  toString(): string;
   toExport(): unknown;
 }
 
@@ -55,6 +56,20 @@ export class ExchangeOrder implements ExchangeOrderInterface {
   }
 
   /***** Export/Import *****/
+  toString() {
+    return JSON.stringify({
+      id: this.id,
+      side: this.side,
+      assetPair: [
+        this.assetPair.assetBase,
+        this.assetPair.assetQuote,
+      ],
+      amount: this.amount,
+      price: this.price,
+      type: this.type,
+    });
+  }
+
   toExport() {
     return {
       id: this.id,

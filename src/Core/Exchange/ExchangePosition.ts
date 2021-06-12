@@ -1,7 +1,10 @@
+import { Asset } from '../Asset/Asset';
+import { Assets } from '../Asset/Assets';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 
 export interface ExchangePositionInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
+  asset: Asset;
   type: ExchangePositionTypeEnum;
   status: ExchangePositionStatusEnum;
   timestamp: number;
@@ -24,6 +27,7 @@ export enum ExchangePositionStatusEnum {
 
 export class ExchangePosition {
   id: string;
+  asset: Asset;
   type: ExchangePositionTypeEnum;
   status: ExchangePositionStatusEnum;
   timestamp: number;
@@ -32,11 +36,13 @@ export class ExchangePosition {
 
   constructor(
     id: string,
+    asset: Asset,
     type: ExchangePositionTypeEnum,
     status: ExchangePositionStatusEnum,
     timestamp: number = Date.now()
   ) {
     this.id = id;
+    this.asset = asset;
     this.type = type;
     this.status = status;
     this.timestamp = timestamp;
@@ -46,6 +52,7 @@ export class ExchangePosition {
   toExport() {
     return {
       id: this.id,
+      asset: this.asset.symbol,
       type: this.type,
       status: this.status,
       timestamp: this.timestamp,
@@ -57,6 +64,7 @@ export class ExchangePosition {
   static fromImport(data: any): ExchangePosition {
     const exchangePosition = new ExchangePosition(
       data.id,
+      Assets.getBySymbol(data.asset),
       data.type,
       data.status,
       data.timestamp
