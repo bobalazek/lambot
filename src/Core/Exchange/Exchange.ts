@@ -63,6 +63,7 @@ export class Exchange implements ExchangeInterface {
     this.apiCredentials = apiCredentials;
     this.assetPairConverter = assetPairConverter;
     this.assetPairPrices = new Map();
+    this.accounts = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
