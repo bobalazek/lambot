@@ -12,12 +12,8 @@ export interface TraderInterface {
 export class Trader implements TraderInterface {
   session: Session;
 
-  _pendingOrders: {order: ExchangeOrder, executionTime: number}[];
-
   constructor(session: Session) {
     this.session = session;
-
-    this._pendingOrders = [];
 
     this.start();
   }
@@ -84,19 +80,46 @@ export class Trader implements TraderInterface {
       }
 
       // Actually start checking if we can do any orders
-      await this._addPotentialOrders();
-      await this._executePendingOrders();
+      await this._processOpenPositions();
+      await this._processNewPotentialPositions();
     }, updateInterval);
   }
 
-  async _addPotentialOrders(): Promise<ExchangeOrder[]> {
+  async _processOpenPositions(): Promise<void> {
     const {
       session,
     } = this;
 
-    logger.debug('Starting to add potential orders ...');
+    logger.debug('Starting to process open positions ...');
 
-    const orders: ExchangeOrder[] = [];
+    session.assets.forEach((sessionAsset) => {
+      const {
+        openPositions,
+        strategy,
+      } = sessionAsset;
+
+      if (openPositions.length === 0) {
+        return;
+      }
+
+      openPositions.forEach((openPosition) => {
+        const assetPrice = session.exchange.assetPairPrices.get(openPosition.asset.symbol);
+        if (openPosition.shouldSell(
+          assetPrice,
+          strategy
+        )) {
+          // TODO: trigger sell!
+        }
+      });
+    });
+  }
+
+  async _processNewPotentialPositions(): Promise<void> {
+    const {
+      session,
+    } = this;
+
+    logger.debug('Starting to process new potential positions ...');
 
     session.assets.forEach((sessionAsset) => {
       const {
@@ -105,37 +128,10 @@ export class Trader implements TraderInterface {
       } = sessionAsset;
 
       if (openPositions.length >= strategy.maximumOpenPositions) {
-        // We have enough open positions
         return;
       }
 
       // TODO
     });
-
-    return orders;
-  }
-
-  async _executePendingOrders(): Promise<ExchangeOrder[]> {
-    const {
-      _pendingOrders: pendingOrders,
-    } = this;
-
-    logger.debug('Starting to execute pending orders ...');
-
-    if (pendingOrders.length === 0) {
-      logger.debug('No pending orders found.');
-
-      return [];
-    }
-
-    const executedOrders: ExchangeOrder[] = [];
-
-    pendingOrders.forEach((order) => {
-      logger.debug(`Executing order "${order.toString()}" ...`);
-
-      // TODO
-    });
-
-    return executedOrders;
   }
 }

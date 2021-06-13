@@ -5,14 +5,14 @@ import logger from '../../Utils/Logger';
 
 export class ExchangeValidator {
   public static async validate(exchange: Exchange) {
-    logger.debug(chalk.italic(
-      'Starting session and exchange validation ...'
-    ));
-
     const {
       assetPriceUpdateIntervalSeconds,
       trendIntervalSeconds,
     } = exchange.session.config;
+
+    logger.debug(chalk.italic(
+      'Starting session and exchange validation ...'
+    ));
 
     if (assetPriceUpdateIntervalSeconds < 1) {
       logger.critical(chalk.red.bold(

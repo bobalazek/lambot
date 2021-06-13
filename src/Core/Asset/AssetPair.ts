@@ -1,9 +1,11 @@
 import { Asset } from './Asset';
+import { Assets } from './Assets';
 
 export interface AssetPairInterface {
   assetBase: Asset;
   assetQuote: Asset;
   toString(converter: AssetPairStringConverterInterface): string;
+  toExport(): unknown;
 }
 
 export interface AssetPairStringConverterInterface {
@@ -21,6 +23,20 @@ export class AssetPair implements AssetPairInterface {
 
   toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {
     return converter.convert(this);
+  }
+
+  toExport() {
+    return {
+      assetBase: this.assetBase.symbol,
+      assetQuote: this.assetQuote.symbol,
+    };
+  }
+
+  static fromImport(data: any): AssetPair {
+    return new AssetPair(
+      Assets.getBySymbol(data.assetBase),
+      Assets.getBySymbol(data.assetQuote)
+    );
   }
 }
 

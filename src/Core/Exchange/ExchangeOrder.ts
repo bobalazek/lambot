@@ -60,10 +60,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     return JSON.stringify({
       id: this.id,
       side: this.side,
-      assetPair: [
-        this.assetPair.assetBase,
-        this.assetPair.assetQuote,
-      ],
+      assetPair: this.assetPair.toExport(),
       amount: this.amount,
       price: this.price,
       type: this.type,
@@ -73,10 +70,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
   toExport() {
     return {
       id: this.id,
-      assetPair: [
-        this.assetPair.assetBase.toString(),
-        this.assetPair.assetQuote.toString(),
-      ],
+      assetPair: this.assetPair.toExport(),
       side: this.side,
       amount: this.amount,
       price: this.price,
@@ -89,10 +83,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
   static fromImport(data: any): ExchangeOrder {
     const order = new ExchangeOrder(
       data.id,
-      new AssetPair(
-        Assets.getBySymbol(data.assetPair[0]),
-        Assets.getBySymbol(data.assetPair[1]),
-      ),
+      AssetPair.fromImport(data.assetPair),
       data.side,
       data.amount,
       data.price,
