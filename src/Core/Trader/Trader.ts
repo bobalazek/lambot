@@ -101,7 +101,13 @@ export class Trader implements TraderInterface {
     session.assets.forEach((sessionAsset) => {
       const {
         strategy,
+        openPositions,
       } = sessionAsset;
+
+      if (openPositions.length >= strategy.maximumOpenPositions) {
+        // We have enough open positions
+        return;
+      }
 
       // TODO
     });

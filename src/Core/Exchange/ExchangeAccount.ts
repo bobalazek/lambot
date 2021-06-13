@@ -32,6 +32,7 @@ export class ExchangeAccount implements ExchangeAccountInterface {
   toExport() {
     return {
       type: this.type,
+      assets: this.assets.entries(),
       positions: this.positions.map((position) => {
         return position.toExport();
       }),
@@ -39,12 +40,12 @@ export class ExchangeAccount implements ExchangeAccountInterface {
   }
 
   static fromImport(data: any): ExchangeAccount {
-    // this.assets should be imported on the fly, with a API call
-
     const exchangeAccount = new ExchangeAccount(data.type);
 
-    data.forEach((position) => {
-      exchangeAccount.positions.push(ExchangePosition.fromImport(position));
+    exchangeAccount.assets = new Map(data.assets);
+
+    data.forEach((positionData) => {
+      exchangeAccount.positions.push(ExchangePosition.fromImport(positionData));
     });
 
     return exchangeAccount;
