@@ -117,10 +117,11 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return null;
     }
 
+    const changesReversed = [...changes.reverse()];
     const percentages: number[] = [];
-    for (let i = 0; i < changes.reverse().length; i++) {
-      const change = changes[i];
-      if (now - change.timestamp >= intervalTime) {
+    for (let i = 0; i < changesReversed.length; i++) {
+      const change = changesReversed[i];
+      if (now - change.timestamp > intervalTime) {
         break;
       }
 

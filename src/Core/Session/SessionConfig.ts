@@ -15,7 +15,7 @@ export class SessionConfig implements SessionConfigInterface {
   constructor({
     warmupPeriodSeconds = 300,
     assetPriceUpdateIntervalSeconds = 2,
-    trendIntervalSeconds = 2,
+    trendIntervalSeconds = 5,
     memoryUsageMonitoringIntervalSeconds = 30,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
