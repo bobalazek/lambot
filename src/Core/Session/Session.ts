@@ -1,13 +1,9 @@
 import chalk from 'chalk';
 
-import { Asset } from '../Asset/Asset';
-import { AssetPair } from '../Asset/AssetPair';
-import { Assets } from '../Asset/Assets';
 import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPrice } from '../Exchange/ExchangeAssetPrice';
-import { SessionAsset, SessionAssetTradingTypeEnum } from './SessionAsset';
+import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
-import { Strategy } from '../Strategy/Strategy';
 import logger from '../../Utils/Logger';
 
 export interface SessionInterface {
@@ -19,7 +15,8 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
-  getAssetPairsList(): Set<string>;
+  getAssetPairs(): Set<string>;
+  toString(): string;
   toExport(): unknown;
 }
 
@@ -64,11 +61,11 @@ export class Session implements SessionInterface {
     });
   }
 
-  getAssetPairsList(): Set<string> {
+  getAssetPairs(): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
-      sessionAsset.getAssetPairsSet(this.exchange.assetPairConverter).forEach((assetPair) => {
+      sessionAsset.getAssetPairs(this.exchange.assetPairConverter).forEach((assetPair) => {
         assetPairs.add(assetPair);
       });
     });
@@ -77,6 +74,17 @@ export class Session implements SessionInterface {
   }
 
   /***** Export/Import *****/
+  toString() {
+    return JSON.stringify({
+      id: this.id,
+      exchange: this.exchange.key,
+      createdAt: this.createdAt,
+      assets: this.assets.map((sessionAsset) => {
+        return sessionAsset.toString(this.exchange.assetPairConverter);
+      }),
+    });
+  }
+
   toExport() {
     return {
       id: this.id,
@@ -102,7 +110,7 @@ export class Session implements SessionInterface {
       process.exit(1);
     }
 
-    const exchange = await Exchange.fromImport(sessionData.exchange);
+    const exchange = Exchange.fromImport(sessionData.exchange);
     const config = SessionConfig.fromImport(sessionData.config);
     const session = new Session(
       sessionData.id,

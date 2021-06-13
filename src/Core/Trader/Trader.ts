@@ -32,7 +32,7 @@ export class Trader implements TraderInterface {
     } = session.config;
     const updateInterval = assetPriceUpdateIntervalSeconds * 1000;
     const trendIntervalTime = trendIntervalSeconds * 1000;
-    const assetPairsList = session.getAssetPairsList();
+    const assetPairs = session.getAssetPairs();
 
     return setInterval(async () => {
       // Update the current asset prices
@@ -41,7 +41,7 @@ export class Trader implements TraderInterface {
 
       for (let i = 0; i < assetPrices.length; i++) {
         const assetData = assetPrices[i];
-        if (!assetPairsList.has(assetData.symbol)) {
+        if (!assetPairs.has(assetData.symbol)) {
           continue;
         }
 

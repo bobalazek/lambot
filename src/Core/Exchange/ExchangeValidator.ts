@@ -50,7 +50,7 @@ export class ExchangeValidator {
       const {
         tradingType,
       } = sessionAsset;
-      const sessionAssetAssetPairSet = sessionAsset.getAssetPairsSet(exchange.assetPairConverter);
+      const sessionAssetAssetPairSet = sessionAsset.getAssetPairs(exchange.assetPairConverter);
 
       sessionAssetAssetPairSet.forEach((assetPairSymbol) => {
         // Check if that pair exists on the exchange

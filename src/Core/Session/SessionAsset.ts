@@ -8,7 +8,7 @@ export interface SessionAssetInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
   tradingType: SessionAssetTradingTypeEnum;
-  getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
+  getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
   toString(assetPairConverter: AssetPairStringConverterInterface): string;
   toExport(): unknown;
 }
@@ -37,7 +37,7 @@ export class SessionAsset implements SessionAssetInterface {
     this.tradingType = tradingType;
   }
 
-  getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string> {
+  getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
@@ -49,16 +49,12 @@ export class SessionAsset implements SessionAssetInterface {
 
   /***** Export/Import *****/
   toString(assetPairConverter: AssetPairStringConverterInterface): string {
-    const assetString = this.asset.toString();
-    const assetPairsString = this.assetPairs.map((assetPair) => {
-      return assetPair.toString(assetPairConverter);
-    }).join(', ');
-
-    return (
-      'Base asset: ' + assetString +
-      '; ' +
-      'Asset pairs: ' + assetPairsString
-    );
+    return JSON.stringify({
+      asset: this.asset.toString(),
+      assetPairs: this.assetPairs.map((assetPair) => {
+        return assetPair.toString(assetPairConverter);
+      }),
+    });
   }
 
   toExport() {
