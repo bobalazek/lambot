@@ -4,10 +4,9 @@ import { Command } from 'commander';
 import { AssetPair } from './Core/Asset/AssetPair';
 import { Assets } from './Core/Asset/Assets';
 import { Manager } from './Core/Manager';
-import { ExchangeAccountTypeEnum } from './Core/Exchange/ExchangeAccount';
 import { ExchangesEnum } from './Core/Exchange/ExchangesFactory';
 import { SessionManager } from './Core/Session/SessionManager';
-import { SessionAsset } from './Core/Session/SessionAsset';
+import { SessionAsset, SessionAssetTradingTypeEnum } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
 import { Strategy } from './Core/Strategy/Strategy';
 
@@ -33,7 +32,6 @@ const sessionId = programOptions.session;
   // Config
   const sessionConfig = new SessionConfig({});
   const exchangeKey = ExchangesEnum.BINANCE;
-  const exchangeAccountType = ExchangeAccountTypeEnum.SPOT;
   const sessionAssets = [
     new SessionAsset(
       Assets.USDT,
@@ -80,7 +78,8 @@ const sessionId = programOptions.session;
       ],
       new Strategy({
         orderAmount: '15',
-      })
+      }),
+      SessionAssetTradingTypeEnum.SPOT
     ),
   ];
 
@@ -89,7 +88,6 @@ const sessionId = programOptions.session;
     sessionId,
     sessionConfig,
     exchangeKey,
-    exchangeAccountType,
     sessionAssets
   );
 

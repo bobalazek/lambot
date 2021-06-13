@@ -15,6 +15,8 @@ export enum ExchangeAccountTypeEnum {
   OPTIONS = 'OPTIONS',
 }
 
+export type ExchangeAccountsMap = Map<string, ExchangeAccountInterface>;
+
 export class ExchangeAccount implements ExchangeAccountInterface {
   type: ExchangeAccountTypeEnum;
   assets: ExchangeAccountAssetsMap;

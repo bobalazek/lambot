@@ -4,12 +4,14 @@ import {
   AssetPairStringConverterDefault,
   AssetPairStringConverterInterface,
 } from '../Asset/AssetPair';
+import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 
 export interface ExchangeAssetPairInterface extends AssetPairInterface {
   amountMinimum: string;
   amountMaximum: string;
   priceMinimum: string;
   priceMaximum: string;
+  tradingTypes: SessionAssetTradingTypeEnum[];
 }
 
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
@@ -19,6 +21,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   amountMaximum: string;
   priceMinimum: string;
   priceMaximum: string;
+  tradingTypes: SessionAssetTradingTypeEnum[];
 
   constructor(
     assetBase: Asset,
@@ -26,7 +29,8 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     amountMinimum: string,
     amountMaximum: string,
     priceMinimum: string,
-    priceMaximum: string
+    priceMaximum: string,
+    tradingTypes: SessionAssetTradingTypeEnum[]
   ) {
     this.assetBase = assetBase;
     this.assetQuote = assetQuote;
@@ -34,6 +38,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this.amountMaximum = amountMaximum;
     this.priceMinimum = priceMinimum;
     this.priceMaximum = priceMaximum;
+    this.tradingTypes = tradingTypes;
   }
 
   toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {

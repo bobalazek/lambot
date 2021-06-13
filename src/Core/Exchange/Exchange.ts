@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
-import { ExchangeAccount, ExchangeAccountTypeEnum } from './ExchangeAccount';
+import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
 import { ExchangeAssetPricesMap, ExchangeAssetPriceWithSymbolEntryInterface } from './ExchangeAssetPrice';
@@ -15,13 +15,14 @@ import { ExchangeOrder } from './ExchangeOrder';
 import { Trader } from '../Trader/Trader';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
+import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 
 export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
-  account: ExchangeAccount;
+  accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
   trader: Trader;
@@ -37,6 +38,7 @@ export interface ExchangeInterface {
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum
   ): Promise<ExchangeOrderFees>;
+  getAccountType(accountType: SessionAssetTradingTypeEnum)
   toExport(): unknown;
 }
 
@@ -46,7 +48,7 @@ export class Exchange implements ExchangeInterface {
   apiCredentials: ApiCredentials;
   assetPairConverter: AssetPairStringConverterInterface;
   assetPairPrices: ExchangeAssetPricesMap;
-  account: ExchangeAccount;
+  accounts: ExchangeAccountsMap;
   session: Session;
   trader: Trader;
 
@@ -73,14 +75,20 @@ export class Exchange implements ExchangeInterface {
     // Validate
     await ExchangeValidator.validate(this);
 
-    // Setup account
-    const exchangeAccount = new ExchangeAccount(session.exchangeAccountType);
-    const exchangeAccountAssets = await this.getAccountAssets(session.exchangeAccountType);
-    exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
-      const key = exchangeAccountAsset.asset.symbol;
-      exchangeAccount.assets.set(key, exchangeAccountAsset);
+    // Setup accounts
+    const accountTypes = [...new Set(this.session.assets.map((sessionAsset) => {
+      return sessionAsset.tradingType;
+    }))];
+    await asyncForEach(accountTypes, async (accountType) => {
+      const exchangeAccountType = this.getAccountType(accountType);
+      const exchangeAccount = new ExchangeAccount(exchangeAccountType);
+      const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);
+      exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
+        const key = exchangeAccountAsset.asset.symbol;
+        exchangeAccount.assets.set(key, exchangeAccountAsset);
+      });
+      this.accounts.set(exchangeAccountType, exchangeAccount);
     });
-    this.account = exchangeAccount;
 
     // Show which assets we will be trading with this session
     logger.info(chalk.bold(
@@ -127,6 +135,31 @@ export class Exchange implements ExchangeInterface {
 
   async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeOrderFees> {
     throw new Error('getAssetFees() not implemented yet.');
+  }
+
+  /***** Helpers *****/
+  getAccountType(accountType: SessionAssetTradingTypeEnum) {
+    let exchangeAccountType: ExchangeAccountTypeEnum = null;
+
+    switch (accountType) {
+      case SessionAssetTradingTypeEnum.FUTURES:
+        exchangeAccountType = ExchangeAccountTypeEnum.FUTURES;
+        break;
+      case SessionAssetTradingTypeEnum.MARGIN:
+        exchangeAccountType = ExchangeAccountTypeEnum.MARGIN;
+        break;
+      case SessionAssetTradingTypeEnum.SPOT:
+        exchangeAccountType = ExchangeAccountTypeEnum.SPOT;
+        break;
+      default:
+        logger.critical(chalk.red.bold(
+          `Invalid account type.`
+        ));
+
+        process.exit(1);
+    }
+
+    return exchangeAccountType;
   }
 
   /***** Export/Import *****/

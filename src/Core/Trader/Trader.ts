@@ -12,8 +12,12 @@ export interface TraderInterface {
 export class Trader implements TraderInterface {
   session: Session;
 
+  _pendingOrders: {order: ExchangeOrder, executionTime: number}[];
+
   constructor(session: Session) {
     this.session = session;
+
+    this._pendingOrders = [];
 
     this.start();
   }
@@ -80,20 +84,17 @@ export class Trader implements TraderInterface {
       }
 
       // Actually start checking if we can do any orders
-      const orders = await this._getOrders();
-      this._executeOrders(orders);
+      await this._addPotentialOrders();
+      await this._executePendingOrders();
     }, updateInterval);
   }
 
-  async _getOrders(): Promise<ExchangeOrder[]> {
+  async _addPotentialOrders(): Promise<ExchangeOrder[]> {
     const {
       session,
     } = this;
-    const {
-      positions,
-    } = session.exchange.account;
 
-    logger.debug('Starting to get orders ...');
+    logger.debug('Starting to add potential orders ...');
 
     const orders: ExchangeOrder[] = [];
 
@@ -108,23 +109,25 @@ export class Trader implements TraderInterface {
     return orders;
   }
 
-  async _executeOrders(orders: ExchangeOrder[]): Promise<ExchangeOrder[]> {
-    logger.debug('Starting to execute orders ...');
+  async _executePendingOrders(): Promise<ExchangeOrder[]> {
+    const {
+      _pendingOrders: pendingOrders,
+    } = this;
 
-    if (orders.length === 0) {
-      logger.debug('No orders found.');
+    logger.debug('Starting to execute pending orders ...');
+
+    if (pendingOrders.length === 0) {
+      logger.debug('No pending orders found.');
 
       return [];
     }
 
     const executedOrders: ExchangeOrder[] = [];
 
-    orders.forEach((order) => {
+    pendingOrders.forEach((order) => {
       logger.debug(`Executing order "${order.toString()}" ...`);
 
       // TODO
-
-      executedOrders.push(order);
     });
 
     return executedOrders;

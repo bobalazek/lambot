@@ -6,23 +6,33 @@ export interface SessionAssetInterface {
   asset: Asset; // What is the default asset you want to trade in?
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
+  tradingType: SessionAssetTradingTypeEnum;
   getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
   toString(assetPairConverter: AssetPairStringConverterInterface): string;
+}
+
+export enum SessionAssetTradingTypeEnum {
+  SPOT = 'SPOT',
+  MARGIN = 'MARGIN',
+  FUTURES = 'FUTURES',
 }
 
 export class SessionAsset implements SessionAssetInterface {
   asset: Asset;
   assetPairs: AssetPair[];
   strategy: Strategy;
+  tradingType: SessionAssetTradingTypeEnum;
 
   constructor(
     asset: Asset,
     assetPairs: AssetPair[],
-    strategy: Strategy
+    strategy: Strategy,
+    tradingType: SessionAssetTradingTypeEnum
   ) {
     this.asset = asset;
     this.assetPairs = assetPairs;
     this.strategy = strategy;
+    this.tradingType = tradingType;
   }
 
   getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string> {

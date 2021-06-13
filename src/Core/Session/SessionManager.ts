@@ -8,7 +8,6 @@ import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
 import { DATA_SESSIONS_DIR } from '../../constants';
 import logger from '../../Utils/Logger';
-import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 
 export class SessionManager {
   static async save(session: Session): Promise<string> {
@@ -55,19 +54,19 @@ export class SessionManager {
     id: string,
     config: SessionConfig,
     exchangeKey: ExchangesEnum,
-    exchangeAccountType: ExchangeAccountTypeEnum,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
     logger.info(chalk.cyan(`Creating a new session with ID "${id}" ...`));
 
     const exchange = ExchangesFactory.get(exchangeKey);
-    const session = new Session(id, exchange, exchangeAccountType, config);
+    const session = new Session(id, exchange, config);
 
     sessionAssets.forEach((sessionAsset) => {
       session.addAsset(
         sessionAsset.asset,
         sessionAsset.assetPairs,
-        sessionAsset.strategy
+        sessionAsset.strategy,
+        sessionAsset.tradingType
       );
     });
 
@@ -78,7 +77,6 @@ export class SessionManager {
     id: string,
     config: SessionConfig,
     exchangeKey: ExchangesEnum,
-    exchangeAccountType: ExchangeAccountTypeEnum,
     sessionAssets: SessionAsset[]
   ): Promise<Session> {
     const sessionFilePath = this.getPathById(id);
@@ -96,7 +94,6 @@ export class SessionManager {
       id,
       config,
       exchangeKey,
-      exchangeAccountType,
       sessionAssets
     );
   }

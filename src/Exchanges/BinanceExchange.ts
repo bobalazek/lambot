@@ -13,8 +13,9 @@ import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/Exc
 import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
-import logger from '../Utils/Logger';
 import { Session } from '../Core/Session/Session';
+import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
+import logger from '../Utils/Logger';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -188,6 +189,21 @@ export class BinanceExchange extends Exchange {
           }
         });
 
+        let tradingTypes: SessionAssetTradingTypeEnum[] = [];
+        if (
+          symbolData.isSpotTradingAllowed &&
+          symbolData.permissions.includes('SPOT')
+        ) {
+          tradingTypes.push(SessionAssetTradingTypeEnum.SPOT);
+        }
+
+        if (
+          symbolData.isMarginTradingAllowed &&
+          symbolData.permissions.includes('MARGIN')
+        ) {
+          tradingTypes.push(SessionAssetTradingTypeEnum.MARGIN);
+        }
+
         assetPairs.push(
           new ExchangeAssetPair(
             Assets.getBySymbol(symbolData.baseAsset),
@@ -195,7 +211,8 @@ export class BinanceExchange extends Exchange {
             amountMinimum,
             amountMaximum,
             priceMinimum,
-            priceMaximum
+            priceMaximum,
+            tradingTypes
           )
         );
 
