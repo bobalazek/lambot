@@ -53,29 +53,10 @@ export class Session implements SessionInterface {
     this.startedAt = Date.now();
   }
 
-  /**
-   * Add a asset to this session.
-   *
-   * @param asset Which is the base asset we want to do all the trades with?
-   * @param assetPairs Which pairs do we want to trade with?
-   * @param strategy What strategy do we want to use?
-   */
-  addAsset(
-    asset: Asset,
-    assetPairs: AssetPair[],
-    strategy: Strategy,
-    tradingType: SessionAssetTradingTypeEnum
-  ) {
-    this.assets.push(
-      new SessionAsset(
-        asset,
-        assetPairs,
-        strategy,
-        tradingType
-      )
-    );
+  addAsset(sessionAsset: SessionAsset) {
+    this.assets.push(sessionAsset);
 
-    assetPairs.forEach((assetPair) => {
+    sessionAsset.assetPairs.forEach((assetPair) => {
       this.exchange.assetPairPrices.set(
         assetPair.toString(this.exchange.assetPairConverter),
         new ExchangeAssetPrice()
@@ -100,17 +81,7 @@ export class Session implements SessionInterface {
     return {
       id: this.id,
       assets: this.assets.map((sessionAsset) => {
-        return { // TODO: move that into SessionAsset.ts, toExport()
-          asset: sessionAsset.asset.toString(),
-          assetPairs: sessionAsset.assetPairs.map((assetPair) => {
-            return [
-              assetPair.assetBase.toString(),
-              assetPair.assetQuote.toString(),
-            ];
-          }),
-          strategy: sessionAsset.strategy.toExport(),
-          tradingType: sessionAsset.tradingType,
-        };
+        return sessionAsset.toExport();
       }),
       status: this.status,
       createdAt: this.createdAt,
@@ -140,17 +111,8 @@ export class Session implements SessionInterface {
     );
 
     sessionData.assets.forEach((assetData) => {
-      session.addAsset(
-        Assets.getBySymbol(assetData.asset),
-        assetData.assetPairs.map((assetPair) => {
-          return new AssetPair(
-            Assets.getBySymbol(assetPair[0]),
-            Assets.getBySymbol(assetPair[1])
-          );
-        }),
-        Strategy.fromImport(assetData.strategy),
-        assetData.tradingType
-      );
+      const sessionAsset = SessionAsset.fromImport(assetData);
+      session.addAsset(sessionAsset);
     });
 
     session.status = sessionData.status;

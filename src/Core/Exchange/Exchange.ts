@@ -10,12 +10,12 @@ import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from './ExchangeOrderFee
 import { ExchangesFactory } from './ExchangesFactory';
 import { ExchangeValidator } from './ExchangeValidator';
 import { Session } from '../Session/Session';
+import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeOrder } from './ExchangeOrder';
 import { Trader } from '../Trader/Trader';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
-import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 
 export interface ExchangeInterface {
   key: string;

@@ -1,5 +1,6 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
+import { Assets } from '../Asset/Assets';
 import { Strategy } from '../Strategy/Strategy';
 
 export interface SessionAssetInterface {
@@ -9,6 +10,7 @@ export interface SessionAssetInterface {
   tradingType: SessionAssetTradingTypeEnum;
   getAssetPairsSet(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
   toString(assetPairConverter: AssetPairStringConverterInterface): string;
+  toExport(): unknown;
 }
 
 export enum SessionAssetTradingTypeEnum {
@@ -45,6 +47,7 @@ export class SessionAsset implements SessionAssetInterface {
     return assetPairs;
   }
 
+  /***** Export/Import *****/
   toString(assetPairConverter: AssetPairStringConverterInterface): string {
     const assetString = this.asset.toString();
     const assetPairsString = this.assetPairs.map((assetPair) => {
@@ -55,6 +58,34 @@ export class SessionAsset implements SessionAssetInterface {
       'Base asset: ' + assetString +
       '; ' +
       'Asset pairs: ' + assetPairsString
+    );
+  }
+
+  toExport() {
+    return {
+      asset: this.asset.toString(),
+      assetPairs: this.assetPairs.map((assetPair) => {
+        return [
+          assetPair.assetBase.toString(),
+          assetPair.assetQuote.toString(),
+        ];
+      }),
+      strategy: this.strategy.toExport(),
+      tradingType: this.tradingType,
+    };
+  }
+
+  static fromImport(data: any): SessionAsset {
+    return new SessionAsset(
+      Assets.getBySymbol(data.asset),
+      data.assetPairs.map((assetPair) => {
+        return new AssetPair(
+          Assets.getBySymbol(assetPair[0]),
+          Assets.getBySymbol(assetPair[1])
+        );
+      }),
+      Strategy.fromImport(data.strategy),
+      data.tradingType
     );
   }
 }

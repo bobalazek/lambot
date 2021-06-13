@@ -62,12 +62,7 @@ export class SessionManager {
     const session = new Session(id, exchange, config);
 
     sessionAssets.forEach((sessionAsset) => {
-      session.addAsset(
-        sessionAsset.asset,
-        sessionAsset.assetPairs,
-        sessionAsset.strategy,
-        sessionAsset.tradingType
-      );
+      session.addAsset(sessionAsset);
     });
 
     return session;
