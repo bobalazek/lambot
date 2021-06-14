@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 
-import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
@@ -9,14 +8,12 @@ import logger from '../../Utils/Logger';
 export interface TraderInterface {
   session: Session;
   start(): ReturnType<typeof setInterval>;
-  shouldBuy(
-    sessionAsset: SessionAsset,
-    exchangeAssetPrice: ExchangeAssetPriceInterface
-  ): boolean;
-  shouldSell(
-    sessionAsset: SessionAsset,
-    exchangeAssetPrice: ExchangeAssetPriceInterface
-  ): boolean;
+  processCurrentTrades(): Promise<void>;
+  processPotentialTrades(): Promise<void>;
+  shouldBuy(sessionAsset: SessionAsset): boolean;
+  shouldSell(sessionAsset: SessionAsset): boolean;
+  executeBuy(sessionAsset: SessionAsset): boolean;
+  executeSell(sessionAsset: SessionAsset): boolean;
 }
 
 export class Trader implements TraderInterface {
@@ -83,33 +80,19 @@ export class Trader implements TraderInterface {
       });
 
       // Cleanup entries if processing time takes too long
-      if (processingTime > 200) {
+      if (processingTime > updateInterval / 10) {
         session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
           exchangeAssetPrice.cleanupEntries(0.5);
         });
       }
 
       // Actually start checking if we can do any trades
-      await this._processCurrentTrades();
-      await this._processPotentialTrades();
+      await this.processCurrentTrades();
+      await this.processPotentialTrades();
     }, updateInterval);
   }
 
-  shouldBuy(
-    sessionAsset: SessionAsset,
-    exchangeAssetPrice: ExchangeAssetPriceInterface
-  ): boolean {
-    return false;
-  }
-
-  shouldSell(
-    sessionAsset: SessionAsset,
-    exchangeAssetPrice: ExchangeAssetPriceInterface
-  ): boolean {
-    return false;
-  }
-
-  async _processCurrentTrades(): Promise<void> {
+  async processCurrentTrades(): Promise<void> {
     const {
       session,
     } = this;
@@ -117,31 +100,52 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      const assetPrice = session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
-      if (this.shouldSell(
-        sessionAsset,
-        assetPrice
-      )) {
-        // TODO: trigger sell!
+      if (!this.shouldSell(sessionAsset)) {
+        return;
       }
+
+      this.executeSell(sessionAsset);
     });
   }
 
-  async _processPotentialTrades(): Promise<void> {
-    const {
-      session,
-    } = this;
-
+  async processPotentialTrades(): Promise<void> {
     logger.debug('Starting to process new potential trades ...');
 
-    session.assets.forEach((sessionAsset) => {
-      const assetPrice = session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
-      if (this.shouldBuy(
-        sessionAsset,
-        assetPrice
-      )) {
-        // TODO: trigger buy!
+    // TODO: order them by the biggest relative profit percentage or something?
+    this.session.assets.forEach((sessionAsset) => {
+      if (!this.shouldBuy(sessionAsset)) {
+        return;
       }
+
+      this.executeBuy(sessionAsset);
     });
+  }
+
+  shouldBuy(sessionAsset: SessionAsset): boolean {
+    const assetPrice = this.session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+
+    // TODO
+
+    return false;
+  }
+
+  shouldSell(sessionAsset: SessionAsset): boolean {
+    const assetPrice = this.session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+
+    // TODO
+
+    return false;
+  }
+
+  executeBuy(sessionAsset: SessionAsset): boolean {
+    // TODO
+
+    return false;
+  }
+
+  executeSell(sessionAsset: SessionAsset): boolean {
+    // TODO
+
+    return false;
   }
 }
