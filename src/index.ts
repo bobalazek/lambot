@@ -17,14 +17,14 @@ dotenv.config();
 const program = new Command();
 program
   .version('0.1')
-  .option('-d, --dry-run', 'Are executing a dry run/test mode?', true)
+  .option('-p, --production', 'Does actual trading with your account.', false)
   .requiredOption('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
   .parse(process.argv)
 ;
 const programOptions = program.opts();
 
 // Actual program
-const isTestMode = programOptions.dryRun;
+const isTestMode = !programOptions.production;
 const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
