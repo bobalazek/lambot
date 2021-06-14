@@ -2,6 +2,7 @@ import chalk from 'chalk';
 
 import { Session } from '../Session/Session';
 import logger from '../../Utils/Logger';
+import { ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 
 export interface TraderInterface {
   session: Session;
@@ -79,17 +80,17 @@ export class Trader implements TraderInterface {
       }
 
       // Actually start checking if we can do any orders
-      await this._processPositions();
-      await this._processNewPotentialPositions();
+      await this._processTrades();
+      await this._processNewPotentialTrades();
     }, updateInterval);
   }
 
-  async _processPositions(): Promise<void> {
+  async _processTrades(): Promise<void> {
     const {
       session,
     } = this;
 
-    logger.debug('Starting to process open positions ...');
+    logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
       const {
@@ -102,7 +103,9 @@ export class Trader implements TraderInterface {
       }
 
       trades.forEach((trade) => {
-        // TODO: check if it isn't closed first
+        if (trade.status !== ExchangeTradeStatusEnum.OPEN) {
+          return;
+        }
 
         const assetPrice = session.exchange.assetPairPrices.get(trade.asset.symbol);
         if (trade.shouldSell(
@@ -115,12 +118,12 @@ export class Trader implements TraderInterface {
     });
   }
 
-  async _processNewPotentialPositions(): Promise<void> {
+  async _processNewPotentialTrades(): Promise<void> {
     const {
       session,
     } = this;
 
-    logger.debug('Starting to process new potential positions ...');
+    logger.debug('Starting to process new potential trades ...');
 
     session.assets.forEach((sessionAsset) => {
       const {
@@ -128,7 +131,7 @@ export class Trader implements TraderInterface {
         trades,
       } = sessionAsset;
 
-      if (trades.length >= strategy.maximumPositions) {
+      if (trades.length >= strategy.maximumOpenTrades) {
         return;
       }
 

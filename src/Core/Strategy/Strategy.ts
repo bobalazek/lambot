@@ -3,7 +3,7 @@ export interface StrategyInterface {
   tradeAmount: string;
 
   // How many open trades are we allowed to have for this asset?
-  maximumPositions: number;
+  maximumOpenTrades: number;
 
   // At least how much volume does that asset need so we can consider a buy?
   minimumDailyVolume: number;
@@ -40,7 +40,7 @@ export interface StrategyInterface {
 
 export class Strategy implements StrategyInterface {
   tradeAmount: string;
-  maximumPositions: number;
+  maximumOpenTrades: number;
   minimumDailyVolume: number;
   takeProfitPercentage: number;
   takeProfitTroughTimeoutSeconds: number;
@@ -53,7 +53,7 @@ export class Strategy implements StrategyInterface {
 
   constructor({
     tradeAmount = '1',
-    maximumPositions = 1,
+    maximumOpenTrades = 5,
     minimumDailyVolume = 0,
     takeProfitPercentage = 5,
     takeProfitTroughTimeoutSeconds = 0,
@@ -65,7 +65,7 @@ export class Strategy implements StrategyInterface {
     buyTroughSlipPercentage = 0.25,
   }) {
     this.tradeAmount = tradeAmount;
-    this.maximumPositions = maximumPositions;
+    this.maximumOpenTrades = maximumOpenTrades;
     this.minimumDailyVolume = minimumDailyVolume;
     this.takeProfitPercentage = takeProfitPercentage;
     this.takeProfitTroughTimeoutSeconds = takeProfitTroughTimeoutSeconds;
@@ -81,7 +81,7 @@ export class Strategy implements StrategyInterface {
   toExport() {
     return {
       tradeAmount: this.tradeAmount,
-      maximumPositions: this.maximumPositions,
+      maximumOpenTrades: this.maximumOpenTrades,
       minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
@@ -97,7 +97,7 @@ export class Strategy implements StrategyInterface {
   static fromImport(data: any): Strategy {
     return new Strategy({
       tradeAmount: data.tradeAmount,
-      maximumPositions: data.maximumPositions,
+      maximumOpenTrades: data.maximumOpenTrades,
       minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,

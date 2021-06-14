@@ -26,7 +26,7 @@ For example: You have a base asset USDT and you want to trade with USDTBTC, USSD
 ## TODO
 
 * Jest tests
-* Messaging app (like telegram) notifications when buy/sell/position updates ...
+* Messaging app (like telegram) notifications when buy/sell/trade updates ...
 
 
 ## Disclaimer
