@@ -17,10 +17,6 @@ export interface ExchangeTradeInterface {
   triggerSellPrice: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
-  shouldSell(
-    exchangeAssetPrice: ExchangeAssetPriceInterface,
-    strategy: StrategyInterface
-  ): boolean;
   toExport(): unknown;
 }
 
@@ -64,15 +60,6 @@ export class ExchangeTrade {
     this.type = type;
     this.status = status;
     this.timestamp = timestamp;
-  }
-
-  shouldSell(
-    exchangeAssetPrice: ExchangeAssetPriceInterface,
-    strategy: StrategyInterface
-  ): boolean {
-    // TODO
-
-    return false;
   }
 
   /***** Export/Import *****/

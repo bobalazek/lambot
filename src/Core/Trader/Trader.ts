@@ -1,12 +1,22 @@
 import chalk from 'chalk';
 
+import { ExchangeTrade } from '../Exchange/ExchangeTrade';
+import { ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
 import { Session } from '../Session/Session';
+import { SessionAsset } from '../Session/SessionAsset';
 import logger from '../../Utils/Logger';
-import { ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 
 export interface TraderInterface {
   session: Session;
   start(): ReturnType<typeof setInterval>;
+  shouldBuy(
+    sessionAsset: SessionAsset,
+    exchangeAssetPrice: ExchangeAssetPriceInterface
+  ): boolean;
+  shouldSell(
+    sessionAsset: SessionAsset,
+    exchangeAssetPrice: ExchangeAssetPriceInterface
+  ): boolean;
 }
 
 export class Trader implements TraderInterface {
@@ -79,13 +89,27 @@ export class Trader implements TraderInterface {
         });
       }
 
-      // Actually start checking if we can do any orders
-      await this._processTrades();
-      await this._processNewPotentialTrades();
+      // Actually start checking if we can do any trades
+      await this._processCurrentTrades();
+      await this._processPotentialTrades();
     }, updateInterval);
   }
 
-  async _processTrades(): Promise<void> {
+  shouldBuy(
+    sessionAsset: SessionAsset,
+    exchangeAssetPrice: ExchangeAssetPriceInterface
+  ): boolean {
+    return false;
+  }
+
+  shouldSell(
+    sessionAsset: SessionAsset,
+    exchangeAssetPrice: ExchangeAssetPriceInterface
+  ): boolean {
+    return false;
+  }
+
+  async _processCurrentTrades(): Promise<void> {
     const {
       session,
     } = this;
@@ -93,32 +117,17 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      const {
-        trades,
-        strategy,
-      } = sessionAsset;
-
-      if (trades.length === 0) {
-        return;
+      const assetPrice = session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+      if (this.shouldSell(
+        sessionAsset,
+        assetPrice
+      )) {
+        // TODO: trigger sell!
       }
-
-      trades.forEach((trade) => {
-        if (trade.status !== ExchangeTradeStatusEnum.OPEN) {
-          return;
-        }
-
-        const assetPrice = session.exchange.assetPairPrices.get(trade.asset.symbol);
-        if (trade.shouldSell(
-          assetPrice,
-          strategy
-        )) {
-          // TODO: trigger sell!
-        }
-      });
     });
   }
 
-  async _processNewPotentialTrades(): Promise<void> {
+  async _processPotentialTrades(): Promise<void> {
     const {
       session,
     } = this;
@@ -126,16 +135,13 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process new potential trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      const {
-        strategy,
-        trades,
-      } = sessionAsset;
-
-      if (trades.length >= strategy.maximumOpenTrades) {
-        return;
+      const assetPrice = session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+      if (this.shouldBuy(
+        sessionAsset,
+        assetPrice
+      )) {
+        // TODO: trigger buy!
       }
-
-      // TODO
     });
   }
 }
