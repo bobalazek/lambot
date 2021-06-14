@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 
 import { Session } from '../Session/Session';
-import { ExchangeOrder } from '../Exchange/ExchangeOrder';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
@@ -94,17 +93,19 @@ export class Trader implements TraderInterface {
 
     session.assets.forEach((sessionAsset) => {
       const {
-        positions,
+        trades,
         strategy,
       } = sessionAsset;
 
-      if (positions.length === 0) {
+      if (trades.length === 0) {
         return;
       }
 
-      positions.forEach((position) => {
-        const assetPrice = session.exchange.assetPairPrices.get(position.asset.symbol);
-        if (position.shouldSell(
+      trades.forEach((trade) => {
+        // TODO: check if it isn't closed first
+
+        const assetPrice = session.exchange.assetPairPrices.get(trade.asset.symbol);
+        if (trade.shouldSell(
           assetPrice,
           strategy
         )) {
@@ -124,10 +125,10 @@ export class Trader implements TraderInterface {
     session.assets.forEach((sessionAsset) => {
       const {
         strategy,
-        positions,
+        trades,
       } = sessionAsset;
 
-      if (positions.length >= strategy.maximumPositions) {
+      if (trades.length >= strategy.maximumPositions) {
         return;
       }
 

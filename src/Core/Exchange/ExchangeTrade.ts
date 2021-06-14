@@ -5,12 +5,12 @@ import { StrategyInterface } from '../Strategy/Strategy';
 import { ExchangeAssetPriceInterface } from './ExchangeAssetPrice';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 
-export interface ExchangePositionInterface {
+export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
   asset: Asset;
   assetPair: AssetPair;
-  type: ExchangePositionTypeEnum;
-  status: ExchangePositionStatusEnum;
+  type: ExchangeTradeTypeEnum;
+  status: ExchangeTradeStatusEnum;
   timestamp: number;
   buyPrice: number; // At which price did we buy the asset?
   sellPrice: number; // At which price did we sell the asset?
@@ -24,25 +24,25 @@ export interface ExchangePositionInterface {
   toExport(): unknown;
 }
 
-export enum ExchangePositionTypeEnum {
+export enum ExchangeTradeTypeEnum {
   LONG = 'LONG',
   SHORT = 'SHORT',
   NEUTRAL = 'NEUTRAL',
 }
 
-export enum ExchangePositionStatusEnum {
+export enum ExchangeTradeStatusEnum {
   BUY_PENDING = 'BUY_PENDING',
   OPEN = 'OPEN',
   SELL_PENDING = 'SELL_PENDING',
   CLOSED = 'CLOSED',
 }
 
-export class ExchangePosition {
+export class ExchangeTrade {
   id: string;
   asset: Asset;
   assetPair: AssetPair;
-  type: ExchangePositionTypeEnum;
-  status: ExchangePositionStatusEnum;
+  type: ExchangeTradeTypeEnum;
+  status: ExchangeTradeStatusEnum;
   timestamp: number;
   buyPrice: number;
   sellPrice: number;
@@ -54,8 +54,8 @@ export class ExchangePosition {
     id: string,
     asset: Asset,
     assetPair: AssetPair,
-    type: ExchangePositionTypeEnum,
-    status: ExchangePositionStatusEnum,
+    type: ExchangeTradeTypeEnum,
+    status: ExchangeTradeStatusEnum,
     timestamp: number = Date.now()
   ) {
     this.id = id;
@@ -92,8 +92,8 @@ export class ExchangePosition {
     };
   }
 
-  static fromImport(data: any): ExchangePosition {
-    const exchangePosition = new ExchangePosition(
+  static fromImport(data: any): ExchangeTrade {
+    const exchangeTrade = new ExchangeTrade(
       data.id,
       Assets.getBySymbol(data.asset),
       data.type,
@@ -102,25 +102,25 @@ export class ExchangePosition {
     );
 
     if (data.buyPrice) {
-      exchangePosition.buyPrice = data.buyPrice;
+      exchangeTrade.buyPrice = data.buyPrice;
     }
 
     if (data.sellPrice) {
-      exchangePosition.sellPrice = data.sellPrice;
+      exchangeTrade.sellPrice = data.sellPrice;
     }
 
     if (data.triggerSellPrice) {
-      exchangePosition.sellPrice = data.triggerSellPrice;
+      exchangeTrade.sellPrice = data.triggerSellPrice;
     }
 
     if (data.buyOrder) {
-      exchangePosition.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
+      exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
     }
 
     if (data.sellOrder) {
-      exchangePosition.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
+      exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
     }
 
-    return exchangePosition;
+    return exchangeTrade;
   }
 }

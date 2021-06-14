@@ -1,7 +1,7 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
 import { Assets } from '../Asset/Assets';
-import { ExchangePosition } from '../Exchange/ExchangePosition';
+import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { Strategy } from '../Strategy/Strategy';
 
 export interface SessionAssetInterface {
@@ -9,7 +9,7 @@ export interface SessionAssetInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
   tradingType: SessionAssetTradingTypeEnum;
-  positions: ExchangePosition[];
+  trades: ExchangeTrade[];
   getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
   toString(assetPairConverter: AssetPairStringConverterInterface): string;
   toExport(): unknown;
@@ -26,7 +26,7 @@ export class SessionAsset implements SessionAssetInterface {
   assetPairs: AssetPair[];
   strategy: Strategy;
   tradingType: SessionAssetTradingTypeEnum;
-  positions: ExchangePosition[];
+  trades: ExchangeTrade[];
 
   constructor(
     asset: Asset,
@@ -38,7 +38,7 @@ export class SessionAsset implements SessionAssetInterface {
     this.assetPairs = assetPairs;
     this.strategy = strategy;
     this.tradingType = tradingType;
-    this.positions = [];
+    this.trades = [];
   }
 
   getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string> {

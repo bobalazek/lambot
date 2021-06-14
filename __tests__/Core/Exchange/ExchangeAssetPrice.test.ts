@@ -50,7 +50,7 @@ const entriesPriceTexts = [
   '1.1 🟢 (⛰️ -21.4%; 5s ago) (🕳️ +22.2%; 1s ago)',
 ];
 
-describe('ExchangePosition', () => {
+describe('ExchangeAssetPrice', () => {
   let exchangeAssetPrice: ExchangeAssetPrice;
 
   beforeEach(() => {
