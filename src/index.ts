@@ -77,7 +77,7 @@ const sessionId = programOptions.session;
         new AssetPair(Assets.EGLD, Assets.USDT),
       ],
       new Strategy({
-        orderAmount: '15',
+        tradeAmount: '15',
       }),
       SessionAssetTradingTypeEnum.SPOT
     ),

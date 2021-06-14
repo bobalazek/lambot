@@ -75,19 +75,19 @@ export class ExchangeValidator {
 
         // Check if our order amount is too small or big
         const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
-        const orderAmount = parseFloat(sessionAsset.strategy.orderAmount);
-        if (parseFloat(exhangeAssetPair.amountMaximum) < orderAmount) {
+        const tradeAmount = parseFloat(sessionAsset.strategy.tradeAmount);
+        if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
           logger.critical(chalk.red.bold(
             `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.orderAmount}". ` +
+            `You specified: "${sessionAsset.strategy.tradeAmount}". ` +
             `Maximum: "${exhangeAssetPair.amountMaximum}"`
           ));
 
           process.exit(1);
-        } else if (parseFloat(exhangeAssetPair.amountMinimum) > orderAmount) {
+        } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
           logger.critical(chalk.red.bold(
             `The order amount for "${assetPairSymbol}" is too small for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.orderAmount}". ` +
+            `You specified: "${sessionAsset.strategy.tradeAmount}". ` +
             `Minimum: "${exhangeAssetPair.amountMinimum}"`
           ));
 

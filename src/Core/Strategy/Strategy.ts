@@ -1,6 +1,6 @@
 export interface StrategyInterface {
-  // How much of the base asset do we want to use per order?
-  orderAmount: string;
+  // How much of the base asset do we want to use per trade?
+  tradeAmount: string;
 
   // How many open trades are we allowed to have for this asset?
   maximumPositions: number;
@@ -39,7 +39,7 @@ export interface StrategyInterface {
 }
 
 export class Strategy implements StrategyInterface {
-  orderAmount: string;
+  tradeAmount: string;
   maximumPositions: number;
   minimumDailyVolume: number;
   takeProfitPercentage: number;
@@ -52,7 +52,7 @@ export class Strategy implements StrategyInterface {
   buyTroughSlipPercentage: number;
 
   constructor({
-    orderAmount = '1',
+    tradeAmount = '1',
     maximumPositions = 1,
     minimumDailyVolume = 0,
     takeProfitPercentage = 5,
@@ -64,7 +64,7 @@ export class Strategy implements StrategyInterface {
     stopLossTimeoutSeconds = 30,
     buyTroughSlipPercentage = 0.25,
   }) {
-    this.orderAmount = orderAmount;
+    this.tradeAmount = tradeAmount;
     this.maximumPositions = maximumPositions;
     this.minimumDailyVolume = minimumDailyVolume;
     this.takeProfitPercentage = takeProfitPercentage;
@@ -80,7 +80,7 @@ export class Strategy implements StrategyInterface {
   /***** Export/Import *****/
   toExport() {
     return {
-      orderAmount: this.orderAmount,
+      tradeAmount: this.tradeAmount,
       maximumPositions: this.maximumPositions,
       minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
@@ -96,7 +96,7 @@ export class Strategy implements StrategyInterface {
 
   static fromImport(data: any): Strategy {
     return new Strategy({
-      orderAmount: data.orderAmount,
+      tradeAmount: data.tradeAmount,
       maximumPositions: data.maximumPositions,
       minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
