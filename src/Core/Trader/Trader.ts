@@ -1,26 +1,37 @@
 import chalk from 'chalk';
 
-import { ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
+import { AssetPair } from '../Asset/AssetPair';
+import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
+import { ExchangeTrade } from '../Exchange/ExchangeTrade';
+import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
   session: Session;
+  status: TraderStatusEnum;
   start(): ReturnType<typeof setInterval>;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
-  shouldBuy(sessionAsset: SessionAsset): boolean;
-  shouldSell(sessionAsset: SessionAsset): boolean;
-  executeBuy(sessionAsset: SessionAsset): boolean;
-  executeSell(sessionAsset: SessionAsset): boolean;
+  shouldBuy(assetPair: AssetPair): boolean;
+  shouldSell(exchangeTrade: ExchangeTrade): boolean;
+  executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+}
+
+export enum TraderStatusEnum {
+  STOPPED = 'STOPPED',
+  RUNNING = 'RUNNING',
 }
 
 export class Trader implements TraderInterface {
   session: Session;
+  status: TraderStatusEnum;
 
   constructor(session: Session) {
     this.session = session;
+    this.status = TraderStatusEnum.STOPPED;
 
     this.start();
   }
@@ -36,6 +47,8 @@ export class Trader implements TraderInterface {
     const updateInterval = assetPriceUpdateIntervalSeconds * 1000;
     const trendIntervalTime = trendIntervalSeconds * 1000;
     const assetPairs = session.getAssetPairs();
+
+    this.status = TraderStatusEnum.RUNNING;
 
     return setInterval(async () => {
       // Update the current asset prices
@@ -100,52 +113,104 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      if (!this.shouldSell(sessionAsset)) {
-        return;
-      }
+      sessionAsset.trades.forEach((exchangeTrade) => {
+        if (!this.shouldSell(exchangeTrade)) {
+          return;
+        }
 
-      this.executeSell(sessionAsset);
+        this.executeSell(exchangeTrade, sessionAsset);
+      });
     });
   }
 
   async processPotentialTrades(): Promise<void> {
     logger.debug('Starting to process new potential trades ...');
 
-    // TODO: order them by the biggest relative profit percentage or something?
     this.session.assets.forEach((sessionAsset) => {
-      if (!this.shouldBuy(sessionAsset)) {
-        return;
-      }
+      const assetPairs = sessionAsset.assetPairs;
 
-      this.executeBuy(sessionAsset);
+      // TODO: order them (assetPairs) by the biggest relative profit percentage or something?
+      // So we can prioritize the assets we may buy sooner.
+
+      assetPairs.forEach((assetPair) => {
+        if (!this.shouldBuy(assetPair)) {
+          return;
+        }
+
+        this.executeBuy(assetPair, sessionAsset);
+      });
     });
   }
 
-  shouldBuy(sessionAsset: SessionAsset): boolean {
-    const assetPrice = this.session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+  shouldBuy(assetPair: AssetPair): boolean {
+    const assetPrice = this.session.exchange.assetPairPrices.get(
+      assetPair.toString(this.session.exchange.assetPairConverter)
+    );
 
     // TODO
 
     return false;
   }
 
-  shouldSell(sessionAsset: SessionAsset): boolean {
-    const assetPrice = this.session.exchange.assetPairPrices.get(sessionAsset.asset.symbol);
+  shouldSell(exchangeTrade: ExchangeTrade): boolean {
+    const assetPrice = this.session.exchange.assetPairPrices.get(
+      exchangeTrade.assetPair.toString(this.session.exchange.assetPairConverter)
+    );
 
     // TODO
 
     return false;
   }
 
-  executeBuy(sessionAsset: SessionAsset): boolean {
-    // TODO
+  async executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const order = this._createNewOrder(
+      assetPair,
+      sessionAsset,
+      ExchangeOrderSideEnum.BUY,
+      sessionAsset.strategy.tradeAmount
+    );
 
-    return false;
+    // TODO: send to exchange
+
+    return order;
   }
 
-  executeSell(sessionAsset: SessionAsset): boolean {
-    // TODO
+  async executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const order = this._createNewOrder(
+      exchangeTrade.assetPair,
+      sessionAsset,
+      ExchangeOrderSideEnum.SELL,
+      '1' // TODO
+    );
 
-    return false;
+    // TODO: send to exchange
+
+    return order;
+  }
+
+  _createNewOrder(
+    assetPair: AssetPair,
+    sessionAsset: SessionAsset,
+    orderSide: ExchangeOrderSideEnum,
+    amount: string
+  ) {
+    const {
+      session,
+    } = this;
+
+    const now = Date.now();
+    const assetPairSymbol = assetPair.toString(session.exchange.assetPairConverter);
+    const id = this.session.id + '_' + assetPairSymbol + '_' + orderSide + '_' + now;
+    const accountType = session.exchange.getAccountType(sessionAsset.tradingType);
+
+    return new ExchangeOrder(
+      id,
+      assetPair,
+      orderSide,
+      amount,
+      null,
+      ExchangeOrderTypeEnum.MARKET,
+      accountType
+    );
   }
 }

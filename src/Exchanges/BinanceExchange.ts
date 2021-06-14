@@ -12,7 +12,7 @@ import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
 import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
-import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
+import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
 import { Session } from '../Core/Session/Session';
 import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
 import logger from '../Utils/Logger';
@@ -113,6 +113,52 @@ export class BinanceExchange extends Exchange {
       }
 
       return orders;
+    } catch (error) {
+      logger.error(chalk.red(error.response.data.msg));
+
+      throw new Error(error);
+    }
+  }
+
+  async addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
+    logger.debug(chalk.italic(
+      'Adding account order ...'
+    ));
+
+    if (type !== ExchangeAccountTypeEnum.SPOT) {
+      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
+
+      process.exit(1);
+    }
+
+    try {
+      const orderSymbol = order.assetPair.toString(this.assetPairConverter);
+      const orderType = order.type;
+
+      const data: any = {
+        symbol: orderSymbol,
+        side: order.side,
+        type: orderType,
+        newClientOrderId: order.id,
+      };
+
+      if (orderType === ExchangeOrderTypeEnum.LIMIT) {
+        data.quantity = order.amount;
+        data.price = order.price;
+        data.timeInForce = ExchangeOrderTimeInForceEnum.GTC;
+      } else if (orderType === ExchangeOrderTypeEnum.MARKET) {
+        data.quantity = order.amount;
+      }
+
+      const response = await this._doRequest(
+        RequestMethodEnum.POST,
+        'https://api.binance.com/api/v3/order',
+        data
+      );
+
+      order.exchangeResponse = response.data;
+
+      return order;
     } catch (error) {
       logger.error(chalk.red(error.response.data.msg));
 

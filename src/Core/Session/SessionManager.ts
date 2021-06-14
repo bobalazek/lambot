@@ -6,7 +6,7 @@ import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
 import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
-import { DATA_SESSIONS_DIR } from '../../constants';
+import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
 
 export class SessionManager {
