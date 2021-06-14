@@ -80,12 +80,12 @@ export class Trader implements TraderInterface {
       }
 
       // Actually start checking if we can do any orders
-      await this._processOpenPositions();
+      await this._processPositions();
       await this._processNewPotentialPositions();
     }, updateInterval);
   }
 
-  async _processOpenPositions(): Promise<void> {
+  async _processPositions(): Promise<void> {
     const {
       session,
     } = this;
@@ -94,17 +94,17 @@ export class Trader implements TraderInterface {
 
     session.assets.forEach((sessionAsset) => {
       const {
-        openPositions,
+        positions,
         strategy,
       } = sessionAsset;
 
-      if (openPositions.length === 0) {
+      if (positions.length === 0) {
         return;
       }
 
-      openPositions.forEach((openPosition) => {
-        const assetPrice = session.exchange.assetPairPrices.get(openPosition.asset.symbol);
-        if (openPosition.shouldSell(
+      positions.forEach((position) => {
+        const assetPrice = session.exchange.assetPairPrices.get(position.asset.symbol);
+        if (position.shouldSell(
           assetPrice,
           strategy
         )) {
@@ -124,10 +124,10 @@ export class Trader implements TraderInterface {
     session.assets.forEach((sessionAsset) => {
       const {
         strategy,
-        openPositions,
+        positions,
       } = sessionAsset;
 
-      if (openPositions.length >= strategy.maximumOpenPositions) {
+      if (positions.length >= strategy.maximumPositions) {
         return;
       }
 

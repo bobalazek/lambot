@@ -2,8 +2,8 @@ export interface StrategyInterface {
   // How much of the base asset do we want to use per order?
   orderAmount: string;
 
-  // How many open positions are we allowed to have for this asset?
-  maximumOpenPositions: number;
+  // How many open trades are we allowed to have for this asset?
+  maximumPositions: number;
 
   // At least how much volume does that asset need so we can consider a buy?
   minimumDailyVolume: number;
@@ -40,7 +40,7 @@ export interface StrategyInterface {
 
 export class Strategy implements StrategyInterface {
   orderAmount: string;
-  maximumOpenPositions: number;
+  maximumPositions: number;
   minimumDailyVolume: number;
   takeProfitPercentage: number;
   takeProfitTroughTimeoutSeconds: number;
@@ -53,7 +53,7 @@ export class Strategy implements StrategyInterface {
 
   constructor({
     orderAmount = '1',
-    maximumOpenPositions = 1,
+    maximumPositions = 1,
     minimumDailyVolume = 0,
     takeProfitPercentage = 5,
     takeProfitTroughTimeoutSeconds = 0,
@@ -65,7 +65,7 @@ export class Strategy implements StrategyInterface {
     buyTroughSlipPercentage = 0.25,
   }) {
     this.orderAmount = orderAmount;
-    this.maximumOpenPositions = maximumOpenPositions;
+    this.maximumPositions = maximumPositions;
     this.minimumDailyVolume = minimumDailyVolume;
     this.takeProfitPercentage = takeProfitPercentage;
     this.takeProfitTroughTimeoutSeconds = takeProfitTroughTimeoutSeconds;
@@ -81,7 +81,7 @@ export class Strategy implements StrategyInterface {
   toExport() {
     return {
       orderAmount: this.orderAmount,
-      maximumOpenPositions: this.maximumOpenPositions,
+      maximumPositions: this.maximumPositions,
       minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
@@ -97,7 +97,7 @@ export class Strategy implements StrategyInterface {
   static fromImport(data: any): Strategy {
     return new Strategy({
       orderAmount: data.orderAmount,
-      maximumOpenPositions: data.maximumOpenPositions,
+      maximumPositions: data.maximumPositions,
       minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,
