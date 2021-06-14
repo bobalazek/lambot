@@ -1,4 +1,4 @@
-export interface StrategyInterface {
+export interface StrategyParametersInterface {
   // How much of the base asset do we want to use per trade?
   tradeAmount: string;
 
@@ -31,10 +31,22 @@ export interface StrategyInterface {
   // Usefull with suden large troughs!
   stopLossTimeoutSeconds: number;
 
+  // Should we enable trailing stop loss?
+  // This will activate AFTER you hit your initial takeProfitPercentage.
+  // After that, the stop loss will then be set as to the takeProfit percentage.
+  trailingStopLossEnabled: boolean;
+
+  // How much percentage in profit do we need to increase,
+  // relative to the CURRENT stopLossPercentage,
+  // before we increase the stop loss again (by that same value)?
+  trailingStopLossThresholdPercentage: number;
+
   // How much percentage can the price rise after a trough, until we want to trigger a buy order?
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
   buyTroughSlipPercentage: number;
+}
 
+export interface StrategyInterface extends StrategyParametersInterface {
   toExport(): unknown;
 }
 
@@ -49,32 +61,24 @@ export class Strategy implements StrategyInterface {
   stopLossEnabled: boolean;
   stopLossPercentage: number;
   stopLossTimeoutSeconds: number;
+  trailingStopLossEnabled: boolean;
+  trailingStopLossThresholdPercentage: number;
   buyTroughSlipPercentage: number;
 
-  constructor({
-    tradeAmount = '1',
-    maximumOpenTrades = 5,
-    minimumDailyVolume = 0,
-    takeProfitPercentage = 5,
-    takeProfitTroughTimeoutSeconds = 0,
-    trailingTakeProfitEnabled = true,
-    trailingTakeProfitSlipPercentage = 0.25,
-    stopLossEnabled = true,
-    stopLossPercentage = 3,
-    stopLossTimeoutSeconds = 30,
-    buyTroughSlipPercentage = 0.25,
-  }) {
-    this.tradeAmount = tradeAmount;
-    this.maximumOpenTrades = maximumOpenTrades;
-    this.minimumDailyVolume = minimumDailyVolume;
-    this.takeProfitPercentage = takeProfitPercentage;
-    this.takeProfitTroughTimeoutSeconds = takeProfitTroughTimeoutSeconds;
-    this.trailingTakeProfitEnabled = trailingTakeProfitEnabled;
-    this.trailingTakeProfitSlipPercentage = trailingTakeProfitSlipPercentage;
-    this.stopLossEnabled = stopLossEnabled;
-    this.stopLossPercentage = stopLossPercentage;
-    this.stopLossTimeoutSeconds = stopLossTimeoutSeconds;
-    this.buyTroughSlipPercentage = buyTroughSlipPercentage;
+  constructor(parameters: StrategyParametersInterface) {
+    this.tradeAmount = parameters.tradeAmount;
+    this.maximumOpenTrades = parameters.maximumOpenTrades;
+    this.minimumDailyVolume = parameters.minimumDailyVolume;
+    this.takeProfitPercentage = parameters.takeProfitPercentage;
+    this.takeProfitTroughTimeoutSeconds = parameters.takeProfitTroughTimeoutSeconds;
+    this.trailingTakeProfitEnabled = parameters.trailingTakeProfitEnabled;
+    this.trailingTakeProfitSlipPercentage = parameters.trailingTakeProfitSlipPercentage;
+    this.stopLossEnabled = parameters.stopLossEnabled;
+    this.stopLossPercentage = parameters.stopLossPercentage;
+    this.stopLossTimeoutSeconds = parameters.stopLossTimeoutSeconds;
+    this.trailingStopLossEnabled = parameters.trailingStopLossEnabled;
+    this.trailingStopLossThresholdPercentage = parameters.trailingStopLossThresholdPercentage;
+    this.buyTroughSlipPercentage = parameters.buyTroughSlipPercentage;
   }
 
   /***** Export/Import *****/
@@ -90,6 +94,8 @@ export class Strategy implements StrategyInterface {
       stopLossEnabled: this.stopLossEnabled,
       stopLossPercentage: this.stopLossPercentage,
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
+      trailingStopLossEnabled: this.trailingStopLossEnabled,
+      trailingStopLossThresholdPercentage: this.trailingStopLossThresholdPercentage,
       buyTroughSlipPercentage: this.buyTroughSlipPercentage,
     };
   }
@@ -106,6 +112,8 @@ export class Strategy implements StrategyInterface {
       stopLossEnabled: data.stopLossEnabled,
       stopLossPercentage: data.stopLossPercentage,
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
+      trailingStopLossEnabled: data.trailingStopLossEnabled,
+      trailingStopLossThresholdPercentage: data.trailingStopLossThresholdPercentage,
       buyTroughSlipPercentage: data.buyTroughSlipPercentage,
     });
   }

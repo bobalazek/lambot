@@ -8,7 +8,7 @@ import { ExchangesEnum } from './Core/Exchange/ExchangesFactory';
 import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset, SessionAssetTradingTypeEnum } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
-import { Strategy } from './Core/Strategy/Strategy';
+import { DefaultStrategy } from './Strategies/DefaultStrategy';
 
 // Prepare environment variables
 dotenv.config();
@@ -76,7 +76,7 @@ const sessionId = programOptions.session;
         new AssetPair(Assets.MANA, Assets.USDT),
         new AssetPair(Assets.EGLD, Assets.USDT),
       ],
-      new Strategy({
+      new DefaultStrategy({
         tradeAmount: '15',
       }),
       SessionAssetTradingTypeEnum.SPOT
