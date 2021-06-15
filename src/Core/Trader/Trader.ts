@@ -80,8 +80,6 @@ export class Trader implements TraderInterface {
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
         exchangeAssetPrice.processEntries();
       });
-      const processingTime = Date.now() - now;
-      logger.debug(`Processing took ${processingTime}ms.`);
 
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
@@ -91,16 +89,19 @@ export class Trader implements TraderInterface {
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });
 
+      // Actually start checking if we can do any trades
+      await this.processCurrentTrades();
+      await this.processPotentialTrades();
+
       // Cleanup entries if processing time takes too long
-      if (processingTime > updateInterval / 10) {
+      const processingTime = Date.now() - now;
+      logger.debug(`Processing a tick took ${processingTime}ms.`);
+
+      if (processingTime > updateInterval / 2) {
         session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
           exchangeAssetPrice.cleanupEntries(0.5);
         });
       }
-
-      // Actually start checking if we can do any trades
-      await this.processCurrentTrades();
-      await this.processPotentialTrades();
     }, updateInterval);
   }
 
