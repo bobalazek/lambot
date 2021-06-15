@@ -29,19 +29,19 @@ export interface ExchangeAssetPriceEntryInterface {
   price: string;
 }
 
-export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
-
 export enum ExchangeAssetPriceTrendEnum {
   UPTREND = 'UPTREND',
   DOWNTREND = 'DOWNTREND',
   SIDEWAYS_TREND  = 'SIDEWAYS_TREND',
 }
 
-// TODO: move that somewhere
-let trendIcon = {};
-trendIcon[ExchangeAssetPriceTrendEnum.UPTREND] = '🟢';
-trendIcon[ExchangeAssetPriceTrendEnum.DOWNTREND] = '🔴';
-trendIcon[ExchangeAssetPriceTrendEnum.SIDEWAYS_TREND] = '🔵';
+export const ExchangeAssetTrendIconMap = new Map<string, string>([
+  [ExchangeAssetPriceTrendEnum.UPTREND, '🟢'],
+  [ExchangeAssetPriceTrendEnum.DOWNTREND, '🔴'],
+  [ExchangeAssetPriceTrendEnum.SIDEWAYS_TREND, '🔵'],
+]);
+
+export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
 
 export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entries: ExchangeAssetPriceEntryInterface[];
@@ -117,7 +117,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     const percentages: number[] = [];
     for (let i = 0; i < changesReversed.length; i++) {
       const change = changesReversed[i];
-      if (now - change.timestamp > intervalTime) {
+      if (now - change.timestamp >= intervalTime) {
         break;
       }
 
@@ -302,7 +302,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     if (trend) {
-      string += ` ` + trendIcon[trend];
+      string += ` ` + ExchangeAssetTrendIconMap.get(trend);
     }
 
     if (entryLastPeak) {

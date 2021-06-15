@@ -142,7 +142,7 @@ describe('ExchangeAssetPrice', () => {
 
       jest.spyOn(Date, 'now').mockImplementation(() => now);
 
-      const priceText = exchangeAssetPrice.getPriceText(now, 2000);
+      const priceText = exchangeAssetPrice.getPriceText(now, 1000);
 
       expect(priceText).toBe(entriesPriceTexts[index]);
     });

@@ -73,13 +73,9 @@ export class Trader implements TraderInterface {
           timestamp: now,
           price: assetData.price,
         });
-      }
 
-      // Now that we updated our prices, let's process the entries!
-      logger.info(chalk.bold('Starting to process entries ...'));
-      session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
-        exchangeAssetPrice.processEntries();
-      });
+        assetPrice.processEntries();
+      }
 
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
@@ -127,12 +123,20 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process new potential trades ...');
 
     this.session.assets.forEach((sessionAsset) => {
-      const assetPairs = sessionAsset.assetPairs;
+      const {
+        trades,
+        strategy,
+        assetPairs,
+      } = sessionAsset;
+      if (trades.length >= strategy.maximumOpenTrades) {
 
+      }
+
+      const assetPairsSorted = [...assetPairs];
       // TODO: order them (assetPairs) by the biggest relative profit percentage or something?
       // So we can prioritize the assets we may buy sooner.
 
-      assetPairs.forEach((assetPair) => {
+      assetPairsSorted.forEach((assetPair) => {
         if (!this.shouldBuy(assetPair)) {
           return;
         }
@@ -170,7 +174,8 @@ export class Trader implements TraderInterface {
       sessionAsset.strategy.tradeAmount
     );
 
-    // TODO: send to exchange
+    // TODO: send to exchange, but that should happen in a separate loop
+    // Maybe add nanoevents and trigger it there?
 
     return order;
   }
