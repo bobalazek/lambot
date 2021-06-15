@@ -46,7 +46,7 @@ export class SessionAsset implements SessionAssetInterface {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
-      assetPairs.add(assetPair.toString());
+      assetPairs.add(AssetPair.toKey(assetPair));
     });
 
     return assetPairs;

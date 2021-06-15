@@ -20,7 +20,7 @@ export class Asset implements AssetInterface {
   }
 
   toString(): string {
-    return this.symbol;
+    return this.getKey();
   }
 
   toExport() {

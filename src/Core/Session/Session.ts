@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 
+import { AssetPair } from '../Asset/AssetPair';
 import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPrice } from '../Exchange/ExchangeAssetPrice';
 import { SessionAsset } from './SessionAsset';
@@ -55,7 +56,7 @@ export class Session implements SessionInterface {
 
     sessionAsset.assetPairs.forEach((assetPair) => {
       this.exchange.assetPairPrices.set(
-        assetPair.toString(),
+        AssetPair.toKey(assetPair),
         new ExchangeAssetPrice()
       );
     });

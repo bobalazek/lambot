@@ -1,9 +1,7 @@
-import { Asset } from '../../Asset/Asset';
+import { AssetPairDataInterface } from '../../Asset/AssetPair';
 import { SessionAssetTradingTypeEnum } from '../../Session/SessionAsset';
 
-export interface ExchangeResponseAssetPairInterface {
-  assetBase: Asset;
-  assetQuote: Asset;
+export interface ExchangeResponseAssetPairInterface extends AssetPairDataInterface {
   amountMinimum: string;
   amountMaximum: string;
   priceMinimum: string;
