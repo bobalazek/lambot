@@ -66,58 +66,52 @@ export class BinanceExchange extends Exchange {
 
     // TODO: we will probably want to cache the orders somewhere?
 
-    try {
-      const response = await this._doRequest(
-        RequestMethodEnum.GET,
-        // 'https://api.binance.com/api/v3/allOrders', // rather all? That one then does require the symbol
-        'https://api.binance.com/api/v3/openOrders',
-        {
-          symbol,
-          // limit: 1000, in case we want to use the allOrders endpoint
-          // startTime: 0,
-          // endTime: 0,
-        },
-        true
-      );
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      // 'https://api.binance.com/api/v3/allOrders', // rather all? That one then does require the symbol
+      'https://api.binance.com/api/v3/openOrders',
+      {
+        symbol,
+        // limit: 1000, in case we want to use the allOrders endpoint
+        // startTime: 0,
+        // endTime: 0,
+      },
+      true
+    );
 
-      const orders: ExchangeOrder[] = [];
-      for (let i = 0; i < response.data.length; i++) {
-        const orderData = response.data[i];
+    const orders: ExchangeOrder[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      const orderData = response.data[i];
 
-        if (!this._symbolAssetPairsMap.has(orderData.symbol)) {
-          logger.critical(chalk.red.bold(
-            'Could not find the symbol in the asset pairs array. ' +
-            'Make sure getAssetPairs() was called before.'
-          ));
+      if (!this._symbolAssetPairsMap.has(orderData.symbol)) {
+        logger.critical(chalk.red.bold(
+          'Could not find the symbol in the asset pairs array. ' +
+          'Make sure getAssetPairs() was called before.'
+        ));
 
-          process.exit(1);
-        }
-
-        const assetPairArray = this._symbolAssetPairsMap.get(orderData.symbol);
-
-        orders.push(
-          new ExchangeOrder(
-            orderData.clientOrderId ?? orderData.orderId,
-            new AssetPair(
-              Assets.getBySymbol(assetPairArray[0]),
-              Assets.getBySymbol(assetPairArray[1])
-            ),
-            orderData.side,
-            orderData.origQty,
-            orderData.price,
-            orderData.type,
-            type,
-            orderData
-          )
-        );
+        process.exit(1);
       }
 
-      return orders;
-    } catch (error) {
-      logger.error(chalk.red(error.response.data.msg));
+      const assetPairArray = this._symbolAssetPairsMap.get(orderData.symbol);
 
-      throw new Error(error);
+      orders.push(
+        new ExchangeOrder(
+          orderData.clientOrderId ?? orderData.orderId,
+          new AssetPair(
+            Assets.getBySymbol(assetPairArray[0]),
+            Assets.getBySymbol(assetPairArray[1])
+          ),
+          orderData.side,
+          orderData.origQty,
+          orderData.price,
+          orderData.type,
+          type,
+          orderData
+        )
+      );
     }
+
+    return orders;
   }
 
   async addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
@@ -131,39 +125,33 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
-    try {
-      const orderSymbol = order.assetPair.toString(this.assetPairConverter);
-      const orderType = order.type;
+    const orderSymbol = order.assetPair.toExchangeSymbolString(this.assetPairConverter);
+    const orderType = order.type;
 
-      const data: any = {
-        symbol: orderSymbol,
-        side: order.side,
-        type: orderType,
-        newClientOrderId: order.id,
-      };
+    const data: any = {
+      symbol: orderSymbol,
+      side: order.side,
+      type: orderType,
+      newClientOrderId: order.id,
+    };
 
-      if (orderType === ExchangeOrderTypeEnum.LIMIT) {
-        data.quantity = order.amount;
-        data.price = order.price;
-        data.timeInForce = ExchangeOrderTimeInForceEnum.GTC;
-      } else if (orderType === ExchangeOrderTypeEnum.MARKET) {
-        data.quantity = order.amount;
-      }
-
-      const response = await this._doRequest(
-        RequestMethodEnum.POST,
-        'https://api.binance.com/api/v3/order',
-        data
-      );
-
-      order.exchangeResponse = response.data;
-
-      return order;
-    } catch (error) {
-      logger.error(chalk.red(error.response.data.msg));
-
-      throw new Error(error);
+    if (orderType === ExchangeOrderTypeEnum.LIMIT) {
+      data.quantity = order.amount;
+      data.price = order.price;
+      data.timeInForce = ExchangeOrderTimeInForceEnum.GTC;
+    } else if (orderType === ExchangeOrderTypeEnum.MARKET) {
+      data.quantity = order.amount;
     }
+
+    const response = await this._doRequest(
+      RequestMethodEnum.POST,
+      'https://api.binance.com/api/v3/order',
+      data
+    );
+
+    order.exchangeResponse = response.data;
+
+    return order;
   }
 
   async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]> {
@@ -175,105 +163,93 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
-    try {
-      const response = await this._doRequest(
-        RequestMethodEnum.GET,
-        'https://api.binance.com/api/v3/account',
-        {},
-        true
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/account',
+      {},
+      true
+    );
+
+    const accountAssets: ExchangeAccountAsset[] = [];
+    for (let i = 0; i < response.data.balances.length; i++) {
+      const balanceData = response.data.balances[i];
+
+      accountAssets.push(
+        new ExchangeAccountAsset(
+          Assets.getBySymbol(balanceData.asset),
+          balanceData.free,
+          balanceData.locked
+        )
       );
-
-      const accountAssets: ExchangeAccountAsset[] = [];
-      for (let i = 0; i < response.data.balances.length; i++) {
-        const balanceData = response.data.balances[i];
-
-        accountAssets.push(
-          new ExchangeAccountAsset(
-            Assets.getBySymbol(balanceData.asset),
-            balanceData.free,
-            balanceData.locked
-          )
-        );
-      }
-
-      return accountAssets;
-    } catch (error) {
-      logger.error(chalk.red(error.response.data.msg));
-
-      throw new Error(error);
     }
+
+    return accountAssets;
   }
 
   async getAssetPairs(): Promise<ExchangeAssetPair[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
-    try {
-      const response = await this._doRequest(
-        RequestMethodEnum.GET,
-        'https://api.binance.com/api/v3/exchangeInfo'
-      );
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/exchangeInfo'
+    );
 
-      // TODO: split that into a separate call (getInfo() or something)
-      // and cache those pairs locally when we need them.
+    // TODO: split that into a separate call (getInfo() or something)
+    // and cache those pairs locally when we need them.
 
-      const assetPairs: ExchangeAssetPair[] = [];
-      for (let i = 0; i < response.data.symbols.length; i++) {
-        const symbolData = response.data.symbols[i];
+    const assetPairs: ExchangeAssetPair[] = [];
+    for (let i = 0; i < response.data.symbols.length; i++) {
+      const symbolData = response.data.symbols[i];
 
-        let amountMinimum = '0';
-        let amountMaximum = '0';
-        let priceMinimum = '0';
-        let priceMaximum = '0';
+      let amountMinimum = '0';
+      let amountMaximum = '0';
+      let priceMinimum = '0';
+      let priceMaximum = '0';
 
-        symbolData.filters.forEach((symbolFilterData) => {
-          if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
-            amountMinimum = symbolFilterData.minQty;
-            amountMaximum = symbolFilterData.maxQty;
-          } else if (symbolFilterData.filterType === 'PRICE_FILTER') {
-            priceMinimum = symbolFilterData.minPrice;
-            priceMaximum = symbolFilterData.maxPrice;
-          }
-        });
-
-        let tradingTypes: SessionAssetTradingTypeEnum[] = [];
-        if (
-          symbolData.isSpotTradingAllowed &&
-          symbolData.permissions.includes('SPOT')
-        ) {
-          tradingTypes.push(SessionAssetTradingTypeEnum.SPOT);
+      symbolData.filters.forEach((symbolFilterData) => {
+        if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
+          amountMinimum = symbolFilterData.minQty;
+          amountMaximum = symbolFilterData.maxQty;
+        } else if (symbolFilterData.filterType === 'PRICE_FILTER') {
+          priceMinimum = symbolFilterData.minPrice;
+          priceMaximum = symbolFilterData.maxPrice;
         }
+      });
 
-        if (
-          symbolData.isMarginTradingAllowed &&
-          symbolData.permissions.includes('MARGIN')
-        ) {
-          tradingTypes.push(SessionAssetTradingTypeEnum.MARGIN);
-        }
-
-        assetPairs.push(
-          new ExchangeAssetPair(
-            Assets.getBySymbol(symbolData.baseAsset),
-            Assets.getBySymbol(symbolData.quoteAsset),
-            amountMinimum,
-            amountMaximum,
-            priceMinimum,
-            priceMaximum,
-            tradingTypes
-          )
-        );
-
-        this._symbolAssetPairsMap.set(
-          symbolData.symbol,
-          [symbolData.baseAsset, symbolData.quoteAsset]
-        );
+      let tradingTypes: SessionAssetTradingTypeEnum[] = [];
+      if (
+        symbolData.isSpotTradingAllowed &&
+        symbolData.permissions.includes('SPOT')
+      ) {
+        tradingTypes.push(SessionAssetTradingTypeEnum.SPOT);
       }
 
-      return assetPairs;
-    } catch (error) {
-      logger.error(chalk.red(error.response.data.msg));
+      if (
+        symbolData.isMarginTradingAllowed &&
+        symbolData.permissions.includes('MARGIN')
+      ) {
+        tradingTypes.push(SessionAssetTradingTypeEnum.MARGIN);
+      }
 
-      throw new Error(error);
+      assetPairs.push(
+        new ExchangeAssetPair(
+          Assets.getBySymbol(symbolData.baseAsset),
+          Assets.getBySymbol(symbolData.quoteAsset),
+          amountMinimum,
+          amountMaximum,
+          priceMinimum,
+          priceMaximum,
+          tradingTypes
+        )
+      );
+
+      this._symbolAssetPairsMap.set(
+        symbolData.symbol,
+        [symbolData.baseAsset, symbolData.quoteAsset]
+      );
     }
+
+    return assetPairs;
   }
 
   async getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]> {
@@ -281,30 +257,24 @@ export class BinanceExchange extends Exchange {
       'Fetching asset prices ...'
     ));
 
-    try {
-      const response = await this._doRequest(
-        RequestMethodEnum.GET,
-        'https://api.binance.com/api/v3/ticker/price'
-      );
-      const now = Date.now();
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/ticker/price'
+    );
+    const now = Date.now();
 
-      const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
-      for (let i = 0; i < response.data.length; i++) {
-        const assetData = response.data[i];
+    const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      const assetData = response.data[i];
 
-        assetPrices.push({
-          symbol: assetData.symbol,
-          price: assetData.price,
-          timestamp: now,
-        });
-      }
-
-      return assetPrices;
-    } catch (error) {
-      logger.error(chalk.red(error.response.data.msg));
-
-      throw new Error(error);
+      assetPrices.push({
+        symbol: assetData.symbol,
+        price: assetData.price,
+        timestamp: now,
+      });
     }
+
+    return assetPrices;
   }
 
   async getAssetFees(

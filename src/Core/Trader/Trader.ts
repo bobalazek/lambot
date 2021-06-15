@@ -144,7 +144,7 @@ export class Trader implements TraderInterface {
 
   shouldBuy(assetPair: AssetPair): boolean {
     const assetPrice = this.session.exchange.assetPairPrices.get(
-      assetPair.toString(this.session.exchange.assetPairConverter)
+      assetPair.toString()
     );
 
     // TODO
@@ -154,7 +154,7 @@ export class Trader implements TraderInterface {
 
   shouldSell(exchangeTrade: ExchangeTrade): boolean {
     const assetPrice = this.session.exchange.assetPairPrices.get(
-      exchangeTrade.assetPair.toString(this.session.exchange.assetPairConverter)
+      exchangeTrade.assetPair.toString()
     );
 
     // TODO
@@ -180,7 +180,7 @@ export class Trader implements TraderInterface {
       exchangeTrade.assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
-      '1' // TODO
+      sessionAsset.strategy.tradeAmount
     );
 
     // TODO: send to exchange
@@ -199,7 +199,7 @@ export class Trader implements TraderInterface {
     } = this;
 
     const now = Date.now();
-    const assetPairSymbol = assetPair.toString(session.exchange.assetPairConverter);
+    const assetPairSymbol = assetPair.toString();
     const id = this.session.id + '_' + assetPairSymbol + '_' + orderSide + '_' + now;
     const accountType = session.exchange.getAccountType(sessionAsset.tradingType);
 

@@ -85,7 +85,7 @@ export class Exchange implements ExchangeInterface {
       const exchangeAccount = new ExchangeAccount(exchangeAccountType);
       const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);
       exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
-        const key = exchangeAccountAsset.asset.symbol;
+        const key = exchangeAccountAsset.asset.getKey();
         exchangeAccount.assets.set(key, exchangeAccountAsset);
       });
       this.accounts.set(exchangeAccountType, exchangeAccount);
@@ -97,7 +97,7 @@ export class Exchange implements ExchangeInterface {
     ));
     session.assets.forEach((sessionAsset) => {
       logger.info(chalk.bold(
-        sessionAsset.toString(this.assetPairConverter)
+        sessionAsset.toString()
       ));
     });
 

@@ -1,6 +1,9 @@
 export interface AssetInterface {
   symbol: string;
   name: string;
+  getKey(): string;
+  toString(): string;
+  toExport(): unknown;
 }
 
 export class Asset implements AssetInterface {
@@ -12,7 +15,25 @@ export class Asset implements AssetInterface {
     this.name = name;
   }
 
+  getKey(): string {
+    return this.symbol;
+  }
+
   toString(): string {
     return this.symbol;
+  }
+
+  toExport() {
+    return {
+      symbol: this.symbol,
+      name: this.name,
+    };
+  }
+
+  static fromImport(data: any): Asset {
+    return new Asset(
+      data.symbol,
+      data.name
+    );
   }
 }

@@ -43,8 +43,17 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this.tradingTypes = tradingTypes;
   }
 
-  toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {
+  toExchangeSymbolString(
+    converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()
+  ): string {
     return converter.convert(this);
+  }
+
+  toString(): string {
+    return (
+      this.assetBase.symbol +
+      this.assetQuote.symbol
+    );
   }
 
   toExport() {

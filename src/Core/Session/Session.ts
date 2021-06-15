@@ -55,7 +55,7 @@ export class Session implements SessionInterface {
 
     sessionAsset.assetPairs.forEach((assetPair) => {
       this.exchange.assetPairPrices.set(
-        assetPair.toString(this.exchange.assetPairConverter),
+        assetPair.toString(),
         new ExchangeAssetPrice()
       );
     });
@@ -65,7 +65,7 @@ export class Session implements SessionInterface {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
-      sessionAsset.getAssetPairs(this.exchange.assetPairConverter).forEach((assetPair) => {
+      sessionAsset.getAssetPairs().forEach((assetPair) => {
         assetPairs.add(assetPair);
       });
     });
@@ -80,7 +80,7 @@ export class Session implements SessionInterface {
       exchange: this.exchange.key,
       createdAt: this.createdAt,
       assets: this.assets.map((sessionAsset) => {
-        return sessionAsset.toString(this.exchange.assetPairConverter);
+        return sessionAsset.toString();
       }),
     });
   }

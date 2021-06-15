@@ -41,29 +41,29 @@ export class SessionAsset implements SessionAssetInterface {
     this.trades = [];
   }
 
-  getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string> {
+  getAssetPairs(): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
-      assetPairs.add(assetPair.toString(assetPairConverter));
+      assetPairs.add(assetPair.toString());
     });
 
     return assetPairs;
   }
 
   /***** Export/Import *****/
-  toString(assetPairConverter: AssetPairStringConverterInterface): string {
+  toString(): string {
     return JSON.stringify({
-      asset: this.asset.toString(),
+      asset: this.asset.toExport(),
       assetPairs: this.assetPairs.map((assetPair) => {
-        return assetPair.toString(assetPairConverter);
+        return assetPair.toExport();
       }),
     });
   }
 
   toExport() {
     return {
-      asset: this.asset.toString(),
+      asset: this.asset.toExport(),
       assetPairs: this.assetPairs.map((assetPair) => {
         return [
           assetPair.assetBase.toString(),
@@ -77,7 +77,7 @@ export class SessionAsset implements SessionAssetInterface {
 
   static fromImport(data: any): SessionAsset {
     return new SessionAsset(
-      Assets.getBySymbol(data.asset),
+      Asset.fromImport(data.asset),
       data.assetPairs.map((assetPair) => {
         return new AssetPair(
           Assets.getBySymbol(assetPair[0]),

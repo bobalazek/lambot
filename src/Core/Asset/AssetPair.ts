@@ -4,7 +4,8 @@ import { Assets } from './Assets';
 export interface AssetPairInterface {
   assetBase: Asset;
   assetQuote: Asset;
-  toString(converter: AssetPairStringConverterInterface): string;
+  toExchangeSymbolString(converter: AssetPairStringConverterInterface): string;
+  toString(): string;
   toExport(): unknown;
 }
 
@@ -21,8 +22,17 @@ export class AssetPair implements AssetPairInterface {
     this.assetQuote = assetQuote;
   }
 
-  toString(converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()): string {
+  toExchangeSymbolString(
+    converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()
+  ): string {
     return converter.convert(this);
+  }
+
+  toString(): string {
+    return (
+      this.assetBase.symbol +
+      this.assetQuote.symbol
+    );
   }
 
   toExport() {

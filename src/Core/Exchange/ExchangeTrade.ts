@@ -66,7 +66,7 @@ export class ExchangeTrade {
   toExport() {
     return {
       id: this.id,
-      asset: this.asset.symbol,
+      asset: this.asset.toExport(),
       assetPair: this.assetPair.toExport(),
       type: this.type,
       status: this.status,
@@ -82,7 +82,7 @@ export class ExchangeTrade {
   static fromImport(data: any): ExchangeTrade {
     const exchangeTrade = new ExchangeTrade(
       data.id,
-      Assets.getBySymbol(data.asset),
+      Asset.fromImport(data.asset),
       data.type,
       data.status,
       data.timestamp

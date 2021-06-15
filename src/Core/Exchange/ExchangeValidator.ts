@@ -41,7 +41,7 @@ export class ExchangeValidator {
 
     const exhangeAssetPairs = await exchange.getAssetPairs();
     const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
-      const key = assetPair.toString(exchange.assetPairConverter);
+      const key = assetPair.toString();
       return [key, assetPair];
     }));
 
@@ -50,7 +50,7 @@ export class ExchangeValidator {
       const {
         tradingType,
       } = sessionAsset;
-      const sessionAssetAssetPairSet = sessionAsset.getAssetPairs(exchange.assetPairConverter);
+      const sessionAssetAssetPairSet = sessionAsset.getAssetPairs();
 
       sessionAssetAssetPairSet.forEach((assetPairSymbol) => {
         // Check if that pair exists on the exchange
