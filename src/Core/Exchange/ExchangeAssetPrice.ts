@@ -37,10 +37,6 @@ export enum ExchangeAssetPriceTrendEnum {
   SIDEWAYS_TREND  = 'SIDEWAYS_TREND',
 }
 
-export interface ExchangeAssetPriceWithSymbolEntryInterface extends ExchangeAssetPriceEntryInterface {
-  symbol: string;
-}
-
 // TODO: move that somewhere
 let trendIcon = {};
 trendIcon[ExchangeAssetPriceTrendEnum.UPTREND] = '🟢';

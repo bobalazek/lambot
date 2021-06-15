@@ -8,12 +8,13 @@ import { AssetPair } from '../Core/Asset/AssetPair';
 import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
-import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from '../Core/Exchange/ExchangeAccountAsset';
-import { ExchangeAssetPair } from '../Core/Exchange/ExchangeAssetPair';
-import { ExchangeAssetPriceWithSymbolEntryInterface } from '../Core/Exchange/ExchangeAssetPrice';
-import { ExchangeOrderFees, ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
+import { ExchangeResponseAccountAsset, ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
+import { ExchangeResponseOrderFees } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
+import { ExchangeResponseAssetPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAsserPriceEntry';
+import { ExchangeResponseAssetPair } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
+import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session } from '../Core/Session/Session';
 import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
 import logger from '../Utils/Logger';
@@ -149,7 +150,7 @@ export class BinanceExchange extends Exchange {
     return order;
   }
 
-  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeAccountAssetInterface[]> {
+  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
     logger.debug(chalk.italic('Fetching account assets ...'));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
@@ -165,12 +166,12 @@ export class BinanceExchange extends Exchange {
       true
     );
 
-    const accountAssets: ExchangeAccountAsset[] = [];
+    const accountAssets: ExchangeResponseAccountAsset[] = [];
     for (let i = 0; i < response.data.balances.length; i++) {
       const balanceData = response.data.balances[i];
 
       accountAssets.push(
-        new ExchangeAccountAsset(
+        new ExchangeResponseAccountAsset(
           Assets.getBySymbol(balanceData.asset),
           balanceData.free,
           balanceData.locked
@@ -181,7 +182,7 @@ export class BinanceExchange extends Exchange {
     return accountAssets;
   }
 
-  async getAssetPairs(): Promise<ExchangeAssetPair[]> {
+  async getAssetPairs(): Promise<ExchangeResponseAssetPair[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
     const response = await this._doRequest(
@@ -192,7 +193,7 @@ export class BinanceExchange extends Exchange {
     // TODO: split that into a separate call (getInfo() or something)
     // and cache those pairs locally when we need them.
 
-    const assetPairs: ExchangeAssetPair[] = [];
+    const assetPairs: ExchangeResponseAssetPair[] = [];
     for (let i = 0; i < response.data.symbols.length; i++) {
       const symbolData = response.data.symbols[i];
 
@@ -227,7 +228,7 @@ export class BinanceExchange extends Exchange {
       }
 
       assetPairs.push(
-        new ExchangeAssetPair(
+        new ExchangeResponseAssetPair(
           Assets.getBySymbol(symbolData.baseAsset),
           Assets.getBySymbol(symbolData.quoteAsset),
           amountMinimum,
@@ -247,7 +248,7 @@ export class BinanceExchange extends Exchange {
     return assetPairs;
   }
 
-  async getAssetPrices(): Promise<ExchangeAssetPriceWithSymbolEntryInterface[]> {
+  async getAssetPrices(): Promise<ExchangeResponseAssetPriceEntryInterface[]> {
     logger.debug(chalk.italic(
       'Fetching asset prices ...'
     ));
@@ -258,7 +259,7 @@ export class BinanceExchange extends Exchange {
     );
     const now = Date.now();
 
-    const assetPrices: ExchangeAssetPriceWithSymbolEntryInterface[] = [];
+    const assetPrices: ExchangeResponseAssetPriceEntryInterface[] = [];
     for (let i = 0; i < response.data.length; i++) {
       const assetData = response.data[i];
 
@@ -276,13 +277,13 @@ export class BinanceExchange extends Exchange {
     symbol: string,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum
-  ): Promise<ExchangeOrderFees> {
+  ): Promise<ExchangeResponseOrderFees> {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
 
-    return new ExchangeOrderFees(0.075);
+    return new ExchangeResponseOrderFees(0.075);
   }
 
   /***** Helpers *****/

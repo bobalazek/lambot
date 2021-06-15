@@ -1,14 +1,12 @@
-import { Asset } from '../Asset/Asset';
+import { Asset } from '../../Asset/Asset';
 
-export interface ExchangeAccountAssetInterface {
+export interface ExchangeResponseAccountAssetInterface {
   asset: Asset;
   amountFree: string;
   amountLocked: string;
 }
 
-export type ExchangeAccountAssetsMap = Map<string, ExchangeAccountAssetInterface>;
-
-export class ExchangeAccountAsset implements ExchangeAccountAssetInterface {
+export class ExchangeResponseAccountAsset implements ExchangeResponseAccountAssetInterface {
   asset: Asset;
   amountFree: string;
   amountLocked: string;

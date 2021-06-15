@@ -1,4 +1,4 @@
-import { ExchangeAccountAssetsMap } from './ExchangeAccountAsset';
+import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeTrade } from './ExchangeTrade';
 
 export interface ExchangeAccountInterface {
@@ -14,6 +14,8 @@ export enum ExchangeAccountTypeEnum {
   MARGIN = 'MARGIN',
   OPTIONS = 'OPTIONS',
 }
+
+export type ExchangeAccountAssetsMap = Map<string, ExchangeResponseAccountAssetInterface>;
 
 export type ExchangeAccountsMap = Map<string, ExchangeAccountInterface>;
 
