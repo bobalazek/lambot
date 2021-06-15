@@ -3,11 +3,11 @@ import chalk from 'chalk';
 import { ApiCredentials } from '../Api/ApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
-import { ExchangeResponseAccountAsset, ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
+import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeAssetPricesMap } from './ExchangeAssetPrice';
-import { ExchangeResponseOrderFees } from './Response/ExchangeResponseOrderFees';
+import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPriceEntryInterface } from './Response/ExchangeResponseAsserPriceEntry';
-import { ExchangeResponseAssetPair, ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
+import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -39,7 +39,7 @@ export interface ExchangeInterface {
     symbol: string,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum
-  ): Promise<ExchangeResponseOrderFees>;
+  ): Promise<ExchangeResponseOrderFeesInterface>;
   getAccountType(accountType: SessionAssetTradingTypeEnum)
   toExport(): unknown;
 }
@@ -124,11 +124,11 @@ export class Exchange implements ExchangeInterface {
     throw new Error('addAccountOrder() not implemented yet.');
   }
 
-  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAsset[]> {
+  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
     throw new Error('getAccountAssets() not implemented yet.');
   }
 
-  async getAssetPairs(): Promise<ExchangeResponseAssetPair[]> {
+  async getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]> {
     throw new Error('getAssetPairs() not implemented yet.');
   }
 
@@ -136,7 +136,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
-  async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFees> {
+  async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 

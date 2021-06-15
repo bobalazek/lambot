@@ -10,10 +10,10 @@ import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
-import { ExchangeResponseAccountAsset, ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
-import { ExchangeResponseOrderFees } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
+import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
+import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAsserPriceEntry';
-import { ExchangeResponseAssetPair } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
+import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session } from '../Core/Session/Session';
 import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
@@ -166,23 +166,21 @@ export class BinanceExchange extends Exchange {
       true
     );
 
-    const accountAssets: ExchangeResponseAccountAsset[] = [];
+    const accountAssets: ExchangeResponseAccountAssetInterface[] = [];
     for (let i = 0; i < response.data.balances.length; i++) {
       const balanceData = response.data.balances[i];
 
-      accountAssets.push(
-        new ExchangeResponseAccountAsset(
-          Assets.getBySymbol(balanceData.asset),
-          balanceData.free,
-          balanceData.locked
-        )
-      );
+      accountAssets.push({
+        asset: Assets.getBySymbol(balanceData.asset),
+        amountFree: balanceData.free,
+        amountLocked: balanceData.locked,
+      });
     }
 
     return accountAssets;
   }
 
-  async getAssetPairs(): Promise<ExchangeResponseAssetPair[]> {
+  async getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
     const response = await this._doRequest(
@@ -193,7 +191,7 @@ export class BinanceExchange extends Exchange {
     // TODO: split that into a separate call (getInfo() or something)
     // and cache those pairs locally when we need them.
 
-    const assetPairs: ExchangeResponseAssetPair[] = [];
+    const assetPairs: ExchangeResponseAssetPairInterface[] = [];
     for (let i = 0; i < response.data.symbols.length; i++) {
       const symbolData = response.data.symbols[i];
 
@@ -227,17 +225,15 @@ export class BinanceExchange extends Exchange {
         tradingTypes.push(SessionAssetTradingTypeEnum.MARGIN);
       }
 
-      assetPairs.push(
-        new ExchangeResponseAssetPair(
-          Assets.getBySymbol(symbolData.baseAsset),
-          Assets.getBySymbol(symbolData.quoteAsset),
-          amountMinimum,
-          amountMaximum,
-          priceMinimum,
-          priceMaximum,
-          tradingTypes
-        )
-      );
+      assetPairs.push({
+        assetBase: Assets.getBySymbol(symbolData.baseAsset),
+        assetQuote: Assets.getBySymbol(symbolData.quoteAsset),
+        amountMinimum,
+        amountMaximum,
+        priceMinimum,
+        priceMaximum,
+        tradingTypes
+      });
 
       this._symbolAssetPairsMap.set(
         symbolData.symbol,
@@ -277,13 +273,15 @@ export class BinanceExchange extends Exchange {
     symbol: string,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum
-  ): Promise<ExchangeResponseOrderFees> {
+  ): Promise<ExchangeResponseOrderFeesInterface> {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
 
-    return new ExchangeResponseOrderFees(0.075);
+    return {
+      amountPercentage: 0.075,
+    };
   }
 
   /***** Helpers *****/
