@@ -4,7 +4,8 @@ import crypto from 'crypto';
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Core/Api/ApiCredentials';
-import { AssetPair, AssetPairStringConverterDefault } from '../Core/Asset/AssetPair';
+import { AssetPair } from '../Core/Asset/AssetPair';
+import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from '../Core/Exchange/ExchangeAccountAsset';
@@ -64,17 +65,11 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
-    // TODO: we will probably want to cache the orders somewhere?
-
     const response = await this._doRequest(
       RequestMethodEnum.GET,
-      // 'https://api.binance.com/api/v3/allOrders', // rather all? That one then does require the symbol
       'https://api.binance.com/api/v3/openOrders',
       {
         symbol,
-        // limit: 1000, in case we want to use the allOrders endpoint
-        // startTime: 0,
-        // endTime: 0,
       },
       true
     );

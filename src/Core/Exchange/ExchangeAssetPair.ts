@@ -1,9 +1,6 @@
 import { Asset } from '../Asset/Asset';
-import {
-  AssetPairInterface,
-  AssetPairStringConverterDefault,
-  AssetPairStringConverterInterface,
-} from '../Asset/AssetPair';
+import { AssetPairInterface } from '../Asset/AssetPair';
+import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { Assets } from '../Asset/Assets';
 import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 
@@ -43,9 +40,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this.tradingTypes = tradingTypes;
   }
 
-  toExchangeSymbolString(
-    converter: AssetPairStringConverterInterface = new AssetPairStringConverterDefault()
-  ): string {
+  toExchangeSymbolString(converter: AssetPairStringConverterInterface): string {
     return converter.convert(this);
   }
 

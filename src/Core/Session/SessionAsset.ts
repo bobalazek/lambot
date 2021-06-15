@@ -1,5 +1,6 @@
 import { Asset } from '../Asset/Asset';
-import { AssetPair, AssetPairStringConverterInterface } from '../Asset/AssetPair';
+import { AssetPair } from '../Asset/AssetPair';
+import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { Assets } from '../Asset/Assets';
 import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { Strategy } from '../Strategy/Strategy';

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { ApiCredentials } from '../Api/ApiCredentials';
-import { AssetPairStringConverterInterface } from '../Asset/AssetPair';
+import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAccountAsset, ExchangeAccountAssetInterface } from './ExchangeAccountAsset';
 import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
