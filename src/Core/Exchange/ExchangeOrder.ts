@@ -1,5 +1,4 @@
 import { AssetPair } from '../Asset/AssetPair';
-import { Assets } from '../Asset/Assets';
 import { ExchangeAccountTypeEnum } from './ExchangeAccount';
 
 export interface ExchangeOrderInterface {

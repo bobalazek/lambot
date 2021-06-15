@@ -1,8 +1,5 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
-import { Assets } from '../Asset/Assets';
-import { StrategyInterface } from '../Strategy/Strategy';
-import { ExchangeAssetPriceInterface } from './ExchangeAssetPrice';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 
 export interface ExchangeTradeInterface {

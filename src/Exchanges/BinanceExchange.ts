@@ -3,7 +3,7 @@ import qs from 'qs';
 import crypto from 'crypto';
 import chalk from 'chalk';
 
-import { ApiCredentials } from '../Core/Api/ApiCredentials';
+import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { AssetPair } from '../Core/Asset/AssetPair';
 import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
@@ -28,7 +28,7 @@ export class BinanceExchange extends Exchange {
   private _timeOffset: number;
   private _symbolAssetPairsMap: Map<string, [string, string]>;
 
-  constructor(apiCredentials: ApiCredentials) {
+  constructor(apiCredentials: ExchangeApiCredentialsInterface) {
     super(
       'binance',
       'Binance',

@@ -1,4 +1,4 @@
-import { ApiCredentials } from '../Api/ApiCredentials';
+import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { Exchange } from './Exchange';
 import { BinanceExchange } from '../../Exchanges/BinanceExchange';
 
@@ -8,7 +8,7 @@ export enum ExchangesEnum {
 }
 
 export class ExchangesFactory {
-  static get(key: ExchangesEnum | string, apiCredentials?: ApiCredentials): Exchange {
+  static get(key: ExchangesEnum | string, apiCredentials?: ExchangeApiCredentialsInterface): Exchange {
     switch (key) {
       case ExchangesEnum.BINANCE:
         if (!apiCredentials) {

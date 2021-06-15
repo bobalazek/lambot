@@ -1,6 +1,5 @@
 import { Strategy } from '../Core/Strategy/Strategy';
 
-
 export class DefaultStrategy extends Strategy {
   constructor({
     tradeAmount = '1',

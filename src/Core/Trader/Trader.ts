@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
-import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { Session } from '../Session/Session';

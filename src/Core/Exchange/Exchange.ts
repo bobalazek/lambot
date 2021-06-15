@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { ApiCredentials } from '../Api/ApiCredentials';
+import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
@@ -22,7 +22,7 @@ import logger from '../../Utils/Logger';
 export interface ExchangeInterface {
   key: string;
   name: string;
-  apiCredentials: ApiCredentials;
+  apiCredentials: ExchangeApiCredentialsInterface;
   assetPairConverter: AssetPairStringConverterInterface;
   accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
@@ -47,7 +47,7 @@ export interface ExchangeInterface {
 export class Exchange implements ExchangeInterface {
   key: string;
   name: string;
-  apiCredentials: ApiCredentials;
+  apiCredentials: ExchangeApiCredentialsInterface;
   assetPairConverter: AssetPairStringConverterInterface;
   assetPairPrices: ExchangeAssetPricesMap;
   accounts: ExchangeAccountsMap;
@@ -57,7 +57,7 @@ export class Exchange implements ExchangeInterface {
   constructor(
     key: string,
     name: string,
-    apiCredentials: ApiCredentials,
+    apiCredentials: ExchangeApiCredentialsInterface,
     assetPairConverter: AssetPairStringConverterInterface
   ) {
     this.key = key;
