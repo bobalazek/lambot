@@ -11,6 +11,7 @@ export interface TraderInterface {
   session: Session;
   status: TraderStatusEnum;
   start(): ReturnType<typeof setInterval>;
+  stop(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
   shouldBuy(assetPair: AssetPair): boolean;
@@ -27,6 +28,7 @@ export enum TraderStatusEnum {
 export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
+  interval: ReturnType<typeof setInterval>;
 
   constructor(session: Session) {
     this.session = session;
@@ -43,13 +45,13 @@ export class Trader implements TraderInterface {
       assetPriceUpdateIntervalSeconds,
       trendIntervalSeconds,
     } = session.config;
-    const updateInterval = assetPriceUpdateIntervalSeconds * 1000;
+    const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
     const trendIntervalTime = trendIntervalSeconds * 1000;
     const assetPairs = session.getAssetPairs();
 
     this.status = TraderStatusEnum.RUNNING;
 
-    return setInterval(async () => {
+    return this.interval = setInterval(async () => {
       // Update the current asset prices
       const assetPrices = await session.exchange.getAssetPrices();
       const now = Date.now();
@@ -93,12 +95,18 @@ export class Trader implements TraderInterface {
       const processingTime = Date.now() - now;
       logger.debug(`Processing a tick took ${processingTime}ms.`);
 
-      if (processingTime > updateInterval / 2) {
+      if (processingTime > updateIntervalTime / 2) {
         session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
           exchangeAssetPrice.cleanupEntries(0.5);
         });
       }
-    }, updateInterval);
+    }, updateIntervalTime);
+  }
+
+  stop() {
+    this.status = TraderStatusEnum.STOPPED;
+
+    clearInterval(this.interval);
   }
 
   async processCurrentTrades(): Promise<void> {
@@ -128,8 +136,9 @@ export class Trader implements TraderInterface {
         strategy,
         assetPairs,
       } = sessionAsset;
-      if (trades.length >= strategy.maximumOpenTrades) {
 
+      if (trades.length >= strategy.maximumOpenTrades) {
+        return;
       }
 
       const assetPairsSorted = [...assetPairs];

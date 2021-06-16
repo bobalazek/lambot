@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { calculatePercentage } from '../../Utils/Helpers';
+import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
@@ -11,7 +11,7 @@ export interface ExchangeAssetPriceInterface {
   getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeInterface[];
-  getTrend(now: number, intervalTime: number): ExchangeAssetPriceTrendEnum;
+  getTrend(now: number, intervalTime: number): ExchangeAssetPriceTrend;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(now: number, trendIntervalTime: number): string;
@@ -29,16 +29,21 @@ export interface ExchangeAssetPriceEntryInterface {
   price: string;
 }
 
-export enum ExchangeAssetPriceTrendEnum {
+export interface ExchangeAssetPriceTrend {
+  status: ExchangeAssetPriceTrendStatusEnum;
+  trendPercentage: number;
+}
+
+export enum ExchangeAssetPriceTrendStatusEnum {
   UPTREND = 'UPTREND',
   DOWNTREND = 'DOWNTREND',
   SIDEWAYS_TREND  = 'SIDEWAYS_TREND',
 }
 
 export const ExchangeAssetTrendIconMap = new Map<string, string>([
-  [ExchangeAssetPriceTrendEnum.UPTREND, '🟢'],
-  [ExchangeAssetPriceTrendEnum.DOWNTREND, '🔴'],
-  [ExchangeAssetPriceTrendEnum.SIDEWAYS_TREND, '🔵'],
+  [ExchangeAssetPriceTrendStatusEnum.UPTREND, '🟢'],
+  [ExchangeAssetPriceTrendStatusEnum.DOWNTREND, '🔴'],
+  [ExchangeAssetPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],
 ]);
 
 export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
@@ -104,7 +109,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   getTrend(
     now: number = Date.now(),
     intervalTime: number = 1000
-  ): ExchangeAssetPriceTrendEnum {
+  ): ExchangeAssetPriceTrend {
     const changes = this.getChanges();
     if (
       !changes ||
@@ -133,13 +138,17 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       return a + b;
     }, 0) / percentagesCount;
 
+    let status = ExchangeAssetPriceTrendStatusEnum.SIDEWAYS_TREND;
     if (trendPercentage > 0) {
-      return ExchangeAssetPriceTrendEnum.UPTREND;
+      status = ExchangeAssetPriceTrendStatusEnum.UPTREND;
     } else if (trendPercentage < 0) {
-      return ExchangeAssetPriceTrendEnum.DOWNTREND;
+      status = ExchangeAssetPriceTrendStatusEnum.DOWNTREND;
     }
 
-    return ExchangeAssetPriceTrendEnum.SIDEWAYS_TREND;
+    return {
+      status,
+      trendPercentage,
+    };
   }
 
   processEntries(): void {
@@ -302,7 +311,12 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     }
 
     if (trend) {
-      string += ` ` + ExchangeAssetTrendIconMap.get(trend);
+      string += ' ' + ExchangeAssetTrendIconMap.get(trend.status);
+
+      const percentage = trend.trendPercentage;
+      if (percentage) {
+        string += ' ' + colorTextByValue(percentage);
+      }
     }
 
     if (entryLastPeak) {
