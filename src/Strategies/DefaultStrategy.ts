@@ -14,7 +14,8 @@ export class DefaultStrategy extends Strategy {
     stopLossTimeoutSeconds = 30,
     trailingStopLossEnabled = false,
     trailingStopLossThresholdPercentage = 0,
-    buyTroughSlipPercentage = 0.25,
+    trailingStopLossThresholdValuePercentage = 0,
+    buyTroughUptrendThresholdPercentage = 0.25,
   }) {
     super({
       tradeAmount,
@@ -29,7 +30,8 @@ export class DefaultStrategy extends Strategy {
       stopLossTimeoutSeconds,
       trailingStopLossEnabled,
       trailingStopLossThresholdPercentage,
-      buyTroughSlipPercentage,
+      trailingStopLossThresholdValuePercentage,
+      buyTroughUptrendThresholdPercentage,
     });
   }
 }

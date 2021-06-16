@@ -38,12 +38,19 @@ export interface StrategyParametersInterface {
 
   // How much percentage in profit do we need to increase,
   // relative to the CURRENT stopLossPercentage,
-  // before we increase the stop loss again (by that same value)?
+  // before we should increase the stop loss again?
   trailingStopLossThresholdPercentage: number;
+
+  // Relates to the option above. It specifies by how much should it increase,
+  // once it reaches that values specified above.
+  // For example, the above value you'd probably set like 0.5 percent,
+  // while this value, you would probably only set to 0.25, so it slowly
+  // follows the above value "from a distance", in case of small dips.
+  trailingStopLossThresholdValuePercentage: number;
 
   // How much percentage can the price rise after a trough, until we want to trigger a buy order?
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
-  buyTroughSlipPercentage: number;
+  buyTroughUptrendThresholdPercentage: number;
 }
 
 export interface StrategyInterface extends StrategyParametersInterface {
@@ -63,7 +70,8 @@ export class Strategy implements StrategyInterface {
   stopLossTimeoutSeconds: number;
   trailingStopLossEnabled: boolean;
   trailingStopLossThresholdPercentage: number;
-  buyTroughSlipPercentage: number;
+  trailingStopLossThresholdValuePercentage: number;
+  buyTroughUptrendThresholdPercentage: number;
 
   constructor(parameters: StrategyParametersInterface) {
     this.tradeAmount = parameters.tradeAmount;
@@ -78,7 +86,8 @@ export class Strategy implements StrategyInterface {
     this.stopLossTimeoutSeconds = parameters.stopLossTimeoutSeconds;
     this.trailingStopLossEnabled = parameters.trailingStopLossEnabled;
     this.trailingStopLossThresholdPercentage = parameters.trailingStopLossThresholdPercentage;
-    this.buyTroughSlipPercentage = parameters.buyTroughSlipPercentage;
+    this.trailingStopLossThresholdValuePercentage = parameters.trailingStopLossThresholdValuePercentage;
+    this.buyTroughUptrendThresholdPercentage = parameters.buyTroughUptrendThresholdPercentage;
   }
 
   /***** Export/Import *****/
@@ -96,7 +105,8 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
       trailingStopLossEnabled: this.trailingStopLossEnabled,
       trailingStopLossThresholdPercentage: this.trailingStopLossThresholdPercentage,
-      buyTroughSlipPercentage: this.buyTroughSlipPercentage,
+      trailingStopLossThresholdValuePercentage: this.trailingStopLossThresholdValuePercentage,
+      buyTroughUptrendThresholdPercentage: this.buyTroughUptrendThresholdPercentage,
     };
   }
 
@@ -114,7 +124,8 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
       trailingStopLossEnabled: data.trailingStopLossEnabled,
       trailingStopLossThresholdPercentage: data.trailingStopLossThresholdPercentage,
-      buyTroughSlipPercentage: data.buyTroughSlipPercentage,
+      trailingStopLossThresholdValuePercentage: data.trailingStopLossThresholdValuePercentage,
+      buyTroughUptrendThresholdPercentage: data.buyTroughUptrendThresholdPercentage,
     });
   }
 }
