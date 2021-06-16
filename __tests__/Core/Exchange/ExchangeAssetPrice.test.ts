@@ -91,10 +91,20 @@ describe('ExchangeAssetPrice', () => {
     expect(lastPeakEntry.timestamp).toBe(15000);
     expect(lastPeakEntry.price).toBe('1.4');
 
+    // Largest peak entry
+    const largestPeakEntry = exchangeAssetPrice.getLargestPeakEntry();
+    expect(largestPeakEntry.timestamp).toBe(10000);
+    expect(largestPeakEntry.price).toBe('1.6');
+
     // Last trough entry
     const lastTroughEntry = exchangeAssetPrice.getLastTroughEntry();
     expect(lastTroughEntry.timestamp).toBe(19000);
     expect(lastTroughEntry.price).toBe('0.9');
+
+    // Largest trough entry
+    const largestTroughEntry = exchangeAssetPrice.getLargestTroughEntry();
+    expect(largestTroughEntry.timestamp).toBe(7000);
+    expect(largestTroughEntry.price).toBe('0.8');
   });
 
   it('should return the correct peak if last item is a peak', () => {
@@ -142,7 +152,7 @@ describe('ExchangeAssetPrice', () => {
 
       jest.spyOn(Date, 'now').mockImplementation(() => now);
 
-      const priceText = exchangeAssetPrice.getPriceText(now, 1000);
+      const priceText = exchangeAssetPrice.getPriceText(now);
 
       expect(priceText).toBe(entriesPriceTexts[index]);
     });

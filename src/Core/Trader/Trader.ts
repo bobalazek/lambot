@@ -1,23 +1,24 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
-import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
+import { calculatePercentage } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
   session: Session;
   status: TraderStatusEnum;
+  startTime: number;
   start(): ReturnType<typeof setInterval>;
   stop(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
-  shouldBuy(assetPair: AssetPair): boolean;
-  shouldSell(exchangeTrade: ExchangeTrade): boolean;
+  shouldBuy(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
+  shouldSell(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
   executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
-  executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
 }
 
 export enum TraderStatusEnum {
@@ -29,10 +30,12 @@ export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
   interval: ReturnType<typeof setInterval>;
+  startTime: number;
 
   constructor(session: Session) {
     this.session = session;
     this.status = TraderStatusEnum.STOPPED;
+    this.startTime = 0;
 
     this.start();
   }
@@ -42,14 +45,15 @@ export class Trader implements TraderInterface {
       session,
     } = this;
     const {
+      warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds,
-      trendIntervalSeconds,
     } = session.config;
+    const warmupPeriodTime = warmupPeriodSeconds * 1000;
     const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
-    const trendIntervalTime = trendIntervalSeconds * 1000;
     const assetPairs = session.getAssetPairs();
 
     this.status = TraderStatusEnum.RUNNING;
+    this.startTime = Date.now();
 
     return this.interval = setInterval(async () => {
       // Update the current asset prices
@@ -82,14 +86,19 @@ export class Trader implements TraderInterface {
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        const priceText = exchangeAssetPrice.getPriceText(now, trendIntervalTime);
+        const priceText = exchangeAssetPrice.getPriceText(now);
 
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });
 
-      // Actually start checking if we can do any trades
-      await this.processCurrentTrades();
-      await this.processPotentialTrades();
+      const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
+      if (warmupPeriodCountdownSeconds < 0) {
+        // Actually start checking if we can do any trades
+        await this.processCurrentTrades();
+        await this.processPotentialTrades();
+      } else {
+        logger.debug(`I am still warming up. ${warmupPeriodCountdownSeconds} seconds to go!`);
+      }
 
       // Cleanup entries if processing time takes too long
       const processingTime = Date.now() - now;
@@ -117,12 +126,12 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      sessionAsset.trades.forEach((exchangeTrade) => {
-        if (!this.shouldSell(exchangeTrade)) {
+      sessionAsset.assetPairs.forEach((assetPair) => {
+        if (!this.shouldSell(assetPair, sessionAsset)) {
           return;
         }
 
-        this.executeSell(exchangeTrade, sessionAsset);
+        this.executeSell(assetPair, sessionAsset);
       });
     });
   }
@@ -132,21 +141,15 @@ export class Trader implements TraderInterface {
 
     this.session.assets.forEach((sessionAsset) => {
       const {
-        trades,
-        strategy,
         assetPairs,
       } = sessionAsset;
-
-      if (trades.length >= strategy.maximumOpenTrades) {
-        return;
-      }
 
       const assetPairsSorted = [...assetPairs];
       // TODO: order them (assetPairs) by the biggest relative profit percentage or something?
       // So we can prioritize the assets we may buy sooner.
 
       assetPairsSorted.forEach((assetPair) => {
-        if (!this.shouldBuy(assetPair)) {
+        if (!this.shouldBuy(assetPair, sessionAsset)) {
           return;
         }
 
@@ -155,19 +158,50 @@ export class Trader implements TraderInterface {
     });
   }
 
-  shouldBuy(assetPair: AssetPair): boolean {
+  shouldBuy(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+    const {
+      trades,
+      strategy,
+    } = sessionAsset;
+
+    if (trades.length >= strategy.maximumOpenTrades) {
+      return false;
+    }
+
     const assetPrice = this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
     );
 
-    // TODO
+    const newestPriceEntry = assetPrice.getNewestEntry();
+    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry();
+    if (
+      !newestPriceEntry ||
+      !largestTroughPriceEntry
+    ) {
+      return null;
+    }
 
-    return false;
+    const percentage = calculatePercentage(
+      parseFloat(newestPriceEntry.price),
+      parseFloat(largestTroughPriceEntry.price)
+    );
+
+    if (percentage < strategy.buyTroughUptrendThresholdPercentage) {
+      return false;
+    }
+
+    const now = Date.now();
+    const largestTroughAgeSeconds = Math.round((now - largestTroughPriceEntry.timestamp) / 1000);
+    if (largestTroughAgeSeconds > strategy.buyTroughUptrendThresholdMaximumAgeSeconds) {
+      return false;
+    }
+
+    return true;
   }
 
-  shouldSell(exchangeTrade: ExchangeTrade): boolean {
+  shouldSell(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
     const assetPrice = this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(exchangeTrade.assetPair)
+      AssetPair.toKey(assetPair)
     );
 
     // TODO
@@ -183,19 +217,27 @@ export class Trader implements TraderInterface {
       sessionAsset.strategy.tradeAmount
     );
 
+    logger.notice(chalk.green.bold(
+      `I am buying "${assetPair.toString()}"!`
+    ));
+
     // TODO: send to exchange, but that should happen in a separate loop
     // Maybe add nanoevents and trigger it there?
 
     return order;
   }
 
-  async executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+  async executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const order = this._createNewOrder(
-      exchangeTrade.assetPair,
+      assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
       sessionAsset.strategy.tradeAmount
     );
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${assetPair.toString()}"!`
+    ));
 
     // TODO: send to exchange
 

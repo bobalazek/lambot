@@ -4,23 +4,22 @@ export class DefaultStrategy extends Strategy {
   constructor({
     tradeAmount = '1',
     maximumOpenTrades = 5,
-    minimumDailyVolume = 0,
     takeProfitPercentage = 5,
     takeProfitTroughTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
-    trailingTakeProfitSlipPercentage = 0.25,
+    trailingTakeProfitSlipPercentage = 0.05,
     stopLossEnabled = true,
     stopLossPercentage = 3,
     stopLossTimeoutSeconds = 30,
     trailingStopLossEnabled = false,
     trailingStopLossThresholdPercentage = 0,
     trailingStopLossThresholdValuePercentage = 0,
-    buyTroughUptrendThresholdPercentage = 0.25,
+    buyTroughUptrendThresholdPercentage = 0.05,
+    buyTroughUptrendThresholdMaximumAgeSeconds = 60,
   }) {
     super({
       tradeAmount,
       maximumOpenTrades,
-      minimumDailyVolume,
       takeProfitPercentage,
       takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled,
@@ -32,6 +31,7 @@ export class DefaultStrategy extends Strategy {
       trailingStopLossThresholdPercentage,
       trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage,
+      buyTroughUptrendThresholdMaximumAgeSeconds,
     });
   }
 }

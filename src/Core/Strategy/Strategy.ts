@@ -5,9 +5,6 @@ export interface StrategyParametersInterface {
   // How many open trades are we allowed to have for this asset?
   maximumOpenTrades: number;
 
-  // At least how much volume does that asset need so we can consider a buy?
-  minimumDailyVolume: number;
-
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
@@ -51,6 +48,9 @@ export interface StrategyParametersInterface {
   // How much percentage can the price rise after a trough, until we want to trigger a buy order?
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
   buyTroughUptrendThresholdPercentage: number;
+
+  // Relates to the setting above. What is the maximum age (in seconds), we would still consider a buy?
+  buyTroughUptrendThresholdMaximumAgeSeconds: number;
 }
 
 export interface StrategyInterface extends StrategyParametersInterface {
@@ -60,7 +60,6 @@ export interface StrategyInterface extends StrategyParametersInterface {
 export class Strategy implements StrategyInterface {
   tradeAmount: string;
   maximumOpenTrades: number;
-  minimumDailyVolume: number;
   takeProfitPercentage: number;
   takeProfitTroughTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
@@ -72,11 +71,11 @@ export class Strategy implements StrategyInterface {
   trailingStopLossThresholdPercentage: number;
   trailingStopLossThresholdValuePercentage: number;
   buyTroughUptrendThresholdPercentage: number;
+  buyTroughUptrendThresholdMaximumAgeSeconds: number;
 
   constructor(parameters: StrategyParametersInterface) {
     this.tradeAmount = parameters.tradeAmount;
     this.maximumOpenTrades = parameters.maximumOpenTrades;
-    this.minimumDailyVolume = parameters.minimumDailyVolume;
     this.takeProfitPercentage = parameters.takeProfitPercentage;
     this.takeProfitTroughTimeoutSeconds = parameters.takeProfitTroughTimeoutSeconds;
     this.trailingTakeProfitEnabled = parameters.trailingTakeProfitEnabled;
@@ -88,6 +87,7 @@ export class Strategy implements StrategyInterface {
     this.trailingStopLossThresholdPercentage = parameters.trailingStopLossThresholdPercentage;
     this.trailingStopLossThresholdValuePercentage = parameters.trailingStopLossThresholdValuePercentage;
     this.buyTroughUptrendThresholdPercentage = parameters.buyTroughUptrendThresholdPercentage;
+    this.buyTroughUptrendThresholdMaximumAgeSeconds = parameters.buyTroughUptrendThresholdMaximumAgeSeconds;
   }
 
   /***** Export/Import *****/
@@ -95,7 +95,6 @@ export class Strategy implements StrategyInterface {
     return {
       tradeAmount: this.tradeAmount,
       maximumOpenTrades: this.maximumOpenTrades,
-      minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
@@ -107,6 +106,7 @@ export class Strategy implements StrategyInterface {
       trailingStopLossThresholdPercentage: this.trailingStopLossThresholdPercentage,
       trailingStopLossThresholdValuePercentage: this.trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage: this.buyTroughUptrendThresholdPercentage,
+      buyTroughUptrendThresholdMaximumAgeSeconds: this.buyTroughUptrendThresholdMaximumAgeSeconds,
     };
   }
 
@@ -114,7 +114,6 @@ export class Strategy implements StrategyInterface {
     return new Strategy({
       tradeAmount: data.tradeAmount,
       maximumOpenTrades: data.maximumOpenTrades,
-      minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,
@@ -126,6 +125,7 @@ export class Strategy implements StrategyInterface {
       trailingStopLossThresholdPercentage: data.trailingStopLossThresholdPercentage,
       trailingStopLossThresholdValuePercentage: data.trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage: data.buyTroughUptrendThresholdPercentage,
+      buyTroughUptrendThresholdMaximumAgeSeconds: data.buyTroughUptrendThresholdMaximumAgeSeconds,
     });
   }
 }
