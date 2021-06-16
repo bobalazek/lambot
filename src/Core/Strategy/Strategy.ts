@@ -2,8 +2,11 @@ export interface StrategyParametersInterface {
   // How much of the base asset do we want to use per trade?
   tradeAmount: string;
 
-  // How many open trades are we allowed to have for this asset?
+  // How many open trades are we allowed to have for this asset? Set -1 for unlimited.
   maximumOpenTrades: number;
+
+  // How many open trades are we allowed to have for this asset AND this asset pair? Set -1 for unlimited.
+  maximumOpenTradesPerAssetPair: number;
 
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
@@ -60,6 +63,7 @@ export interface StrategyInterface extends StrategyParametersInterface {
 export class Strategy implements StrategyInterface {
   tradeAmount: string;
   maximumOpenTrades: number;
+  maximumOpenTradesPerAssetPair: number;
   takeProfitPercentage: number;
   takeProfitTroughTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
@@ -76,6 +80,7 @@ export class Strategy implements StrategyInterface {
   constructor(parameters: StrategyParametersInterface) {
     this.tradeAmount = parameters.tradeAmount;
     this.maximumOpenTrades = parameters.maximumOpenTrades;
+    this.maximumOpenTradesPerAssetPair = parameters.maximumOpenTradesPerAssetPair;
     this.takeProfitPercentage = parameters.takeProfitPercentage;
     this.takeProfitTroughTimeoutSeconds = parameters.takeProfitTroughTimeoutSeconds;
     this.trailingTakeProfitEnabled = parameters.trailingTakeProfitEnabled;
@@ -95,6 +100,7 @@ export class Strategy implements StrategyInterface {
     return {
       tradeAmount: this.tradeAmount,
       maximumOpenTrades: this.maximumOpenTrades,
+      maximumOpenTradesPerAssetPair: this.maximumOpenTradesPerAssetPair,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
@@ -114,6 +120,7 @@ export class Strategy implements StrategyInterface {
     return new Strategy({
       tradeAmount: data.tradeAmount,
       maximumOpenTrades: data.maximumOpenTrades,
+      maximumOpenTradesPerAssetPair: data.maximumOpenTradesPerAssetPair,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,

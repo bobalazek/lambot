@@ -6,6 +6,7 @@ import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
 import { calculatePercentage } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
+import { ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 
 export interface TraderInterface {
   session: Session;
@@ -164,7 +165,25 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
-    if (trades.length >= strategy.maximumOpenTrades) {
+    const openTrades = trades.filter((trade) => {
+      return trade.status === ExchangeTradeStatusEnum.OPEN;
+    });
+
+    if (
+      strategy.maximumOpenTrades !== -1 &&
+      openTrades.length >= strategy.maximumOpenTrades
+    ) {
+      return false;
+    }
+
+    const sessionAssetAssetPairOpenTrades = openTrades.filter((trade) => {
+      return AssetPair.toKey(trade.assetPair) === AssetPair.toKey(assetPair);
+    });
+
+    if (
+      strategy.maximumOpenTradesPerAssetPair !== -1 &&
+      sessionAssetAssetPairOpenTrades.length >= strategy.maximumOpenTradesPerAssetPair
+    ) {
       return false;
     }
 
@@ -210,34 +229,47 @@ export class Trader implements TraderInterface {
   }
 
   async executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const assetPairSymbol = AssetPair.toKey(assetPair);
+
+    logger.notice(chalk.green.bold(
+      `I am buying "${assetPairSymbol}"!`
+    ));
+
+    const now = Date.now();
+    const id = this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.BUY,
-      sessionAsset.strategy.tradeAmount
+      sessionAsset.strategy.tradeAmount,
+      id
     );
-
-    logger.notice(chalk.green.bold(
-      `I am buying "${assetPair.toString()}"!`
-    ));
 
     // TODO: send to exchange, but that should happen in a separate loop
     // Maybe add nanoevents and trigger it there?
+    // Also add it to sessionAsset.trades
 
     return order;
   }
 
   async executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const assetPairSymbol = AssetPair.toKey(assetPair);
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${assetPairSymbol}"!`
+    ));
+
+    // TODO: get that exact trade order, so we can get ID from that one instead.
+
+    const now = Date.now();
+    const id = this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
-      sessionAsset.strategy.tradeAmount
+      sessionAsset.strategy.tradeAmount,
+      id
     );
-
-    logger.notice(chalk.green.bold(
-      `I am selling "${assetPair.toString()}"!`
-    ));
 
     // TODO: send to exchange
 
@@ -248,25 +280,17 @@ export class Trader implements TraderInterface {
     assetPair: AssetPair,
     sessionAsset: SessionAsset,
     orderSide: ExchangeOrderSideEnum,
-    amount: string
+    amount: string,
+    idPrefix: string
   ) {
-    const {
-      session,
-    } = this;
-
-    const now = Date.now();
-    const assetPairSymbol = AssetPair.toKey(assetPair);
-    const id = this.session.id + '_' + assetPairSymbol + '_' + orderSide + '_' + now;
-    const accountType = session.exchange.getAccountType(sessionAsset.tradingType);
-
     return new ExchangeOrder(
-      id,
+      idPrefix + '_' + orderSide,
       assetPair,
       orderSide,
       amount,
       null,
       ExchangeOrderTypeEnum.MARKET,
-      accountType
+      this.session.exchange.getAccountType(sessionAsset.tradingType)
     );
   }
 }

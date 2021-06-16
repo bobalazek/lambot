@@ -4,6 +4,7 @@ export class DefaultStrategy extends Strategy {
   constructor({
     tradeAmount = '1',
     maximumOpenTrades = 5,
+    maximumOpenTradesPerAssetPair = 1,
     takeProfitPercentage = 5,
     takeProfitTroughTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
@@ -20,6 +21,7 @@ export class DefaultStrategy extends Strategy {
     super({
       tradeAmount,
       maximumOpenTrades,
+      maximumOpenTradesPerAssetPair,
       takeProfitPercentage,
       takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled,
