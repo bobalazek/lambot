@@ -16,6 +16,7 @@ export interface TraderInterface {
   stop(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
+  getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
   shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
   shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
   executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
@@ -141,42 +142,44 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process new potential trades ...');
 
     this.session.assets.forEach((sessionAsset) => {
-      const {
-        assetPairs,
-        strategy,
-      } = sessionAsset;
-
-      const maximumAge = strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000;
-
-      // Sort by assets that had the biggest increase since the last largest trough
-      const assetPairsSorted = [...assetPairs].sort((assetPairA, assetPairB) => {
-        const percentageA = this._getLargestTroughPercentage(
-          assetPairA,
-          maximumAge
-        );
-        const percentageB = this._getLargestTroughPercentage(
-          assetPairB,
-          maximumAge
-        );
-
-        if (percentageA === null) {
-          return 1;
-        }
-
-        if (percentageB === null) {
-          return -1;
-        }
-
-        return percentageB - percentageA;
-      });
-
-      assetPairsSorted.forEach((assetPair) => {
+      this.getSortedAssetPairs(sessionAsset).forEach((assetPair) => {
         if (!this.shouldBuyAssetPair(assetPair, sessionAsset)) {
           return;
         }
 
         this.executeBuy(assetPair, sessionAsset);
       });
+    });
+  }
+
+  getSortedAssetPairs(sessionAsset: SessionAsset) {
+    const {
+      assetPairs,
+      strategy,
+    } = sessionAsset;
+
+    const maximumAge = strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000;
+
+    // Sort by assets that had the biggest increase since the last largest trough
+    return [...assetPairs].sort((assetPairA, assetPairB) => {
+      const percentageA = this._getLargestTroughPercentage(
+        assetPairA,
+        maximumAge
+      );
+      const percentageB = this._getLargestTroughPercentage(
+        assetPairB,
+        maximumAge
+      );
+
+      if (percentageA === null) {
+        return 1;
+      }
+
+      if (percentageB === null) {
+        return -1;
+      }
+
+      return percentageB - percentageA;
     });
   }
 
