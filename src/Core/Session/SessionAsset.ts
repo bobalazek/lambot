@@ -55,10 +55,7 @@ export class SessionAsset implements SessionAssetInterface {
 
   getOpenTrades(): ExchangeTrade[] {
     return this.trades.filter((trade) => {
-      return (
-        trade.status === ExchangeTradeStatusEnum.OPEN ||
-        trade.status === ExchangeTradeStatusEnum.BUY_PENDING
-      );
+      return trade.status === ExchangeTradeStatusEnum.OPEN;
     })
   }
 

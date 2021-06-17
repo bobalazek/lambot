@@ -200,13 +200,16 @@ export class Trader implements TraderInterface {
       return false;
     }
 
-    const sessionAssetAssetPairOpenTrades = openTrades.filter((trade) => {
-      return AssetPair.toKey(trade.assetPair) === AssetPair.toKey(assetPair);
+    const sessionAssetAssetPairTrades = openTrades.filter((trade) => {
+      return (
+        trade.status !== ExchangeTradeStatusEnum.CLOSED &&
+        AssetPair.toKey(trade.assetPair) === AssetPair.toKey(assetPair)
+      );
     });
 
     if (
       strategy.maximumOpenTradesPerAssetPair !== -1 &&
-      sessionAssetAssetPairOpenTrades.length >= strategy.maximumOpenTradesPerAssetPair
+      sessionAssetAssetPairTrades.length >= strategy.maximumOpenTradesPerAssetPair
     ) {
       return false;
     }
@@ -217,7 +220,8 @@ export class Trader implements TraderInterface {
     );
 
     if (
-      percentage === null ||
+      percentage === null || // No trough yet
+      percentage === 0 || // That means that we are currently in a trough!
       percentage < strategy.buyTroughUptrendThresholdPercentage
     ) {
       return false;
@@ -228,11 +232,18 @@ export class Trader implements TraderInterface {
 
   shouldSellTrade(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): boolean {
     const {
-      trades,
       strategy,
     } = sessionAsset;
 
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+    const assetPriceNewest = assetPrice.getNewestEntry();
+
+    const buyAssetPrice = exchangeTrade.buyPrice;
+    const currentAssetPrice = parseFloat(assetPriceNewest.price);
+    const currentProfitPercentage = calculatePercentage(
+      buyAssetPrice,
+      currentAssetPrice
+    );
 
     // TODO
 
@@ -242,7 +253,7 @@ export class Trader implements TraderInterface {
   async executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const assetPairSymbol = AssetPair.toKey(assetPair);
     const assetPrice = this._getAssetPairPrice(assetPair);
-    const assetPriveNewest = assetPrice.getNewestEntry();
+    const assetPriceNewest = assetPrice.getNewestEntry();
 
     const now = Date.now();
     const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
@@ -261,12 +272,16 @@ export class Trader implements TraderInterface {
       ExchangeTradeStatusEnum.BUY_PENDING,
       now
     );
-    exchangeTrade.buyPrice = parseFloat(assetPriveNewest.price);
+    exchangeTrade.buyPrice = parseFloat(assetPriceNewest.price);
     exchangeTrade.buyOrder = order;
 
     sessionAsset.trades.push(exchangeTrade);
 
     // TODO: send to exchange
+
+    // Now that we "pseudo" created the trade, change the status to open
+    // That will later happen when you actually buy the asset on the exchange.
+    exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
 
     logger.notice(chalk.green.bold(
       `I am buying "${assetPairSymbol}" at "${exchangeTrade.buyPrice}"!`
@@ -278,7 +293,7 @@ export class Trader implements TraderInterface {
   async executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriveNewest = assetPrice.getNewestEntry();
+    const assetPriceNewest = assetPrice.getNewestEntry();
 
     const order = this._createNewOrder(
       exchangeTrade.assetPair,
@@ -287,7 +302,7 @@ export class Trader implements TraderInterface {
       sessionAsset.strategy.tradeAmount,
       exchangeTrade.id
     );
-    exchangeTrade.sellPrice = parseFloat(assetPriveNewest.price);
+    exchangeTrade.sellPrice = parseFloat(assetPriceNewest.price);
     exchangeTrade.sellOrder = order;
     exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
 
@@ -298,6 +313,10 @@ export class Trader implements TraderInterface {
     );
 
     // TODO: send to exchange
+
+    // Now that we "pseudo" created the trade, change the status to closed
+    // That will later happen when you actually sell the asset on the exchange.
+    exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
     logger.notice(chalk.green.bold(
       `I am selling "${assetPairSymbol}". I made "${profitAmount.toPrecision(3)}" (${colorTextByValue(profitPercentage)}) profit!`
