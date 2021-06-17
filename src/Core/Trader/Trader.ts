@@ -1,12 +1,13 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
+import { ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
+import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
-import { calculatePercentage } from '../../Utils/Helpers';
+import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
-import { ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 
 export interface TraderInterface {
   session: Session;
@@ -18,9 +19,9 @@ export interface TraderInterface {
   processPotentialTrades(): Promise<void>;
   getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
   shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
-  shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
+  shouldSellTrade(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): boolean;
   executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
-  executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
 }
 
 export enum TraderStatusEnum {
@@ -131,12 +132,12 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      sessionAsset.assetPairs.forEach((assetPair) => {
-        if (!this.shouldSellAssetPair(assetPair, sessionAsset)) {
+      sessionAsset.getOpenTrades().forEach((trade) => {
+        if (!this.shouldSellTrade(trade, sessionAsset)) {
           return;
         }
 
-        this.executeSell(assetPair, sessionAsset);
+        this.executeSell(trade, sessionAsset);
       });
     });
   }
@@ -188,13 +189,9 @@ export class Trader implements TraderInterface {
 
   shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
     const {
-      trades,
       strategy,
     } = sessionAsset;
-
-    const openTrades = trades.filter((trade) => {
-      return trade.status === ExchangeTradeStatusEnum.OPEN;
-    });
+    const openTrades = sessionAsset.getOpenTrades();
 
     if (
       strategy.maximumOpenTrades !== -1 &&
@@ -229,15 +226,13 @@ export class Trader implements TraderInterface {
     return true;
   }
 
-  shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+  shouldSellTrade(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): boolean {
     const {
       trades,
       strategy,
     } = sessionAsset;
 
-    const assetPrice = this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(assetPair)
-    );
+    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
 
     // TODO
 
@@ -246,10 +241,8 @@ export class Trader implements TraderInterface {
 
   async executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const assetPairSymbol = AssetPair.toKey(assetPair);
-
-    logger.notice(chalk.green.bold(
-      `I am buying "${assetPairSymbol}"!`
-    ));
+    const assetPrice = this._getAssetPairPrice(assetPair);
+    const assetPriveNewest = assetPrice.getNewestEntry();
 
     const now = Date.now();
     const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
@@ -260,34 +253,55 @@ export class Trader implements TraderInterface {
       sessionAsset.strategy.tradeAmount,
       id
     );
+    const exchangeTrade = new ExchangeTrade(
+      id,
+      assetPair.assetBase,
+      assetPair,
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.BUY_PENDING,
+      now
+    );
+    exchangeTrade.buyPrice = parseFloat(assetPriveNewest.price);
+    exchangeTrade.buyOrder = order;
 
-    // TODO: send to exchange, but that should happen in a separate loop?
-    // Maybe add nanoevents and trigger it there?
-    // Also add it to sessionAsset.trades
+    sessionAsset.trades.push(exchangeTrade);
+
+    // TODO: send to exchange
+
+    logger.notice(chalk.green.bold(
+      `I am buying "${assetPairSymbol}" at "${exchangeTrade.buyPrice}"!`
+    ));
 
     return order;
   }
 
-  async executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
-    const assetPairSymbol = AssetPair.toKey(assetPair);
+  async executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
+    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+    const assetPriveNewest = assetPrice.getNewestEntry();
 
-    logger.notice(chalk.green.bold(
-      `I am selling "${assetPairSymbol}"!`
-    ));
-
-    // TODO: get that exact trade order, so we can get ID from that one instead.
-
-    const now = Date.now();
-    const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
-      assetPair,
+      exchangeTrade.assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
       sessionAsset.strategy.tradeAmount,
-      id
+      exchangeTrade.id
+    );
+    exchangeTrade.sellPrice = parseFloat(assetPriveNewest.price);
+    exchangeTrade.sellOrder = order;
+    exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
+
+    const profitAmount = exchangeTrade.buyPrice - exchangeTrade.sellPrice;
+    const profitPercentage = calculatePercentage(
+      exchangeTrade.buyPrice,
+      exchangeTrade.sellPrice
     );
 
     // TODO: send to exchange
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${assetPairSymbol}". I made "${profitAmount.toPrecision(3)}" (${colorTextByValue(profitPercentage)}) profit!`
+    ));
 
     return order;
   }
@@ -313,10 +327,8 @@ export class Trader implements TraderInterface {
   _getLargestTroughPercentage(
     assetPair: AssetPair,
     maximumAge: number
-  ) {
-    const assetPrice = this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(assetPair)
-    );
+  ): number {
+    const assetPrice = this._getAssetPairPrice(assetPair);
     const newestPriceEntry = assetPrice.getNewestEntry();
     const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
       maximumAge
@@ -331,6 +343,12 @@ export class Trader implements TraderInterface {
     return calculatePercentage(
       parseFloat(newestPriceEntry.price),
       parseFloat(largestTroughPriceEntry.price)
+    );
+  }
+
+  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
+    return this.session.exchange.assetPairPrices.get(
+      AssetPair.toKey(assetPair)
     );
   }
 }

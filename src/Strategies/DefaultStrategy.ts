@@ -5,7 +5,7 @@ export class DefaultStrategy extends Strategy {
     tradeAmount = '15',
     maximumOpenTrades = 5,
     maximumOpenTradesPerAssetPair = 1,
-    takeProfitPercentage = 5,
+    takeProfitPercentage = 1.5,
     takeProfitTroughTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.05,
