@@ -9,14 +9,14 @@ export interface ExchangeAssetPriceInterface {
   getNewestEntry(): ExchangeAssetPriceEntryInterface;
   getLastPeakEntry(): ExchangeAssetPriceEntryInterface;
   getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
-  getLargestPeakEntry(): ExchangeAssetPriceEntryInterface;
-  getLargestTroughEntry(): ExchangeAssetPriceEntryInterface;
+  getLargestPeakEntry(maximumAge: number): ExchangeAssetPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
+  getLargestTroughEntry(maximumAge: number): ExchangeAssetPriceEntryInterface;
   addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
   getChanges(): ExchangeAssetPriceChangeInterface[];
   getNewestChange(): ExchangeAssetPriceChangeInterface;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
-  getPriceText(now: number): string;
+  getPriceText(): string;
 }
 
 export interface ExchangeAssetPriceChangeInterface {
@@ -99,42 +99,56 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries[this._entriesTroughIndexes[this._entriesTroughIndexes.length - 1]];
   }
 
-  getLargestPeakEntry(): ExchangeAssetPriceEntryInterface {
+  getLargestPeakEntry(maximumAge: number = -1): ExchangeAssetPriceEntryInterface {
     if (this._entriesPeakIndexes.length === 0) {
       return null;
     }
 
+    const now = Date.now();
     let largestPeakEntry: ExchangeAssetPriceEntryInterface = null;
-    this._entriesPeakIndexes.forEach((index) => {
-      const entry = this._entries[index];
+    for (let i = this._entriesPeakIndexes.length - 1; i >= 0; i--) {
+      const entry = this._entries[this._entriesPeakIndexes[i]];
+      if (
+        maximumAge !== -1 &&
+        now - entry.timestamp > maximumAge
+      ) {
+        break;
+      }
 
       if (
         !largestPeakEntry ||
-        parseFloat(largestPeakEntry.price) <= parseFloat(entry.price)
+        parseFloat(largestPeakEntry.price) < parseFloat(entry.price)
       ) {
         largestPeakEntry = entry;
       }
-    });
+    }
 
     return largestPeakEntry;
   }
 
-  getLargestTroughEntry(): ExchangeAssetPriceEntryInterface {
+  getLargestTroughEntry(maximumAge: number = -1): ExchangeAssetPriceEntryInterface {
     if (this._entriesTroughIndexes.length === 0) {
       return null;
     }
 
+    const now = Date.now();
     let largestTroughEntry: ExchangeAssetPriceEntryInterface = null;
-    this._entriesTroughIndexes.forEach((index) => {
-      const entry = this._entries[index];
+    for (let i = this._entriesTroughIndexes.length - 1; i >= 0; i--) {
+      const entry = this._entries[this._entriesTroughIndexes[i]];
+      if (
+        maximumAge !== -1 &&
+        now - entry.timestamp > maximumAge
+      ) {
+        break;
+      }
 
       if (
         !largestTroughEntry ||
-        parseFloat(largestTroughEntry.price) >= parseFloat(entry.price)
+        parseFloat(largestTroughEntry.price) > parseFloat(entry.price)
       ) {
         largestTroughEntry = entry;
       }
-    });
+    }
 
     return largestTroughEntry;
   }
@@ -292,12 +306,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this.processEntries();
   }
 
-  getPriceText(now: number = Date.now()): string {
+  getPriceText(): string {
     const entryNewest = this.getNewestEntry();
     if (!entryNewest) {
       return chalk.italic('no price set yet');
     }
 
+    const now = Date.now();
     const entryNewestPrice = entryNewest.price;
     const entryNewestTimeAgo = now - entryNewest.timestamp;
     const entryLastPeak = this.getLastPeakEntry();

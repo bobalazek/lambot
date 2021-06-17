@@ -87,7 +87,7 @@ export class Trader implements TraderInterface {
       // Return the price data
       logger.info(chalk.bold('Asset pair price updates:'));
       session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        const priceText = exchangeAssetPrice.getPriceText(now);
+        const priceText = exchangeAssetPrice.getPriceText();
 
         logger.info(chalk.bold(key) + ' - ' + priceText);
       });
@@ -192,7 +192,9 @@ export class Trader implements TraderInterface {
     );
 
     const newestPriceEntry = assetPrice.getNewestEntry();
-    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry();
+    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
+      strategy.buyTroughUptrendThresholdMaximumAgeRangeSeconds * 1000
+    );
     if (
       !newestPriceEntry ||
       !largestTroughPriceEntry
@@ -236,7 +238,7 @@ export class Trader implements TraderInterface {
     ));
 
     const now = Date.now();
-    const id = this.session.id + '_' + assetPairSymbol + '_' + now;
+    const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,
@@ -245,7 +247,7 @@ export class Trader implements TraderInterface {
       id
     );
 
-    // TODO: send to exchange, but that should happen in a separate loop
+    // TODO: send to exchange, but that should happen in a separate loop?
     // Maybe add nanoevents and trigger it there?
     // Also add it to sessionAsset.trades
 
@@ -262,7 +264,7 @@ export class Trader implements TraderInterface {
     // TODO: get that exact trade order, so we can get ID from that one instead.
 
     const now = Date.now();
-    const id = this.session.id + '_' + assetPairSymbol + '_' + now;
+    const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,

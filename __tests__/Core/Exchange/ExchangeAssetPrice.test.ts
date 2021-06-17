@@ -86,6 +86,8 @@ describe('ExchangeAssetPrice', () => {
     expect(newestEntry.timestamp).toBe(20000);
     expect(newestEntry.price).toBe('1.1');
 
+    jest.spyOn(Date, 'now').mockImplementation(() => newestEntry.timestamp);
+
     // Last peak entry
     const lastPeakEntry = exchangeAssetPrice.getLastPeakEntry();
     expect(lastPeakEntry.timestamp).toBe(15000);
@@ -148,11 +150,9 @@ describe('ExchangeAssetPrice', () => {
 
       const newestEntry = exchangeAssetPrice.getNewestEntry();
 
-      const now = newestEntry.timestamp;
+      jest.spyOn(Date, 'now').mockImplementation(() => newestEntry.timestamp);
 
-      jest.spyOn(Date, 'now').mockImplementation(() => now);
-
-      const priceText = exchangeAssetPrice.getPriceText(now);
+      const priceText = exchangeAssetPrice.getPriceText();
 
       expect(priceText).toBe(entriesPriceTexts[index]);
     });

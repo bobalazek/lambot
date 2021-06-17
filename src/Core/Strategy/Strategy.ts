@@ -52,8 +52,16 @@ export interface StrategyParametersInterface {
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
   buyTroughUptrendThresholdPercentage: number;
 
-  // Relates to the setting above. What is the maximum age (in seconds), we would still consider a buy?
+  // Relates to the setting above. What is the maximum age (in seconds) can the trough be,
+  // so we would still consider a buy?
   buyTroughUptrendThresholdMaximumAgeSeconds: number;
+
+  // Relates to the setting above. How far back (in seconds) should we analyze the troughs,
+  // to determine the biggest one? This setting is there, we we won't go back all the way,
+  // because there could be a large trough 6 hours ago and because of that,
+  // we would then never trigger a buy, as the recent troughs are not that big.
+  // The value must be bigger then the value above (buyTroughUptrendThresholdMaximumAgeSeconds).
+  buyTroughUptrendThresholdMaximumAgeRangeSeconds: number;
 }
 
 export interface StrategyInterface extends StrategyParametersInterface {
@@ -76,6 +84,7 @@ export class Strategy implements StrategyInterface {
   trailingStopLossThresholdValuePercentage: number;
   buyTroughUptrendThresholdPercentage: number;
   buyTroughUptrendThresholdMaximumAgeSeconds: number;
+  buyTroughUptrendThresholdMaximumAgeRangeSeconds: number;
 
   constructor(parameters: StrategyParametersInterface) {
     this.tradeAmount = parameters.tradeAmount;
@@ -93,6 +102,7 @@ export class Strategy implements StrategyInterface {
     this.trailingStopLossThresholdValuePercentage = parameters.trailingStopLossThresholdValuePercentage;
     this.buyTroughUptrendThresholdPercentage = parameters.buyTroughUptrendThresholdPercentage;
     this.buyTroughUptrendThresholdMaximumAgeSeconds = parameters.buyTroughUptrendThresholdMaximumAgeSeconds;
+    this.buyTroughUptrendThresholdMaximumAgeRangeSeconds = parameters.buyTroughUptrendThresholdMaximumAgeRangeSeconds;
   }
 
   /***** Export/Import *****/
@@ -113,6 +123,7 @@ export class Strategy implements StrategyInterface {
       trailingStopLossThresholdValuePercentage: this.trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage: this.buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds: this.buyTroughUptrendThresholdMaximumAgeSeconds,
+      buyTroughUptrendThresholdMaximumAgeRangeSeconds: this.buyTroughUptrendThresholdMaximumAgeRangeSeconds,
     };
   }
 
@@ -133,6 +144,7 @@ export class Strategy implements StrategyInterface {
       trailingStopLossThresholdValuePercentage: data.trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage: data.buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds: data.buyTroughUptrendThresholdMaximumAgeSeconds,
+      buyTroughUptrendThresholdMaximumAgeRangeSeconds: data.buyTroughUptrendThresholdMaximumAgeRangeSeconds,
     });
   }
 }
