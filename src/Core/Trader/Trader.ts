@@ -49,6 +49,7 @@ export class Trader implements TraderInterface {
     const {
       warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds,
+      showAssetPriceUpdates,
     } = session.config;
     const warmupPeriodTime = warmupPeriodSeconds * 1000;
     const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
@@ -85,13 +86,15 @@ export class Trader implements TraderInterface {
         assetPrice.processEntries();
       }
 
-      // Return the price data
-      logger.info(chalk.bold('Asset pair price updates:'));
-      session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-        const priceText = exchangeAssetPrice.getPriceText();
+      if (showAssetPriceUpdates) {
+        // Return the price data
+        logger.info(chalk.bold('Asset pair price updates:'));
+        session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
+          const priceText = exchangeAssetPrice.getPriceText();
 
-        logger.info(chalk.bold(key) + ' - ' + priceText);
-      });
+          logger.info(chalk.bold(key) + ' - ' + priceText);
+        });
+      }
 
       const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
       if (warmupPeriodCountdownSeconds < 0) {
@@ -211,27 +214,15 @@ export class Trader implements TraderInterface {
       return false;
     }
 
-    const assetPrice = this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(assetPair)
+    const percentage = this._getLargestTroughPercentage(
+      assetPair,
+      strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000
     );
 
-    const newestPriceEntry = assetPrice.getNewestEntry();
-    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
-      strategy.buyTroughUptrendThresholdPercentage * 1000
-    );
     if (
-      !newestPriceEntry ||
-      !largestTroughPriceEntry
+      percentage === null ||
+      percentage < strategy.buyTroughUptrendThresholdPercentage
     ) {
-      return null;
-    }
-
-    const percentage = calculatePercentage(
-      parseFloat(newestPriceEntry.price),
-      parseFloat(largestTroughPriceEntry.price)
-    );
-
-    if (percentage < strategy.buyTroughUptrendThresholdPercentage) {
       return false;
     }
 
@@ -239,6 +230,11 @@ export class Trader implements TraderInterface {
   }
 
   shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+    const {
+      trades,
+      strategy,
+    } = sessionAsset;
+
     const assetPrice = this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
     );
