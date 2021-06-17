@@ -2,7 +2,7 @@ import { Strategy } from '../Core/Strategy/Strategy';
 
 export class DefaultStrategy extends Strategy {
   constructor({
-    tradeAmount = '1',
+    tradeAmount = '15',
     maximumOpenTrades = 5,
     maximumOpenTradesPerAssetPair = 1,
     takeProfitPercentage = 5,
@@ -16,8 +16,7 @@ export class DefaultStrategy extends Strategy {
     trailingStopLossThresholdPercentage = 0,
     trailingStopLossThresholdValuePercentage = 0,
     buyTroughUptrendThresholdPercentage = 0.05,
-    buyTroughUptrendThresholdMaximumAgeSeconds = 60,
-    buyTroughUptrendThresholdMaximumAgeRangeSeconds = 900, // 15 minutes
+    buyTroughUptrendThresholdMaximumAgeSeconds = 300,
   }) {
     super({
       tradeAmount,
@@ -35,7 +34,6 @@ export class DefaultStrategy extends Strategy {
       trailingStopLossThresholdValuePercentage,
       buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds,
-      buyTroughUptrendThresholdMaximumAgeRangeSeconds,
     });
   }
 }

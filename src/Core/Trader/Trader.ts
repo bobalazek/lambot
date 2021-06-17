@@ -16,8 +16,8 @@ export interface TraderInterface {
   stop(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
-  shouldBuy(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
-  shouldSell(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
+  shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
+  shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
   executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
   executeSell(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
 }
@@ -128,7 +128,7 @@ export class Trader implements TraderInterface {
 
     session.assets.forEach((sessionAsset) => {
       sessionAsset.assetPairs.forEach((assetPair) => {
-        if (!this.shouldSell(assetPair, sessionAsset)) {
+        if (!this.shouldSellAssetPair(assetPair, sessionAsset)) {
           return;
         }
 
@@ -143,14 +143,35 @@ export class Trader implements TraderInterface {
     this.session.assets.forEach((sessionAsset) => {
       const {
         assetPairs,
+        strategy,
       } = sessionAsset;
 
-      const assetPairsSorted = [...assetPairs];
-      // TODO: order them (assetPairs) by the biggest relative profit percentage or something?
-      // So we can prioritize the assets we may buy sooner.
+      const maximumAge = strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000;
+
+      // Sort by assets that had the biggest increase since the last largest trough
+      const assetPairsSorted = [...assetPairs].sort((assetPairA, assetPairB) => {
+        const percentageA = this._getLargestTroughPercentage(
+          assetPairA,
+          maximumAge
+        );
+        const percentageB = this._getLargestTroughPercentage(
+          assetPairB,
+          maximumAge
+        );
+
+        if (percentageA === null) {
+          return 1;
+        }
+
+        if (percentageB === null) {
+          return -1;
+        }
+
+        return percentageB - percentageA;
+      });
 
       assetPairsSorted.forEach((assetPair) => {
-        if (!this.shouldBuy(assetPair, sessionAsset)) {
+        if (!this.shouldBuyAssetPair(assetPair, sessionAsset)) {
           return;
         }
 
@@ -159,7 +180,7 @@ export class Trader implements TraderInterface {
     });
   }
 
-  shouldBuy(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+  shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
     const {
       trades,
       strategy,
@@ -193,7 +214,7 @@ export class Trader implements TraderInterface {
 
     const newestPriceEntry = assetPrice.getNewestEntry();
     const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
-      strategy.buyTroughUptrendThresholdMaximumAgeRangeSeconds * 1000
+      strategy.buyTroughUptrendThresholdPercentage * 1000
     );
     if (
       !newestPriceEntry ||
@@ -211,16 +232,10 @@ export class Trader implements TraderInterface {
       return false;
     }
 
-    const now = Date.now();
-    const largestTroughAgeSeconds = Math.round((now - largestTroughPriceEntry.timestamp) / 1000);
-    if (largestTroughAgeSeconds > strategy.buyTroughUptrendThresholdMaximumAgeSeconds) {
-      return false;
-    }
-
     return true;
   }
 
-  shouldSell(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+  shouldSellAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
     const assetPrice = this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
     );
@@ -293,6 +308,30 @@ export class Trader implements TraderInterface {
       null,
       ExchangeOrderTypeEnum.MARKET,
       this.session.exchange.getAccountType(sessionAsset.tradingType)
+    );
+  }
+
+  _getLargestTroughPercentage(
+    assetPair: AssetPair,
+    maximumAge: number
+  ) {
+    const assetPrice = this.session.exchange.assetPairPrices.get(
+      AssetPair.toKey(assetPair)
+    );
+    const newestPriceEntry = assetPrice.getNewestEntry();
+    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
+      maximumAge
+    );
+    if (
+      !newestPriceEntry ||
+      !largestTroughPriceEntry
+    ) {
+      return null;
+    }
+
+    return calculatePercentage(
+      parseFloat(newestPriceEntry.price),
+      parseFloat(largestTroughPriceEntry.price)
     );
   }
 }

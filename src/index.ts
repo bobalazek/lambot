@@ -37,7 +37,6 @@ const sessionId = programOptions.session;
       Assets.USDT,
       [
         new AssetPair(Assets.ETH, Assets.USDT),
-        /*
         new AssetPair(Assets.BTC, Assets.USDT),
         new AssetPair(Assets.BNB, Assets.USDT),
         new AssetPair(Assets.BCH, Assets.USDT),
@@ -76,11 +75,8 @@ const sessionId = programOptions.session;
         new AssetPair(Assets.ZEC, Assets.USDT),
         new AssetPair(Assets.MANA, Assets.USDT),
         new AssetPair(Assets.EGLD, Assets.USDT),
-        */
       ],
-      new DefaultStrategy({
-        tradeAmount: '15',
-      }),
+      new DefaultStrategy({}),
       SessionAssetTradingTypeEnum.SPOT
     ),
   ];
