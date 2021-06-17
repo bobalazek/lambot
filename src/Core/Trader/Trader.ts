@@ -51,6 +51,7 @@ export class Trader implements TraderInterface {
       warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds,
       showAssetPriceUpdates,
+      showOpenTradeUpdates,
     } = session.config;
     const warmupPeriodTime = warmupPeriodSeconds * 1000;
     const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
@@ -88,12 +89,31 @@ export class Trader implements TraderInterface {
       }
 
       if (showAssetPriceUpdates) {
-        // Return the price data
+        // Return the asset price data
         logger.info(chalk.bold('Asset pair price updates:'));
         session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
           const priceText = exchangeAssetPrice.getPriceText();
 
           logger.info(chalk.bold(key) + ' - ' + priceText);
+        });
+      }
+
+      if (showOpenTradeUpdates) {
+        // Return open trades data
+        logger.info(chalk.bold('Open trade updates:'));
+        session.assets.forEach((sessionAsset) => {
+          sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
+            const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
+              exchangeTrade
+            );
+            const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000)
+
+            logger.info(
+              chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
+              ` (bought ${timeAgoSeconds} seconds ago) -` +
+              ` current profit: ${colorTextByValue(currentProfitPercentage)}`
+            );
+          });
         });
       }
 
@@ -132,12 +152,12 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     session.assets.forEach((sessionAsset) => {
-      sessionAsset.getOpenTrades().forEach((trade) => {
-        if (!this.shouldSellTrade(trade, sessionAsset)) {
+      sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
+        if (!this.shouldSellTrade(exchangeTrade, sessionAsset)) {
           return;
         }
 
-        this.executeSell(trade, sessionAsset);
+        this.executeSell(exchangeTrade, sessionAsset);
       });
     });
   }
@@ -200,10 +220,10 @@ export class Trader implements TraderInterface {
       return false;
     }
 
-    const sessionAssetAssetPairTrades = openTrades.filter((trade) => {
+    const sessionAssetAssetPairTrades = openTrades.filter((exchangeTrade) => {
       return (
-        trade.status !== ExchangeTradeStatusEnum.CLOSED &&
-        AssetPair.toKey(trade.assetPair) === AssetPair.toKey(assetPair)
+        exchangeTrade.status !== ExchangeTradeStatusEnum.CLOSED &&
+        AssetPair.toKey(exchangeTrade.assetPair) === AssetPair.toKey(assetPair)
       );
     });
 
@@ -213,6 +233,8 @@ export class Trader implements TraderInterface {
     ) {
       return false;
     }
+
+    // TODO: we should probably also take daily volume into account
 
     const percentage = this._getLargestTroughPercentage(
       assetPair,
@@ -235,14 +257,8 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
-    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceNewest = assetPrice.getNewestEntry();
-
-    const buyAssetPrice = exchangeTrade.buyPrice;
-    const currentAssetPrice = parseFloat(assetPriceNewest.price);
-    const currentProfitPercentage = calculatePercentage(
-      buyAssetPrice,
-      currentAssetPrice
+    const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
+      exchangeTrade
     );
 
     // TODO
@@ -368,6 +384,18 @@ export class Trader implements TraderInterface {
   _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
     return this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
+    );
+  }
+
+  _getExchangeTradeCurrentProfitPercentage(exchangeTrade: ExchangeTrade) {
+    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+    const assetPriceNewest = assetPrice.getNewestEntry();
+
+    const buyAssetPrice = exchangeTrade.buyPrice;
+    const currentAssetPrice = parseFloat(assetPriceNewest.price);
+    return calculatePercentage(
+      buyAssetPrice,
+      currentAssetPrice
     );
   }
 }

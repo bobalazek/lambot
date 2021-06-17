@@ -11,7 +11,7 @@ export interface ExchangeTradeInterface {
   timestamp: number;
   buyPrice: number; // At which price did we buy the asset?
   sellPrice: number; // At which price did we sell the asset?
-  triggerSellPrice: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
+  triggerSellPercentage: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
   toExport(): unknown;
@@ -39,9 +39,10 @@ export class ExchangeTrade {
   timestamp: number;
   buyPrice: number;
   sellPrice: number;
-  triggerSellPrice: number;
   buyOrder: ExchangeOrder;
   sellOrder: ExchangeOrder;
+  peakProfitPercentage: number; // What was the highest profit percentage we reached?
+  triggerSellPercentage: number; // At what relative percentage (currentPrice compared to buyPrice) should we sell?
 
   constructor(
     id: string,
@@ -70,9 +71,10 @@ export class ExchangeTrade {
       timestamp: this.timestamp,
       buyPrice: this.buyPrice,
       sellPrice: this.sellPrice,
-      triggerSellPrice: this.triggerSellPrice,
       buyOrder: this.buyOrder?.toExport(),
       sellOrder: this.sellOrder?.toExport(),
+      peakProfitPercentage: this.peakProfitPercentage,
+      triggerSellPercentage: this.triggerSellPercentage,
     };
   }
 
@@ -93,16 +95,20 @@ export class ExchangeTrade {
       exchangeTrade.sellPrice = data.sellPrice;
     }
 
-    if (data.triggerSellPrice) {
-      exchangeTrade.sellPrice = data.triggerSellPrice;
-    }
-
     if (data.buyOrder) {
       exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
     }
 
     if (data.sellOrder) {
       exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
+    }
+
+    if (data.peakProfitPercentage) {
+      exchangeTrade.peakProfitPercentage = data.peakProfitPercentage;
+    }
+
+    if (data.triggerSellPercentage) {
+      exchangeTrade.triggerSellPercentage = data.triggerSellPercentage;
     }
 
     return exchangeTrade;
