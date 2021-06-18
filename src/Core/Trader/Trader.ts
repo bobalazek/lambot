@@ -18,10 +18,8 @@ export interface TraderInterface {
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
   getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
-  shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean;
-  shouldSellTrade(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): boolean;
-  executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
-  executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
 }
 
 export enum TraderStatusEnum {
@@ -153,11 +151,7 @@ export class Trader implements TraderInterface {
 
     session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-        if (!this.shouldSellTrade(exchangeTrade, sessionAsset)) {
-          return;
-        }
-
-        this.executeSell(exchangeTrade, sessionAsset);
+        this.checkForSellSignal(exchangeTrade, sessionAsset);
       });
     });
   }
@@ -167,11 +161,7 @@ export class Trader implements TraderInterface {
 
     this.session.assets.forEach((sessionAsset) => {
       this.getSortedAssetPairs(sessionAsset).forEach((assetPair) => {
-        if (!this.shouldBuyAssetPair(assetPair, sessionAsset)) {
-          return;
-        }
-
-        this.executeBuy(assetPair, sessionAsset);
+        this.checkForBuySignal(assetPair, sessionAsset);
       });
     });
   }
@@ -207,7 +197,7 @@ export class Trader implements TraderInterface {
     });
   }
 
-  shouldBuyAssetPair(assetPair: AssetPair, sessionAsset: SessionAsset): boolean {
+  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const {
       strategy,
     } = sessionAsset;
@@ -217,7 +207,7 @@ export class Trader implements TraderInterface {
       strategy.maximumOpenTrades !== -1 &&
       openTrades.length >= strategy.maximumOpenTrades
     ) {
-      return false;
+      return null;
     }
 
     const sessionAssetAssetPairTrades = openTrades.filter((exchangeTrade) => {
@@ -231,7 +221,7 @@ export class Trader implements TraderInterface {
       strategy.maximumOpenTradesPerAssetPair !== -1 &&
       sessionAssetAssetPairTrades.length >= strategy.maximumOpenTradesPerAssetPair
     ) {
-      return false;
+      return null;
     }
 
     // TODO: we should probably also take daily volume into account
@@ -246,27 +236,10 @@ export class Trader implements TraderInterface {
       percentage === 0 || // That means that we are currently in a trough!
       percentage < strategy.buyTroughUptrendThresholdPercentage
     ) {
-      return false;
+      return null;
     }
 
-    return true;
-  }
-
-  shouldSellTrade(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): boolean {
-    const {
-      strategy,
-    } = sessionAsset;
-
-    const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
-      exchangeTrade
-    );
-
-    // TODO
-
-    return false;
-  }
-
-  async executeBuy(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    // Execute buy!
     const assetPairSymbol = AssetPair.toKey(assetPair);
     const assetPrice = this._getAssetPairPrice(assetPair);
     const assetPriceNewest = assetPrice.getNewestEntry();
@@ -306,7 +279,16 @@ export class Trader implements TraderInterface {
     return order;
   }
 
-  async executeSell(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+    const {
+      strategy,
+    } = sessionAsset;
+
+    const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
+      exchangeTrade
+    );
+
+    // Exectute sell!
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPriceNewest = assetPrice.getNewestEntry();
