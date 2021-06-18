@@ -13,7 +13,7 @@ export interface TraderInterface {
   session: Session;
   status: TraderStatusEnum;
   startTime: number;
-  start(): ReturnType<typeof setInterval>;
+  start(): void;
   stop(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
@@ -45,8 +45,7 @@ export class Trader implements TraderInterface {
     this.startTime = Date.now();
 
     const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
-
-    return this.interval = setInterval(async () => {
+    this.interval = setInterval(async () => {
       const now = Date.now();
 
       await this._updateAssetPrices(now);

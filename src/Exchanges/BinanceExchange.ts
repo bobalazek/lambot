@@ -12,7 +12,7 @@ import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
-import { ExchangeResponseAssetPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAsserPriceEntry';
+import { ExchangeResponseAssetPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPriceEntry';
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetStatisticsInterface } from '../Core/Exchange/Response/ExchangeRespnseAssetStatistics';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';

@@ -6,7 +6,7 @@ import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from '.
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeAssetPricesMap } from './ExchangeAssetPrice';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
-import { ExchangeResponseAssetPriceEntryInterface } from './Response/ExchangeResponseAsserPriceEntry';
+import { ExchangeResponseAssetPriceEntryInterface } from './Response/ExchangeResponseAssetPriceEntry';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetStatisticsInterface } from './Response/ExchangeRespnseAssetStatistics';
 import { ExchangeValidator } from './ExchangeValidator';
@@ -76,6 +76,8 @@ export class Exchange implements ExchangeInterface {
     await ExchangeValidator.validate(this);
 
     await this._setupAccounts();
+
+    // TODO: add asset statistics to the asset!
 
     this._printTradableAssets();
 
