@@ -31,19 +31,26 @@ export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
   interval: ReturnType<typeof setInterval>;
+  statisticsInterval: ReturnType<typeof setInterval>;
   startTime: number;
 
   constructor(session: Session) {
     this.session = session;
     this.status = TraderStatusEnum.STOPPED;
-
-    this.start();
   }
 
-  start() {
+  async start(): Promise<boolean> {
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
+    // Price statistics update
+    const updateStatisticsIntervalTime = this.session.config.assetPriceStatisticsUpdateIntervalSeconds * 1000;
+    await this._updateAssetPriceStatistics();
+    this.statisticsInterval = setInterval(async () => {
+      await this._updateAssetPriceStatistics();
+    }, updateStatisticsIntervalTime);
+
+    // Price update
     const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
     this.interval = setInterval(async () => {
       const now = Date.now();
@@ -58,12 +65,15 @@ export class Trader implements TraderInterface {
 
       this._cleanupAssetPrices(now, updateIntervalTime);
     }, updateIntervalTime);
+
+    return true;
   }
 
   stop() {
     this.status = TraderStatusEnum.STOPPED;
 
     clearInterval(this.interval);
+    clearInterval(this.statisticsInterval);
   }
 
   async processCurrentTrades(): Promise<void> {
@@ -148,7 +158,16 @@ export class Trader implements TraderInterface {
       return null;
     }
 
-    // TODO: we should probably also take daily volume into account
+    const assetPrice = this._getAssetPairPrice(assetPair);
+    if (strategy.minimumDailyVolume !== -1) {
+      const assetPriceStatisticsNewest = assetPrice.getNewestStatistics();
+      if (
+        !assetPriceStatisticsNewest ||
+        parseFloat(assetPriceStatisticsNewest.volume) < strategy.minimumDailyVolume
+      ) {
+        return null;
+      }
+    }
 
     const percentage = this._getLargestTroughPercentage(
       assetPair,
@@ -165,7 +184,6 @@ export class Trader implements TraderInterface {
 
     // Execute buy!
     const assetPairSymbol = AssetPair.toKey(assetPair);
-    const assetPrice = this._getAssetPairPrice(assetPair);
     const assetPriceNewest = assetPrice.getNewestEntry();
 
     const now = Date.now();
@@ -250,23 +268,53 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
+  async _updateAssetPriceStatistics() {
+    const {
+      session,
+    } = this;
+    const assetPairs = session.getAllAssetPairs();
+
+    logger.debug(`Updating asset price statistics ...`);
+
+    const assetStatistics = await session.exchange.getAssetStatistics();
+    for (let i = 0; i < assetStatistics.length; i++) {
+      const statisticsData = assetStatistics[i];
+      if (!assetPairs.has(statisticsData.symbol)) {
+        continue;
+      }
+
+      const assetPrice = session.exchange.assetPairPrices.get(statisticsData.symbol);
+      if (!assetPrice) {
+        logger.info(chalk.red.bold(
+          `Assset price for symbol "${statisticsData.symbol}" not found.`
+        ));
+
+        process.exit(1);
+      }
+
+      assetPrice.addStatistics(statisticsData);
+    }
+  }
+
   async _updateAssetPrices(now: number) {
     const {
       session,
     } = this;
     const assetPairs = session.getAllAssetPairs();
 
+    logger.debug(`Updating asset prices ...`);
+
     const assetPrices = await session.exchange.getAssetPrices();
     for (let i = 0; i < assetPrices.length; i++) {
-      const assetData = assetPrices[i];
-      if (!assetPairs.has(assetData.symbol)) {
+      const priceData = assetPrices[i];
+      if (!assetPairs.has(priceData.symbol)) {
         continue;
       }
 
-      const assetPrice = session.exchange.assetPairPrices.get(assetData.symbol);
+      const assetPrice = session.exchange.assetPairPrices.get(priceData.symbol);
       if (!assetPrice) {
         logger.info(chalk.red.bold(
-          `Assset price for symbol "${assetData.symbol}" not found.`
+          `Assset price for symbol "${priceData.symbol}" not found.`
         ));
 
         process.exit(1);
@@ -274,7 +322,7 @@ export class Trader implements TraderInterface {
 
       assetPrice.addEntry({
         timestamp: now,
-        price: assetData.price,
+        price: priceData.price,
       });
 
       assetPrice.processEntries();
@@ -299,24 +347,27 @@ export class Trader implements TraderInterface {
       return;
     }
 
+    let hasAnyOpenTrades = false;
     logger.info(chalk.bold('Open trade updates:'));
-    if (this.session.assets?.length > 0) {
-      this.session.assets.forEach((sessionAsset) => {
-        sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-          const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
-            exchangeTrade
-          );
-          const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000)
+    this.session.assets.forEach((sessionAsset) => {
+      sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
+        const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
+          exchangeTrade
+        );
+        const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
 
-          logger.info(
-            chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
-            ` (bought ${timeAgoSeconds} seconds ago) -` +
-            ` current profit: ${colorTextByValue(currentProfitPercentage)}`
-          );
-        });
+        hasAnyOpenTrades = true;
+
+        logger.info(
+          chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
+          ` (bought ${timeAgoSeconds} seconds ago) -` +
+          ` current profit: ${colorTextByValue(currentProfitPercentage)}`
+        );
       });
-    } else {
-      logger.info('No open trades yet.');
+    });
+
+    if (!hasAnyOpenTrades) {
+      logger.debug('No open trades found yet.');
     }
   }
 

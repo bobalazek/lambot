@@ -8,6 +8,9 @@ export interface StrategyParametersInterface {
   // How many open trades are we allowed to have for this asset AND this asset pair? Set -1 for unlimited.
   maximumOpenTradesPerAssetPair: number;
 
+  // What's the minimum daily volume we need to even consider this trade? Set -1 for no limit.
+  minimumDailyVolume: number;
+
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
@@ -65,6 +68,7 @@ export class Strategy implements StrategyInterface {
   tradeAmount: string;
   maximumOpenTrades: number;
   maximumOpenTradesPerAssetPair: number;
+  minimumDailyVolume: number;
   takeProfitPercentage: number;
   takeProfitTroughTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
@@ -82,6 +86,7 @@ export class Strategy implements StrategyInterface {
     this.tradeAmount = parameters.tradeAmount;
     this.maximumOpenTrades = parameters.maximumOpenTrades;
     this.maximumOpenTradesPerAssetPair = parameters.maximumOpenTradesPerAssetPair;
+    this.minimumDailyVolume = parameters.minimumDailyVolume;
     this.takeProfitPercentage = parameters.takeProfitPercentage;
     this.takeProfitTroughTimeoutSeconds = parameters.takeProfitTroughTimeoutSeconds;
     this.trailingTakeProfitEnabled = parameters.trailingTakeProfitEnabled;
@@ -102,6 +107,7 @@ export class Strategy implements StrategyInterface {
       tradeAmount: this.tradeAmount,
       maximumOpenTrades: this.maximumOpenTrades,
       maximumOpenTradesPerAssetPair: this.maximumOpenTradesPerAssetPair,
+      minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
@@ -122,6 +128,7 @@ export class Strategy implements StrategyInterface {
       tradeAmount: data.tradeAmount,
       maximumOpenTrades: data.maximumOpenTrades,
       maximumOpenTradesPerAssetPair: data.maximumOpenTradesPerAssetPair,
+      minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
       takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,

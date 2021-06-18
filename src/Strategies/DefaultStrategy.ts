@@ -5,6 +5,7 @@ export class DefaultStrategy extends Strategy {
     tradeAmount = '15',
     maximumOpenTrades = 5,
     maximumOpenTradesPerAssetPair = 1,
+    minimumDailyVolume = 10000,
     takeProfitPercentage = 1.5,
     takeProfitTroughTimeoutSeconds = 0,
     trailingTakeProfitEnabled = true,
@@ -15,13 +16,14 @@ export class DefaultStrategy extends Strategy {
     trailingStopLossEnabled = false,
     trailingStopLossThresholdPercentage = 0,
     trailingStopLossThresholdValuePercentage = 0,
-    buyTroughUptrendThresholdPercentage = 0.05,
+    buyTroughUptrendThresholdPercentage = 0.1,
     buyTroughUptrendThresholdMaximumAgeSeconds = 300,
   }) {
     super({
       tradeAmount,
       maximumOpenTrades,
       maximumOpenTradesPerAssetPair,
+      minimumDailyVolume,
       takeProfitPercentage,
       takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled,

@@ -16,6 +16,9 @@ export interface ExchangeAssetPriceInterface {
   getNewestChange(): ExchangeAssetPriceChangeInterface;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
+  getStatistics(): ExchangeAssetPriceStatisticsInterface[];
+  getNewestStatistics(): ExchangeAssetPriceStatisticsInterface;
+  addStatistics(entry: ExchangeAssetPriceStatisticsInterface): ExchangeAssetPriceStatisticsInterface;
   getPriceText(): string;
 }
 
@@ -29,6 +32,12 @@ export interface ExchangeAssetPriceChangeInterface {
 export interface ExchangeAssetPriceEntryInterface {
   timestamp: number;
   price: string;
+}
+
+export interface ExchangeAssetPriceStatisticsInterface {
+  volume: string;
+  tradesCount: number;
+  timestamp: number;
 }
 
 export interface ExchangeAssetPriceTrend {
@@ -55,12 +64,14 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
   private _entriesPeakIndexes: Array<number>;
   private _entriesTroughIndexes: Array<number>;
   private _changes: ExchangeAssetPriceChangeInterface[];
+  private _statistics: ExchangeAssetPriceStatisticsInterface[];
 
   constructor() {
     this._entries = [];
     this._entriesPeakIndexes = [];
     this._entriesTroughIndexes = [];
     this._changes = [];
+    this._statistics = [];
   }
 
   getEntries(): ExchangeAssetPriceEntryInterface[] {
@@ -304,6 +315,24 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._entries.splice(0, Math.ceil(this._entries.length * ratio));
 
     this.processEntries();
+  }
+
+  getStatistics(): ExchangeAssetPriceStatisticsInterface[] {
+    return this._statistics;
+  }
+
+  getNewestStatistics(): ExchangeAssetPriceStatisticsInterface {
+    if (this._statistics.length === 0) {
+      return null;
+    }
+
+    return this._statistics[this._statistics.length - 1];
+  }
+
+  addStatistics(statistics: ExchangeAssetPriceStatisticsInterface): ExchangeAssetPriceStatisticsInterface {
+    this._statistics.push(statistics);
+
+    return statistics;
   }
 
   getPriceText(): string {

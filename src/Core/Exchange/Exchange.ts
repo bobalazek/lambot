@@ -8,7 +8,7 @@ import { ExchangeAssetPricesMap } from './ExchangeAssetPrice';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPriceEntryInterface } from './Response/ExchangeResponseAssetPriceEntry';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
-import { ExchangeResponseAssetStatisticsInterface } from './Response/ExchangeRespnseAssetStatistics';
+import { ExchangeResponseAssetPriceStatisticsInterface } from './Response/ExchangeResponseAssetPriceStatistics';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -36,7 +36,7 @@ export interface ExchangeInterface {
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPrices(): Promise<ExchangeResponseAssetPriceEntryInterface[]>;
-  getAssetStatistics(): Promise<ExchangeResponseAssetStatisticsInterface[]>;
+  getAssetStatistics(): Promise<ExchangeResponseAssetPriceStatisticsInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
   getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum;
   toExport(): unknown;
@@ -77,8 +77,6 @@ export class Exchange implements ExchangeInterface {
 
     await this._setupAccounts();
 
-    // TODO: add asset statistics to the asset!
-
     this._printTradableAssets();
 
     await SessionManager.save(this.session);
@@ -88,6 +86,8 @@ export class Exchange implements ExchangeInterface {
 
   async start(): Promise<boolean> {
     this.trader = new Trader(this.session);
+
+    await this.trader.start();
 
     return true
   }
@@ -113,7 +113,7 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
-  async getAssetStatistics(): Promise<ExchangeResponseAssetStatisticsInterface[]> {
+  async getAssetStatistics(): Promise<ExchangeResponseAssetPriceStatisticsInterface[]> {
     throw new Error('getAssetStatistics() not implemented yet.');
   }
 
