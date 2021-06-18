@@ -61,12 +61,11 @@ export class SessionAsset implements SessionAssetInterface {
 
   /***** Export/Import *****/
   toString(): string {
-    return JSON.stringify({
-      asset: this.asset.toExport(),
-      assetPairs: this.assetPairs.map((assetPair) => {
-        return assetPair.toExport();
-      }),
-    });
+    const assetPairsString = this.assetPairs.map((assetPair) => {
+      return assetPair.toString();
+    }).join(', ');
+
+    return `Base asset: ${this.asset.toString()}; Asset pairs: ${assetPairsString}`;
   }
 
   toExport() {

@@ -36,7 +36,6 @@ export class Trader implements TraderInterface {
   constructor(session: Session) {
     this.session = session;
     this.status = TraderStatusEnum.STOPPED;
-    this.startTime = 0;
 
     this.start();
   }
@@ -46,93 +45,31 @@ export class Trader implements TraderInterface {
       session,
     } = this;
     const {
-      warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds,
       showAssetPriceUpdates,
       showOpenTradeUpdates,
     } = session.config;
-    const warmupPeriodTime = warmupPeriodSeconds * 1000;
     const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
-    const assetPairs = session.getAssetPairs();
 
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
     return this.interval = setInterval(async () => {
-      // Update the current asset prices
-      const assetPrices = await session.exchange.getAssetPrices();
       const now = Date.now();
 
-      for (let i = 0; i < assetPrices.length; i++) {
-        const assetData = assetPrices[i];
-        if (!assetPairs.has(assetData.symbol)) {
-          continue;
-        }
-
-        const assetPrice = session.exchange.assetPairPrices.get(assetData.symbol);
-        if (!assetPrice) {
-          logger.info(chalk.red.bold(
-            `Assset price for symbol "${assetData.symbol}" not found.`
-          ));
-
-          process.exit(1);
-        }
-
-        assetPrice.addEntry({
-          timestamp: now,
-          price: assetData.price,
-        });
-
-        assetPrice.processEntries();
-      }
+      await this._updateAssetPrices(now);
 
       if (showAssetPriceUpdates) {
-        // Return the asset price data
-        logger.info(chalk.bold('Asset pair price updates:'));
-        session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-          const priceText = exchangeAssetPrice.getPriceText();
-
-          logger.info(chalk.bold(key) + ' - ' + priceText);
-        });
+        this._printAssetPriceUpdates(now);
       }
 
       if (showOpenTradeUpdates) {
-        // Return open trades data
-        logger.info(chalk.bold('Open trade updates:'));
-        session.assets.forEach((sessionAsset) => {
-          sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-            const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
-              exchangeTrade
-            );
-            const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000)
-
-            logger.info(
-              chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
-              ` (bought ${timeAgoSeconds} seconds ago) -` +
-              ` current profit: ${colorTextByValue(currentProfitPercentage)}`
-            );
-          });
-        });
+        this._printOpenTradeUpdates(now);
       }
 
-      const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
-      if (warmupPeriodCountdownSeconds < 0) {
-        // Actually start checking if we can do any trades
-        await this.processCurrentTrades();
-        await this.processPotentialTrades();
-      } else {
-        logger.debug(`I am still warming up. ${warmupPeriodCountdownSeconds} seconds to go!`);
-      }
+      await this._processTrades(now);
 
-      // Cleanup entries if processing time takes too long
-      const processingTime = Date.now() - now;
-      logger.debug(`Processing a tick took ${processingTime}ms.`);
-
-      if (processingTime > updateIntervalTime / 2) {
-        session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
-          exchangeAssetPrice.cleanupEntries(0.5);
-        });
-      }
+      this._cleanupAssetPrices(now, updateIntervalTime);
     }, updateIntervalTime);
   }
 
@@ -200,9 +137,10 @@ export class Trader implements TraderInterface {
   async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
     const {
       strategy,
+      trades,
     } = sessionAsset;
-    const openTrades = sessionAsset.getOpenTrades();
 
+    const openTrades = sessionAsset.getOpenTrades();
     if (
       strategy.maximumOpenTrades !== -1 &&
       openTrades.length >= strategy.maximumOpenTrades
@@ -210,10 +148,13 @@ export class Trader implements TraderInterface {
       return null;
     }
 
-    const sessionAssetAssetPairTrades = openTrades.filter((exchangeTrade) => {
+    const sessionAssetAssetPairTrades = trades.filter((exchangeTrade) => {
       return (
-        exchangeTrade.status !== ExchangeTradeStatusEnum.CLOSED &&
-        AssetPair.toKey(exchangeTrade.assetPair) === AssetPair.toKey(assetPair)
+        AssetPair.toKey(exchangeTrade.assetPair) === AssetPair.toKey(assetPair) &&
+        (
+          exchangeTrade.status === ExchangeTradeStatusEnum.OPEN ||
+          exchangeTrade.status === ExchangeTradeStatusEnum.BUY_PENDING
+        )
       );
     });
 
@@ -288,6 +229,8 @@ export class Trader implements TraderInterface {
       exchangeTrade
     );
 
+    return null;
+
     // Exectute sell!
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
@@ -321,6 +264,100 @@ export class Trader implements TraderInterface {
     ));
 
     return order;
+  }
+
+  /***** Helpers *****/
+  async _updateAssetPrices(now: number) {
+    const {
+      session,
+    } = this;
+    const assetPairs = session.getAssetPairs();
+
+    const assetPrices = await session.exchange.getAssetPrices();
+    for (let i = 0; i < assetPrices.length; i++) {
+      const assetData = assetPrices[i];
+      if (!assetPairs.has(assetData.symbol)) {
+        continue;
+      }
+
+      const assetPrice = session.exchange.assetPairPrices.get(assetData.symbol);
+      if (!assetPrice) {
+        logger.info(chalk.red.bold(
+          `Assset price for symbol "${assetData.symbol}" not found.`
+        ));
+
+        process.exit(1);
+      }
+
+      assetPrice.addEntry({
+        timestamp: now,
+        price: assetData.price,
+      });
+
+      assetPrice.processEntries();
+    }
+  }
+
+  _printAssetPriceUpdates(now: number) {
+    logger.info(chalk.bold('Asset pair price updates:'));
+    this.session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
+      const priceText = exchangeAssetPrice.getPriceText();
+
+      logger.info(chalk.bold(key) + ' - ' + priceText);
+    });
+  }
+
+  _printOpenTradeUpdates(now: number) {
+    logger.info(chalk.bold('Open trade updates:'));
+    if (this.session.assets?.length > 0) {
+      this.session.assets.forEach((sessionAsset) => {
+        sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
+          const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
+            exchangeTrade
+          );
+          const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000)
+
+          logger.info(
+            chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
+            ` (bought ${timeAgoSeconds} seconds ago) -` +
+            ` current profit: ${colorTextByValue(currentProfitPercentage)}`
+          );
+        });
+      });
+    } else {
+      logger.info('No open trades yet.');
+    }
+  }
+
+  async _processTrades(now: number) {
+    const {
+      session,
+    } = this;
+    const {
+      warmupPeriodSeconds,
+    } = session.config;
+    const warmupPeriodTime = warmupPeriodSeconds * 1000;
+
+    const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
+    if (warmupPeriodCountdownSeconds < 0) {
+      // Actually start checking if we can do any trades
+      await this.processCurrentTrades();
+      await this.processPotentialTrades();
+    } else {
+      logger.debug(`I am still warming up. ${warmupPeriodCountdownSeconds} seconds to go!`);
+    }
+  }
+
+  _cleanupAssetPrices(now: number, updateIntervalTime: number) {
+    // Cleanup entries if processing time takes too long
+    const processingTime = Date.now() - now;
+    logger.debug(`Processing a tick took ${processingTime}ms.`);
+
+    if (processingTime > updateIntervalTime / 2) {
+      this.session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
+        exchangeAssetPrice.cleanupEntries(0.5);
+      });
+    }
   }
 
   _createNewOrder(

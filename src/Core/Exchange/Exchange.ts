@@ -8,6 +8,7 @@ import { ExchangeAssetPricesMap } from './ExchangeAssetPrice';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPriceEntryInterface } from './Response/ExchangeResponseAsserPriceEntry';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
+import { ExchangeResponseAssetStatisticsInterface } from './Response/ExchangeRespnseAssetStatistics';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -35,12 +36,9 @@ export interface ExchangeInterface {
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPrices(): Promise<ExchangeResponseAssetPriceEntryInterface[]>;
-  getAssetFees(
-    symbol: string,
-    amount: string,
-    orderFeesType: ExchangeOrderFeesTypeEnum
-  ): Promise<ExchangeResponseOrderFeesInterface>;
-  getAccountType(accountType: SessionAssetTradingTypeEnum)
+  getAssetStatistics(): Promise<ExchangeResponseAssetStatisticsInterface[]>;
+  getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
+  getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum;
   toExport(): unknown;
 }
 
@@ -136,12 +134,16 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPrices() not implemented yet.');
   }
 
+  async getAssetStatistics(): Promise<ExchangeResponseAssetStatisticsInterface[]> {
+    throw new Error('getAssetStatistics() not implemented yet.');
+  }
+
   async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 
   /***** Helpers *****/
-  getAccountType(accountType: SessionAssetTradingTypeEnum) {
+  getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum {
     let exchangeAccountType: ExchangeAccountTypeEnum = null;
 
     switch (accountType) {
