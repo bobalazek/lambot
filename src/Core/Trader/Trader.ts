@@ -59,11 +59,13 @@ export class Trader implements TraderInterface {
 
       this._printAssetPriceUpdates(now);
 
+      const processingStartTime = Date.now();
+
       await this._processTrades(now);
 
       this._printOpenTradeUpdates(now);
 
-      this._cleanupAssetPrices(now, updateIntervalTime);
+      this._cleanupAssetPrices(processingStartTime, updateIntervalTime);
     }, updateIntervalTime);
 
     return true;
@@ -351,8 +353,13 @@ export class Trader implements TraderInterface {
     logger.info(chalk.bold('Open trade updates:'));
     this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-        const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
-          exchangeTrade
+        const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+        const assetPriceNewest = assetPrice.getNewestEntry();
+        const currentAssetPrice = parseFloat(assetPriceNewest.price);
+        const buyAssetPrice = exchangeTrade.buyPrice;
+        const currentProfitPercentage = calculatePercentage(
+          currentAssetPrice,
+          buyAssetPrice
         );
         const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
 
@@ -360,7 +367,8 @@ export class Trader implements TraderInterface {
 
         logger.info(
           chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
-          ` (bought ${timeAgoSeconds} seconds ago) -` +
+          ` @ ${currentAssetPrice}` +
+          ` (bought @ ${buyAssetPrice}; ${timeAgoSeconds} seconds ago)` +
           ` current profit: ${colorTextByValue(currentProfitPercentage)}`
         );
       });
@@ -383,9 +391,9 @@ export class Trader implements TraderInterface {
     }
   }
 
-  _cleanupAssetPrices(now: number, updateIntervalTime: number) {
+  _cleanupAssetPrices(processingStartTime: number, updateIntervalTime: number) {
     // Cleanup entries if processing time takes too long
-    const processingTime = Date.now() - now;
+    const processingTime = Date.now() - processingStartTime;
     logger.debug(`Processing a tick took ${processingTime}ms.`);
 
     if (processingTime > updateIntervalTime / 2) {
@@ -445,11 +453,9 @@ export class Trader implements TraderInterface {
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPriceNewest = assetPrice.getNewestEntry();
 
-    const buyAssetPrice = exchangeTrade.buyPrice;
-    const currentAssetPrice = parseFloat(assetPriceNewest.price);
     return calculatePercentage(
-      buyAssetPrice,
-      currentAssetPrice
+      parseFloat(assetPriceNewest.price),
+      exchangeTrade.buyPrice
     );
   }
 }
