@@ -73,36 +73,13 @@ export class Exchange implements ExchangeInterface {
       'Booting up the exchange ...'
     ));
 
-    // Validate
     await ExchangeValidator.validate(this);
 
-    // Setup accounts
-    const accountTypes = [...new Set(this.session.assets.map((sessionAsset) => {
-      return sessionAsset.tradingType;
-    }))];
-    await asyncForEach(accountTypes, async (accountType) => {
-      const exchangeAccountType = this.getAccountType(accountType);
-      const exchangeAccount = new ExchangeAccount(exchangeAccountType);
-      const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);
-      exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
-        const key = exchangeAccountAsset.asset.getKey();
-        exchangeAccount.assets.set(key, exchangeAccountAsset);
-      });
-      this.accounts.set(exchangeAccountType, exchangeAccount);
-    });
+    await this._setupAccounts();
 
-    // Show which assets we will be trading with this session
-    logger.info(chalk.bold(
-      'I will be trading with the following assets:'
-    ));
-    session.assets.forEach((sessionAsset) => {
-      logger.info(chalk.bold(
-        sessionAsset.toString()
-      ));
-    });
+    this._printTradableAssets();
 
-    // Save the session
-    await SessionManager.save(session);
+    await SessionManager.save(this.session);
 
     return true;
   }
@@ -180,5 +157,34 @@ export class Exchange implements ExchangeInterface {
 
   static fromImport(data: any): Exchange {
     return ExchangesFactory.get(data.key, data.apiCredentials);
+  }
+
+  /***** Helpers *****/
+  async _setupAccounts() {
+    const accountTypes = [...new Set(this.session.assets.map((sessionAsset) => {
+      return sessionAsset.tradingType;
+    }))];
+
+    await asyncForEach(accountTypes, async (accountType) => {
+      const exchangeAccountType = this.getAccountType(accountType);
+      const exchangeAccount = new ExchangeAccount(exchangeAccountType);
+      const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);
+      exchangeAccountAssets.forEach((exchangeAccountAsset) =>  {
+        const key = exchangeAccountAsset.asset.getKey();
+        exchangeAccount.assets.set(key, exchangeAccountAsset);
+      });
+      this.accounts.set(exchangeAccountType, exchangeAccount);
+    });
+  }
+
+  _printTradableAssets() {
+    logger.info(chalk.bold(
+      'I will be trading with the following assets:'
+    ));
+    this.session.assets.forEach((sessionAsset) => {
+      logger.info(chalk.bold(
+        sessionAsset.toString()
+      ));
+    });
   }
 }

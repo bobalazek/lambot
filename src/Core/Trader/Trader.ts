@@ -52,9 +52,10 @@ export class Trader implements TraderInterface {
       await this._updateAssetPrices(now);
 
       this._printAssetPriceUpdates(now);
-      this._printOpenTradeUpdates(now);
 
       await this._processTrades(now);
+
+      this._printOpenTradeUpdates(now);
 
       this._cleanupAssetPrices(now, updateIntervalTime);
     }, updateIntervalTime);
@@ -254,7 +255,7 @@ export class Trader implements TraderInterface {
     const {
       session,
     } = this;
-    const assetPairs = session.getAssetPairs();
+    const assetPairs = session.getAllAssetPairs();
 
     const assetPrices = await session.exchange.getAssetPrices();
     for (let i = 0; i < assetPrices.length; i++) {

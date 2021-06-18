@@ -16,7 +16,7 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
-  getAssetPairs(): Set<string>;
+  getAllAssetPairs(): Set<string>;
   toString(): string;
   toExport(): unknown;
 }
@@ -62,7 +62,7 @@ export class Session implements SessionInterface {
     });
   }
 
-  getAssetPairs(): Set<string> {
+  getAllAssetPairs(): Set<string> {
     const assetPairs = new Set<string>();
 
     this.assets.forEach((sessionAsset) => {
