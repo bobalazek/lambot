@@ -41,31 +41,18 @@ export class Trader implements TraderInterface {
   }
 
   start() {
-    const {
-      session,
-    } = this;
-    const {
-      assetPriceUpdateIntervalSeconds,
-      showAssetPriceUpdates,
-      showOpenTradeUpdates,
-    } = session.config;
-    const updateIntervalTime = assetPriceUpdateIntervalSeconds * 1000;
-
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
+
+    const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
 
     return this.interval = setInterval(async () => {
       const now = Date.now();
 
       await this._updateAssetPrices(now);
 
-      if (showAssetPriceUpdates) {
-        this._printAssetPriceUpdates(now);
-      }
-
-      if (showOpenTradeUpdates) {
-        this._printOpenTradeUpdates(now);
-      }
+      this._printAssetPriceUpdates(now);
+      this._printOpenTradeUpdates(now);
 
       await this._processTrades(now);
 
@@ -80,13 +67,9 @@ export class Trader implements TraderInterface {
   }
 
   async processCurrentTrades(): Promise<void> {
-    const {
-      session,
-    } = this;
-
     logger.debug('Starting to process trades ...');
 
-    session.assets.forEach((sessionAsset) => {
+    this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
         this.checkForSellSignal(exchangeTrade, sessionAsset);
       });
@@ -299,6 +282,10 @@ export class Trader implements TraderInterface {
   }
 
   _printAssetPriceUpdates(now: number) {
+    if (!this.session.config.showAssetPriceUpdates) {
+      return;
+    }
+
     logger.info(chalk.bold('Asset pair price updates:'));
     this.session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
       const priceText = exchangeAssetPrice.getPriceText();
@@ -308,6 +295,10 @@ export class Trader implements TraderInterface {
   }
 
   _printOpenTradeUpdates(now: number) {
+    if (!this.session.config.showOpenTradeUpdates) {
+      return;
+    }
+
     logger.info(chalk.bold('Open trade updates:'));
     if (this.session.assets?.length > 0) {
       this.session.assets.forEach((sessionAsset) => {
@@ -330,14 +321,7 @@ export class Trader implements TraderInterface {
   }
 
   async _processTrades(now: number) {
-    const {
-      session,
-    } = this;
-    const {
-      warmupPeriodSeconds,
-    } = session.config;
-    const warmupPeriodTime = warmupPeriodSeconds * 1000;
-
+    const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
     if (warmupPeriodCountdownSeconds < 0) {
       // Actually start checking if we can do any trades
