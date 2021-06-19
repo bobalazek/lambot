@@ -1,7 +1,6 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
-import { Assets } from '../Asset/Assets';
 import { ExchangeTrade, ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 import { Strategy } from '../Strategy/Strategy';
 
@@ -72,27 +71,32 @@ export class SessionAsset implements SessionAssetInterface {
     return {
       asset: this.asset.toExport(),
       assetPairs: this.assetPairs.map((assetPair) => {
-        return [
-          assetPair.assetBase.toString(),
-          assetPair.assetQuote.toString(),
-        ];
+        return assetPair.toExport();
       }),
       strategy: this.strategy.toExport(),
       tradingType: this.tradingType,
+      trades: this.trades.map((trade) => {
+        return trade.toExport();
+      }),
     };
   }
 
   static fromImport(data: any): SessionAsset {
-    return new SessionAsset(
+    const sessionAsset = new SessionAsset(
       Asset.fromImport(data.asset),
-      data.assetPairs.map((assetPair) => {
-        return new AssetPair(
-          Assets.getBySymbol(assetPair[0]),
-          Assets.getBySymbol(assetPair[1])
-        );
+      data.assetPairs.map((assetPairData) => {
+        return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(data.strategy),
       data.tradingType
     );
+
+    if (data.trades) {
+      sessionAsset.trades = data.trades.map((tradeData) => {
+        return ExchangeTrade.fromImport(tradeData);
+      });
+    }
+
+    return sessionAsset;
   }
 }

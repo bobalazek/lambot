@@ -88,6 +88,7 @@ export class ExchangeTrade {
     const exchangeTrade = new ExchangeTrade(
       data.id,
       Asset.fromImport(data.asset),
+      AssetPair.fromImport(data.assetPair),
       data.type,
       data.status,
       data.timestamp

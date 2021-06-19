@@ -86,8 +86,8 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process trades ...');
 
     this.session.assets.forEach((sessionAsset) => {
-      sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-        this.checkForSellSignal(exchangeTrade, sessionAsset);
+      sessionAsset.getOpenTrades().forEach(async (exchangeTrade) => {
+        await this.checkForSellSignal(exchangeTrade, sessionAsset);
       });
     });
   }
@@ -96,8 +96,8 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process new potential trades ...');
 
     this.session.assets.forEach((sessionAsset) => {
-      this.getSortedAssetPairs(sessionAsset).forEach((assetPair) => {
-        this.checkForBuySignal(assetPair, sessionAsset);
+      this.getSortedAssetPairs(sessionAsset).forEach(async (assetPair) => {
+        await this.checkForBuySignal(assetPair, sessionAsset);
       });
     });
   }
@@ -138,6 +138,8 @@ export class Trader implements TraderInterface {
       strategy,
       trades,
     } = sessionAsset;
+
+    // TODO: check if it isn't too long since the price change (because we are (a-)waiting for this method to finish)
 
     const openTrades = sessionAsset.getOpenTrades();
     if (
@@ -242,6 +244,8 @@ export class Trader implements TraderInterface {
     const {
       strategy,
     } = sessionAsset;
+
+    // TODO: check if it isn't too long since the price change (because we are (a-)waiting for this method to finish)
 
     const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
       exchangeTrade
