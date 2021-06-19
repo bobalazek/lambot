@@ -45,16 +45,16 @@ export interface StrategyParametersInterface {
   /********* Buy Trough **********/
   // How much percentage can the price rise after a trough, until we want to trigger a buy order?
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
-  buyTroughUptrendThresholdPercentage: number;
+  buyTroughUptrendPercentage: number;
 
   // Relates to the setting above. What is the maximum age (in seconds) can the trough be,
   // so we would still consider a buy?
-  // For example: In {buyTroughUptrendThresholdMaximumAgeSeconds} seconds,
-  // we expect the price to jump {buyTroughUptrendThresholdPercentage}% of profit
+  // For example: In {buyTroughUptrendMaximumAgeSeconds} seconds,
+  // we expect the price to jump {buyTroughUptrendPercentage}% of profit
   // so we actually but this asset. However, if session.config.warmupPeriodSeconds
   // is set to lower than that, it will only go trough that time range,
   // before trying to find if it can buy an asset.
-  buyTroughUptrendThresholdMaximumAgeSeconds: number;
+  buyTroughUptrendMaximumAgeSeconds: number;
 }
 
 export interface StrategyInterface extends StrategyParametersInterface {
@@ -74,8 +74,8 @@ export class Strategy implements StrategyInterface {
   stopLossTimeoutSeconds: number;
   trailingStopLossEnabled: boolean;
   trailingStopLossPercentage: number;
-  buyTroughUptrendThresholdPercentage: number;
-  buyTroughUptrendThresholdMaximumAgeSeconds: number;
+  buyTroughUptrendPercentage: number;
+  buyTroughUptrendMaximumAgeSeconds: number;
 
   constructor(parameters: StrategyParametersInterface) {
     this.tradeAmount = parameters.tradeAmount;
@@ -90,8 +90,8 @@ export class Strategy implements StrategyInterface {
     this.stopLossTimeoutSeconds = parameters.stopLossTimeoutSeconds;
     this.trailingStopLossEnabled = parameters.trailingStopLossEnabled;
     this.trailingStopLossPercentage = parameters.trailingStopLossPercentage;
-    this.buyTroughUptrendThresholdPercentage = parameters.buyTroughUptrendThresholdPercentage;
-    this.buyTroughUptrendThresholdMaximumAgeSeconds = parameters.buyTroughUptrendThresholdMaximumAgeSeconds;
+    this.buyTroughUptrendPercentage = parameters.buyTroughUptrendPercentage;
+    this.buyTroughUptrendMaximumAgeSeconds = parameters.buyTroughUptrendMaximumAgeSeconds;
   }
 
   /***** Export/Import *****/
@@ -109,8 +109,8 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
       trailingStopLossEnabled: this.trailingStopLossEnabled,
       trailingStopLossPercentage: this.trailingStopLossPercentage,
-      buyTroughUptrendThresholdPercentage: this.buyTroughUptrendThresholdPercentage,
-      buyTroughUptrendThresholdMaximumAgeSeconds: this.buyTroughUptrendThresholdMaximumAgeSeconds,
+      buyTroughUptrendPercentage: this.buyTroughUptrendPercentage,
+      buyTroughUptrendMaximumAgeSeconds: this.buyTroughUptrendMaximumAgeSeconds,
     };
   }
 
@@ -128,8 +128,8 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
       trailingStopLossEnabled: data.trailingStopLossEnabled,
       trailingStopLossPercentage: data.trailingStopLossPercentage,
-      buyTroughUptrendThresholdPercentage: data.buyTroughUptrendThresholdPercentage,
-      buyTroughUptrendThresholdMaximumAgeSeconds: data.buyTroughUptrendThresholdMaximumAgeSeconds,
+      buyTroughUptrendPercentage: data.buyTroughUptrendPercentage,
+      buyTroughUptrendMaximumAgeSeconds: data.buyTroughUptrendMaximumAgeSeconds,
     });
   }
 }
