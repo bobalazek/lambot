@@ -14,10 +14,6 @@ export interface StrategyParametersInterface {
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
-  // If we have a sudden trough when we are are ready to take profit,
-  // should we wait for it to be stable, or sell anyway?
-  takeProfitTroughTimeoutSeconds: number;
-
   // Should we enable trailing take profit?
   trailingTakeProfitEnabled: boolean;
 
@@ -75,7 +71,6 @@ export class Strategy implements StrategyInterface {
   maximumOpenTradesPerAssetPair: number;
   minimumDailyVolume: number;
   takeProfitPercentage: number;
-  takeProfitTroughTimeoutSeconds: number;
   trailingTakeProfitEnabled: boolean;
   trailingTakeProfitSlipPercentage: number;
   stopLossEnabled: boolean;
@@ -93,7 +88,6 @@ export class Strategy implements StrategyInterface {
     this.maximumOpenTradesPerAssetPair = parameters.maximumOpenTradesPerAssetPair;
     this.minimumDailyVolume = parameters.minimumDailyVolume;
     this.takeProfitPercentage = parameters.takeProfitPercentage;
-    this.takeProfitTroughTimeoutSeconds = parameters.takeProfitTroughTimeoutSeconds;
     this.trailingTakeProfitEnabled = parameters.trailingTakeProfitEnabled;
     this.trailingTakeProfitSlipPercentage = parameters.trailingTakeProfitSlipPercentage;
     this.stopLossEnabled = parameters.stopLossEnabled;
@@ -114,7 +108,6 @@ export class Strategy implements StrategyInterface {
       maximumOpenTradesPerAssetPair: this.maximumOpenTradesPerAssetPair,
       minimumDailyVolume: this.minimumDailyVolume,
       takeProfitPercentage: this.takeProfitPercentage,
-      takeProfitTroughTimeoutSeconds: this.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: this.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: this.trailingTakeProfitSlipPercentage,
       stopLossEnabled: this.stopLossEnabled,
@@ -135,7 +128,6 @@ export class Strategy implements StrategyInterface {
       maximumOpenTradesPerAssetPair: data.maximumOpenTradesPerAssetPair,
       minimumDailyVolume: data.minimumDailyVolume,
       takeProfitPercentage: data.takeProfitPercentage,
-      takeProfitTroughTimeoutSeconds: data.takeProfitTroughTimeoutSeconds,
       trailingTakeProfitEnabled: data.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: data.trailingTakeProfitSlipPercentage,
       stopLossEnabled: data.stopLossEnabled,

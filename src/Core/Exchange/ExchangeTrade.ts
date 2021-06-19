@@ -10,14 +10,14 @@ export interface ExchangeTradeInterface {
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
   timestamp: number;
-  buyPrice: number;
-  sellPrice: number;
-  currentPrice: number;
-  buyFeesPercentage: number;
-  sellFeesPercentage: number;
-  triggerSellPercentage: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
-  buyOrder: ExchangeOrderInterface;
-  sellOrder: ExchangeOrderInterface;
+  buyPrice?: number;
+  sellPrice?: number;
+  buyFeesPercentage?: number;
+  sellFeesPercentage?: number;
+  peakProfitPercentage?: number; // What is the peak prot we reached?
+  triggerSellPercentage?: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
+  buyOrder?: ExchangeOrderInterface;
+  sellOrder?: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
   getFinalProfitPercentage(): number;
   toExport(): unknown;
@@ -43,14 +43,14 @@ export class ExchangeTrade {
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
   timestamp: number;
-  buyPrice: number;
-  sellPrice: number;
-  buyFeesPercentage: number;
-  sellFeesPercentage: number;
-  peakProfitPercentage: number; // What was the highest profit percentage we reached?
-  triggerSellPercentage: number; // At what relative percentage (currentPrice compared to buyPrice) should we sell?
-  buyOrder: ExchangeOrder;
-  sellOrder: ExchangeOrder;
+  buyPrice?: number;
+  sellPrice?: number;
+  buyFeesPercentage?: number;
+  sellFeesPercentage?: number;
+  peakProfitPercentage?: number; // What was the highest profit percentage we reached?
+  triggerSellPercentage?: number; // At what relative percentage (currentPrice compared to buyPrice) should we sell?
+  buyOrder?: ExchangeOrder;
+  sellOrder?: ExchangeOrder;
 
   constructor(
     id: string,
@@ -66,19 +66,32 @@ export class ExchangeTrade {
     this.type = type;
     this.status = status;
     this.timestamp = timestamp;
+    this.peakProfitPercentage = null;
+    this.triggerSellPercentage = null;
   }
 
-  getCurrentProfitPercentage(currentPrice: number): number {
+  getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
+    const buyPrice = includingFees
+      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
+      : this.buyPrice;
+
     return calculatePercentage(
       currentPrice,
-      this.buyPrice
+      buyPrice
     );
   }
 
-  getFinalProfitPercentage(): number {
+  getFinalProfitPercentage(includingFees: boolean = false): number {
+    const sellPrice = includingFees
+      ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)
+      : this.sellPrice;
+    const buyPrice = includingFees
+      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
+      : this.buyPrice;
+
     return calculatePercentage(
-      this.sellPrice,
-      this.buyPrice
+      sellPrice,
+      buyPrice
     );
   }
 

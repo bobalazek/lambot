@@ -219,13 +219,33 @@ export class Trader implements TraderInterface {
     const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
     const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
 
-    return null;
+    if (
+      !strategy.trailingTakeProfitEnabled &&
+      profitPercentage > strategy.takeProfitPercentage
+    ) {
+      return this._executeSell(
+        exchangeTrade,
+        sessionAsset,
+        assetPriceEntryNewest
+      );
+    }
+    // TODO: implement what to do when trailing profit
 
-    return this._executeSell(
-      exchangeTrade,
-      sessionAsset,
-      assetPriceEntryNewest
-    );
+    if (
+      strategy.stopLossEnabled &&
+      strategy.stopLossTimeoutSeconds === 0 &&
+      profitPercentage < 0 &&
+      Math.abs(profitPercentage) > strategy.stopLossPercentage
+    ) {
+      return this._executeSell(
+        exchangeTrade,
+        sessionAsset,
+        assetPriceEntryNewest
+      );
+    }
+    // TODO: implement what to do when stopLossTimeoutSeconds > 0
+
+    return null;
   }
 
   /***** Helpers *****/
