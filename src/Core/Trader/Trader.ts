@@ -217,24 +217,29 @@ export class Trader implements TraderInterface {
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPriceEntryNewest = assetPrice.getNewestEntry();
     const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
-    const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
+    const currentProfitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
 
     if (
       exchangeTrade.peakProfitPercentage === null ||
-      exchangeTrade.peakProfitPercentage < profitPercentage
+      exchangeTrade.peakProfitPercentage < currentProfitPercentage
     ) {
-      exchangeTrade.peakProfitPercentage = profitPercentage;
+      exchangeTrade.peakProfitPercentage = currentProfitPercentage;
     }
 
     if (exchangeTrade.triggerStopLossPercentage === null) {
       exchangeTrade.triggerStopLossPercentage = -strategy.stopLossPercentage;
     }
 
-    if (strategy.trailingStopLossEnabled) {
-      // TODO: implement strategy.trailingStopLossPercentage
+    const expectedTriggerStopLossPercentage = exchangeTrade.peakProfitPercentage - strategy.trailingStopLossPercentage;
+    if (
+      strategy.trailingStopLossEnabled &&
+      strategy.trailingStopLossPercentage < exchangeTrade.peakProfitPercentage - exchangeTrade.triggerStopLossPercentage &&
+      exchangeTrade.triggerStopLossPercentage < expectedTriggerStopLossPercentage
+    ) {
+      exchangeTrade.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
     }
 
-    if (profitPercentage > strategy.takeProfitPercentage) {
+    if (currentProfitPercentage > strategy.takeProfitPercentage) {
       if (!strategy.trailingTakeProfitEnabled) {
         return this._executeSell(
           exchangeTrade,
@@ -245,7 +250,7 @@ export class Trader implements TraderInterface {
 
       if (
         strategy.trailingTakeProfitEnabled &&
-        exchangeTrade.peakProfitPercentage - profitPercentage < strategy.trailingTakeProfitSlipPercentage
+        exchangeTrade.peakProfitPercentage - currentProfitPercentage < strategy.trailingTakeProfitSlipPercentage
       ) {
         return this._executeSell(
           exchangeTrade,
@@ -257,7 +262,7 @@ export class Trader implements TraderInterface {
 
     if (
       strategy.stopLossEnabled &&
-      profitPercentage < exchangeTrade.triggerStopLossPercentage
+      currentProfitPercentage < exchangeTrade.triggerStopLossPercentage
     ) {
       if (strategy.stopLossTimeoutSeconds === 0) {
         return this._executeSell(

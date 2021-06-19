@@ -70,6 +70,9 @@ export class ExchangeTrade {
     this.triggerStopLossPercentage = null;
   }
 
+  /**
+   * Gets the current profit, relating to the current price we provide it.
+   */
   getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
     const buyPrice = includingFees
       ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
@@ -81,6 +84,9 @@ export class ExchangeTrade {
     );
   }
 
+  /**
+   * Gets the final profit of this trade - must be called after the sellPrice is set.
+   */
   getFinalProfitPercentage(includingFees: boolean = false): number {
     const sellPrice = includingFees
       ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)

@@ -12,8 +12,8 @@ export class DefaultStrategy extends Strategy {
     stopLossEnabled = true,
     stopLossPercentage = 2,
     stopLossTimeoutSeconds = 0,
-    trailingStopLossEnabled = false,
-    trailingStopLossPercentage = 0,
+    trailingStopLossEnabled = true,
+    trailingStopLossPercentage = 10,
     buyTroughUptrendPercentage = 0.1,
     buyTroughUptrendMaximumAgeSeconds = 90,
   }) {
