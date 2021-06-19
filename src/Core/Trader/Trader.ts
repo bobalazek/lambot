@@ -7,9 +7,11 @@ import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '.
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
 import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
-import logger from '../../Utils/Logger';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { SessionManager } from '../Session/SessionManager';
+import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
+import { Manager } from '../Manager';
+import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
   session: Session;
@@ -198,42 +200,46 @@ export class Trader implements TraderInterface {
 
     /***** Execute buy! *****/
     const assetPairSymbol = AssetPair.toKey(assetPair);
-    const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
-      strategy.tradeAmount,
-      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
-    )
 
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
+      id,
       assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.BUY,
       strategy.tradeAmount,
-      id
+      assetPriceEntryNewest.price
     );
+    const orderFees = await this.session.exchange.getAssetFees(
+      assetPairSymbol,
+      strategy.tradeAmount,
+      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
+    );
+
+    const buyOrder: ExchangeOrder = !Manager.isTestMode
+      ? await this.session.exchange.addAccountOrder(
+        ExchangeAccountTypeEnum.SPOT,
+        order
+      )
+      : order;
     const exchangeTrade = new ExchangeTrade(
       id,
       assetPair.assetBase,
       assetPair,
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.BUY_PENDING,
+      ExchangeTradeStatusEnum.OPEN,
       now
     );
-    exchangeTrade.buyOrder = order;
     exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
-
-    sessionAsset.trades.push(exchangeTrade);
-
-    // TODO: send to exchange
-
-    exchangeTrade.buyPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
-    exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
+    exchangeTrade.buyOrder = buyOrder;
+    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
 
     logger.notice(chalk.green.bold(
       `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
       `because there was a ${percentage.toPrecision(3)}% profit since the trough!`
     ));
+
+    sessionAsset.trades.push(exchangeTrade);
 
     SessionManager.save(this.session);
 
@@ -257,11 +263,12 @@ export class Trader implements TraderInterface {
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
 
     const order = this._createNewOrder(
+      exchangeTrade.id,
       exchangeTrade.assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
       sessionAsset.strategy.tradeAmount,
-      exchangeTrade.id
+      assetPriceEntryNewest.price
     );
     exchangeTrade.sellOrder = order;
     exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
@@ -414,18 +421,19 @@ export class Trader implements TraderInterface {
   }
 
   _createNewOrder(
+    idPrefix: string,
     assetPair: AssetPair,
     sessionAsset: SessionAsset,
     orderSide: ExchangeOrderSideEnum,
     amount: string,
-    idPrefix: string
+    price: string
   ) {
     return new ExchangeOrder(
       idPrefix + '_' + orderSide,
       assetPair,
       orderSide,
       amount,
-      null,
+      price,
       ExchangeOrderTypeEnum.MARKET,
       this.session.exchange.getAccountType(sessionAsset.tradingType)
     );
