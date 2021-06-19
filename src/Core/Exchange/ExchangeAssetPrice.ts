@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
+import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPriceInterface {
   getEntries(): ExchangeAssetPriceEntryInterface[];
@@ -366,7 +366,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
       string += ' ' + ExchangeAssetTrendIconMap.get(status);
 
       if (percentage) {
-        string += ' ' + colorTextByValue(percentage);
+        string += ' ' + colorTextPercentageByValue(percentage);
       }
     }
 

@@ -6,7 +6,7 @@ export async function asyncForEach<T>(array: Array<T>, callback: (item: T, index
   }
 }
 
-export function colorTextByValue(value: number) {
+export function colorTextPercentageByValue(value: number) {
   if (value > 0) {
     return chalk.green('+' + value.toPrecision(3) + '%');
   } else if (value < 0) {

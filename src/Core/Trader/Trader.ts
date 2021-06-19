@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
-import { ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
+import { ExchangeAssetPriceEntryInterface, ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
-import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
+import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
@@ -186,64 +186,27 @@ export class Trader implements TraderInterface {
     }
 
     const uptrendThresholdMaximumAgeTime = strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000;
-    const percentage = this._getLargestTroughPercentage(
+    const profitPercentage = this._getLargestTroughPercentage(
       assetPair,
       uptrendThresholdMaximumAgeTime
     );
 
     if (
-      !percentage ||
-      percentage < strategy.buyTroughUptrendThresholdPercentage
+      !profitPercentage ||
+      profitPercentage < strategy.buyTroughUptrendThresholdPercentage
     ) {
       return null;
     }
 
-    /***** Execute buy! *****/
-    const assetPairSymbol = AssetPair.toKey(assetPair);
+    // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
 
-    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
-    const order = this._createNewOrder(
-      id,
+    return await this._executeBuy(
+      now,
       assetPair,
       sessionAsset,
-      ExchangeOrderSideEnum.BUY,
-      strategy.tradeAmount,
-      assetPriceEntryNewest.price
+      assetPriceEntryNewest,
+      profitPercentage
     );
-    const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
-      strategy.tradeAmount,
-      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
-    );
-
-    const buyOrder: ExchangeOrder = !Manager.isTestMode
-      ? await this.session.exchange.addAccountOrder(
-        ExchangeAccountTypeEnum.SPOT,
-        order
-      )
-      : order;
-    const exchangeTrade = new ExchangeTrade(
-      id,
-      assetPair.assetBase,
-      assetPair,
-      ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
-      now
-    );
-    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
-    exchangeTrade.buyOrder = buyOrder;
-    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
-
-    logger.notice(chalk.green.bold(
-      `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
-      `because there was a ${percentage.toPrecision(3)}% profit since the trough!`
-    ));
-
-    sessionAsset.trades.push(exchangeTrade);
-
-    SessionManager.save(this.session);
-
-    return exchangeTrade;
   }
 
   async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
@@ -251,7 +214,6 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
-    const now = Date.now();
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPriceEntryNewest = assetPrice.getNewestEntry();
     const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
@@ -259,35 +221,11 @@ export class Trader implements TraderInterface {
 
     return null;
 
-    /***** Execute sell! *****/
-    const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
-
-    const order = this._createNewOrder(
-      exchangeTrade.id,
-      exchangeTrade.assetPair,
+    return this._executeSell(
+      exchangeTrade,
       sessionAsset,
-      ExchangeOrderSideEnum.SELL,
-      sessionAsset.strategy.tradeAmount,
-      assetPriceEntryNewest.price
+      assetPriceEntryNewest
     );
-    exchangeTrade.sellOrder = order;
-    exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
-
-    // TODO: send to exchange
-
-    exchangeTrade.sellPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
-    exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
-
-    const profitAmount = exchangeTrade.buyPrice - exchangeTrade.sellPrice;
-
-    logger.notice(chalk.green.bold(
-      `I am selling "${assetPairSymbol}". ` +
-      `I made "${profitAmount.toPrecision(3)}" (${colorTextByValue(profitPercentage)}) profit!`
-    ));
-
-    SessionManager.save(this.session);
-
-    return exchangeTrade;
   }
 
   /***** Helpers *****/
@@ -386,7 +324,7 @@ export class Trader implements TraderInterface {
           chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
           ` @ ${currentAssetPrice}` +
           ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
-          ` current profit: ${colorTextByValue(profitPercentage)}`
+          ` current profit: ${colorTextPercentageByValue(profitPercentage)}`
         );
       });
     });
@@ -465,5 +403,101 @@ export class Trader implements TraderInterface {
     return this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
     );
+  }
+
+  async _executeBuy(
+    now: number,
+    assetPair: AssetPair,
+    sessionAsset: SessionAsset,
+    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface,
+    profitPercentage: number
+  ): Promise<ExchangeTrade> {
+    const assetPairSymbol = AssetPair.toKey(assetPair);
+
+    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
+    const order = this._createNewOrder(
+      id,
+      assetPair,
+      sessionAsset,
+      ExchangeOrderSideEnum.BUY,
+      sessionAsset.strategy.tradeAmount,
+      assetPriceEntryNewest.price
+    );
+    const orderFees = await this.session.exchange.getAssetFees(
+      assetPairSymbol,
+      sessionAsset.strategy.tradeAmount,
+      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
+    );
+
+    const buyOrder: ExchangeOrder = !Manager.isTestMode
+      ? await this.session.exchange.addAccountOrder(
+        ExchangeAccountTypeEnum.SPOT,
+        order
+      )
+      : order;
+    const exchangeTrade = new ExchangeTrade(
+      id,
+      assetPair.assetBase,
+      assetPair,
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.OPEN,
+      now
+    );
+    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
+    exchangeTrade.buyOrder = buyOrder;
+    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
+
+    logger.notice(chalk.green.bold(
+      `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
+      `because there was a ${profitPercentage.toPrecision(3)}% profit since the trough!`
+    ));
+
+    sessionAsset.trades.push(exchangeTrade);
+
+    SessionManager.save(this.session);
+
+    return exchangeTrade;
+  }
+
+  async _executeSell(
+    exchangeTrade: ExchangeTrade,
+    sessionAsset: SessionAsset,
+    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface
+  ): Promise<ExchangeTrade> {
+    const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
+
+    const order = this._createNewOrder(
+      exchangeTrade.id,
+      exchangeTrade.assetPair,
+      sessionAsset,
+      ExchangeOrderSideEnum.SELL,
+      sessionAsset.strategy.tradeAmount,
+      assetPriceEntryNewest.price
+    );
+    const orderFees = await this.session.exchange.getAssetFees(
+      assetPairSymbol,
+      sessionAsset.strategy.tradeAmount,
+      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
+    );
+
+    const sellOrder: ExchangeOrder = !Manager.isTestMode
+      ? await this.session.exchange.addAccountOrder(
+        ExchangeAccountTypeEnum.SPOT,
+        order
+      )
+      : order;
+    exchangeTrade.sellFeesPercentage = orderFees.amountPercentage;
+    exchangeTrade.sellOrder = sellOrder;
+    exchangeTrade.sellPrice = parseFloat(sellOrder.price);
+    exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${assetPairSymbol}". ` +
+      `I made (${colorTextPercentageByValue(exchangeTrade.getFinalProfitPercentage())}) profit!`
+    ));
+
+    SessionManager.save(this.session);
+
+    return exchangeTrade;
   }
 }

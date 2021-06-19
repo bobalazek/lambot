@@ -19,6 +19,7 @@ export interface ExchangeTradeInterface {
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
+  getFinalProfitPercentage(): number;
   toExport(): unknown;
 }
 
@@ -70,6 +71,13 @@ export class ExchangeTrade {
   getCurrentProfitPercentage(currentPrice: number): number {
     return calculatePercentage(
       currentPrice,
+      this.buyPrice
+    );
+  }
+
+  getFinalProfitPercentage(): number {
+    return calculatePercentage(
+      this.sellPrice,
       this.buyPrice
     );
   }
