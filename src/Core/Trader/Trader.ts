@@ -220,30 +220,55 @@ export class Trader implements TraderInterface {
     const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
 
     if (
-      !strategy.trailingTakeProfitEnabled &&
-      profitPercentage > strategy.takeProfitPercentage
+      exchangeTrade.peakProfitPercentage === null ||
+      exchangeTrade.peakProfitPercentage < profitPercentage
     ) {
-      return this._executeSell(
-        exchangeTrade,
-        sessionAsset,
-        assetPriceEntryNewest
-      );
+      exchangeTrade.peakProfitPercentage = profitPercentage;
     }
-    // TODO: implement what to do when trailing profit
+
+    if (exchangeTrade.triggerStopLossPercentage === null) {
+      exchangeTrade.triggerStopLossPercentage = -strategy.stopLossPercentage;
+    }
+
+    if (strategy.trailingStopLossEnabled) {
+      // TODO: implement strategy.trailingStopLossPercentage
+    }
+
+    if (profitPercentage > strategy.takeProfitPercentage) {
+      if (!strategy.trailingTakeProfitEnabled) {
+        return this._executeSell(
+          exchangeTrade,
+          sessionAsset,
+          assetPriceEntryNewest
+        );
+      }
+
+      if (
+        strategy.trailingTakeProfitEnabled &&
+        exchangeTrade.peakProfitPercentage - profitPercentage < strategy.trailingTakeProfitSlipPercentage
+      ) {
+        return this._executeSell(
+          exchangeTrade,
+          sessionAsset,
+          assetPriceEntryNewest
+        );
+      }
+    }
 
     if (
       strategy.stopLossEnabled &&
-      strategy.stopLossTimeoutSeconds === 0 &&
-      profitPercentage < 0 &&
-      Math.abs(profitPercentage) > strategy.stopLossPercentage
+      profitPercentage < exchangeTrade.triggerStopLossPercentage
     ) {
-      return this._executeSell(
-        exchangeTrade,
-        sessionAsset,
-        assetPriceEntryNewest
-      );
+      if (strategy.stopLossTimeoutSeconds === 0) {
+        return this._executeSell(
+          exchangeTrade,
+          sessionAsset,
+          assetPriceEntryNewest
+        );
+      }
+
+      // TODO: set timeout when to execute
     }
-    // TODO: implement what to do when stopLossTimeoutSeconds > 0
 
     return null;
   }

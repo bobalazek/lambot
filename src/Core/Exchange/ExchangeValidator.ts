@@ -65,6 +65,30 @@ export class ExchangeValidator {
           process.exit(1);
         }
 
+        // Check if trailing take profit is enabled and we have no slippage set
+        if (
+          sessionAsset.strategy.trailingTakeProfitEnabled &&
+          !(sessionAsset.strategy.trailingTakeProfitSlipPercentage > 0)
+        ) {
+          logger.critical(chalk.red.bold(
+            `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
+          ));
+
+          process.exit(1);
+        }
+
+        // Check if trailing take profit is enabled and we have no slippage set
+        if (
+          sessionAsset.strategy.trailingStopLossEnabled &&
+          !(sessionAsset.strategy.trailingStopLossPercentage > 0)
+        ) {
+          logger.critical(chalk.red.bold(
+            `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
+          ));
+
+          process.exit(1);
+        }
+
         // Check if our order amount is too small or big
         const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
         const tradeAmount = parseFloat(sessionAsset.strategy.tradeAmount);

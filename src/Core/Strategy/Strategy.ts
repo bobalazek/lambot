@@ -11,6 +11,7 @@ export interface StrategyParametersInterface {
   // What's the minimum daily volume we need to even consider this trade? Set -1 for no limit.
   minimumDailyVolume: number;
 
+  /********* Take Profit **********/
   // How much do we want to get profit, until we trigger a sell?
   takeProfitPercentage: number;
 
@@ -20,6 +21,7 @@ export interface StrategyParametersInterface {
   // How much can the value trough (from the highest point) until we actually sell?
   trailingTakeProfitSlipPercentage: number;
 
+  /********* Stop Loss **********/
   // Should we enable stop loss?
   stopLossEnabled: boolean;
 
@@ -38,15 +40,9 @@ export interface StrategyParametersInterface {
   // How much percentage in profit do we need to increase,
   // relative to the CURRENT stopLossPercentage,
   // before we should increase the stop loss again?
-  trailingStopLossThresholdPercentage: number;
+  trailingStopLossPercentage: number;
 
-  // Relates to the option above. It specifies by how much should it increase,
-  // once it reaches that values specified above.
-  // For example, the above value you'd probably set like 0.5 percent,
-  // while this value, you would probably only set to 0.25, so it slowly
-  // follows the above value "from a distance", in case of small dips.
-  trailingStopLossThresholdValuePercentage: number;
-
+  /********* Buy Trough **********/
   // How much percentage can the price rise after a trough, until we want to trigger a buy order?
   // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
   buyTroughUptrendThresholdPercentage: number;
@@ -77,8 +73,7 @@ export class Strategy implements StrategyInterface {
   stopLossPercentage: number;
   stopLossTimeoutSeconds: number;
   trailingStopLossEnabled: boolean;
-  trailingStopLossThresholdPercentage: number;
-  trailingStopLossThresholdValuePercentage: number;
+  trailingStopLossPercentage: number;
   buyTroughUptrendThresholdPercentage: number;
   buyTroughUptrendThresholdMaximumAgeSeconds: number;
 
@@ -94,8 +89,7 @@ export class Strategy implements StrategyInterface {
     this.stopLossPercentage = parameters.stopLossPercentage;
     this.stopLossTimeoutSeconds = parameters.stopLossTimeoutSeconds;
     this.trailingStopLossEnabled = parameters.trailingStopLossEnabled;
-    this.trailingStopLossThresholdPercentage = parameters.trailingStopLossThresholdPercentage;
-    this.trailingStopLossThresholdValuePercentage = parameters.trailingStopLossThresholdValuePercentage;
+    this.trailingStopLossPercentage = parameters.trailingStopLossPercentage;
     this.buyTroughUptrendThresholdPercentage = parameters.buyTroughUptrendThresholdPercentage;
     this.buyTroughUptrendThresholdMaximumAgeSeconds = parameters.buyTroughUptrendThresholdMaximumAgeSeconds;
   }
@@ -114,8 +108,7 @@ export class Strategy implements StrategyInterface {
       stopLossPercentage: this.stopLossPercentage,
       stopLossTimeoutSeconds: this.stopLossTimeoutSeconds,
       trailingStopLossEnabled: this.trailingStopLossEnabled,
-      trailingStopLossThresholdPercentage: this.trailingStopLossThresholdPercentage,
-      trailingStopLossThresholdValuePercentage: this.trailingStopLossThresholdValuePercentage,
+      trailingStopLossPercentage: this.trailingStopLossPercentage,
       buyTroughUptrendThresholdPercentage: this.buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds: this.buyTroughUptrendThresholdMaximumAgeSeconds,
     };
@@ -134,8 +127,7 @@ export class Strategy implements StrategyInterface {
       stopLossPercentage: data.stopLossPercentage,
       stopLossTimeoutSeconds: data.stopLossTimeoutSeconds,
       trailingStopLossEnabled: data.trailingStopLossEnabled,
-      trailingStopLossThresholdPercentage: data.trailingStopLossThresholdPercentage,
-      trailingStopLossThresholdValuePercentage: data.trailingStopLossThresholdValuePercentage,
+      trailingStopLossPercentage: data.trailingStopLossPercentage,
       buyTroughUptrendThresholdPercentage: data.buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds: data.buyTroughUptrendThresholdMaximumAgeSeconds,
     });

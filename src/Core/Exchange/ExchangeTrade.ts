@@ -15,7 +15,7 @@ export interface ExchangeTradeInterface {
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
   peakProfitPercentage?: number; // What is the peak prot we reached?
-  triggerSellPercentage?: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
+  triggerStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger (can be positive or negative?
   buyOrder?: ExchangeOrderInterface;
   sellOrder?: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
@@ -47,8 +47,8 @@ export class ExchangeTrade {
   sellPrice?: number;
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
-  peakProfitPercentage?: number; // What was the highest profit percentage we reached?
-  triggerSellPercentage?: number; // At what relative percentage (currentPrice compared to buyPrice) should we sell?
+  peakProfitPercentage?: number;
+  triggerStopLossPercentage?: number;
   buyOrder?: ExchangeOrder;
   sellOrder?: ExchangeOrder;
 
@@ -67,7 +67,7 @@ export class ExchangeTrade {
     this.status = status;
     this.timestamp = timestamp;
     this.peakProfitPercentage = null;
-    this.triggerSellPercentage = null;
+    this.triggerStopLossPercentage = null;
   }
 
   getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
@@ -109,7 +109,7 @@ export class ExchangeTrade {
       buyFeesPercentage: this.buyFeesPercentage,
       sellFeesPercentage: this.sellFeesPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
-      triggerSellPercentage: this.triggerSellPercentage,
+      triggerStopLossPercentage: this.triggerStopLossPercentage,
       buyOrder: this.buyOrder?.toExport(),
       sellOrder: this.sellOrder?.toExport(),
     };
@@ -145,8 +145,8 @@ export class ExchangeTrade {
       exchangeTrade.peakProfitPercentage = data.peakProfitPercentage;
     }
 
-    if (data.triggerSellPercentage) {
-      exchangeTrade.triggerSellPercentage = data.triggerSellPercentage;
+    if (data.triggerStopLossPercentage) {
+      exchangeTrade.triggerStopLossPercentage = data.triggerStopLossPercentage;
     }
 
     if (data.buyOrder) {

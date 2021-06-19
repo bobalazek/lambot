@@ -13,8 +13,7 @@ export class DefaultStrategy extends Strategy {
     stopLossPercentage = 2,
     stopLossTimeoutSeconds = 0,
     trailingStopLossEnabled = false,
-    trailingStopLossThresholdPercentage = 0,
-    trailingStopLossThresholdValuePercentage = 0,
+    trailingStopLossPercentage = 0,
     buyTroughUptrendThresholdPercentage = 0.1,
     buyTroughUptrendThresholdMaximumAgeSeconds = 90,
   }) {
@@ -30,8 +29,7 @@ export class DefaultStrategy extends Strategy {
       stopLossPercentage,
       stopLossTimeoutSeconds,
       trailingStopLossEnabled,
-      trailingStopLossThresholdPercentage,
-      trailingStopLossThresholdValuePercentage,
+      trailingStopLossPercentage,
       buyTroughUptrendThresholdPercentage,
       buyTroughUptrendThresholdMaximumAgeSeconds,
     });
