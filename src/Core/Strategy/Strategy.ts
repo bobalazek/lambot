@@ -57,6 +57,9 @@ export interface StrategyParametersInterface {
 
   // Relates to the setting above. What is the maximum age (in seconds) can the trough be,
   // so we would still consider a buy?
+  // For example: In {buyTroughUptrendThresholdMaximumAgeSeconds} seconds,
+  // we expect the price to jump {buyTroughUptrendThresholdPercentage}% of profit
+  // so we actually but this asset.
   buyTroughUptrendThresholdMaximumAgeSeconds: number;
 }
 

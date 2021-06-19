@@ -171,9 +171,10 @@ export class Trader implements TraderInterface {
       }
     }
 
+    const uptrendThresholdMaximumAgeTime = strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000;
     const percentage = this._getLargestTroughPercentage(
       assetPair,
-      strategy.buyTroughUptrendThresholdMaximumAgeSeconds * 1000
+      uptrendThresholdMaximumAgeTime
     );
 
     if (
@@ -217,7 +218,8 @@ export class Trader implements TraderInterface {
     exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
 
     logger.notice(chalk.green.bold(
-      `I am buying "${assetPairSymbol}" at "${exchangeTrade.buyPrice}"!`
+      `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
+      `because there was a ${percentage.toPrecision(3)}% profit since the trough!`
     ));
 
     return order;

@@ -17,7 +17,7 @@ export class DefaultStrategy extends Strategy {
     trailingStopLossThresholdPercentage = 0,
     trailingStopLossThresholdValuePercentage = 0,
     buyTroughUptrendThresholdPercentage = 0.1,
-    buyTroughUptrendThresholdMaximumAgeSeconds = 300,
+    buyTroughUptrendThresholdMaximumAgeSeconds = 90,
   }) {
     super({
       tradeAmount,
