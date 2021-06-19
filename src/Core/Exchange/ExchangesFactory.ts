@@ -4,7 +4,7 @@ import { BinanceExchange } from '../../Exchanges/BinanceExchange';
 import { MockExchange } from '../../Exchanges/MockExchange';
 
 // Note: You will ALWAYS need to fetch the Exchange via the ExchangesFactory,
-// else you can encounter circular dependency issues!
+// else you can encounter circular dependency issues (at least in jest)!
 
 export enum ExchangesEnum {
   // Should be lowercase, the same as the key (in src/Exchanges/*Exchange.ts) for each exchange

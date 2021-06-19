@@ -16,7 +16,6 @@ import { Session } from '../Session/Session';
 import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeOrder } from './ExchangeOrder';
-import { Trader } from '../Trader/Trader';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 
@@ -28,9 +27,7 @@ export interface ExchangeInterface {
   accounts: ExchangeAccountsMap;
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
-  trader: Trader;
   boot(session: Session): Promise<boolean>;
-  start(): Promise<boolean>;
   getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
@@ -50,7 +47,6 @@ export class Exchange implements ExchangeInterface {
   assetPairPrices: ExchangeAssetPricesMap;
   accounts: ExchangeAccountsMap;
   session: Session;
-  trader: Trader;
 
   constructor(
     key: string,
@@ -82,14 +78,6 @@ export class Exchange implements ExchangeInterface {
     await SessionManager.save(this.session);
 
     return true;
-  }
-
-  async start(): Promise<boolean> {
-    this.trader = new Trader(this.session);
-
-    await this.trader.start();
-
-    return true
   }
 
   /***** API Data fetching ******/
