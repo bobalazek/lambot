@@ -139,7 +139,7 @@ export class Trader implements TraderInterface {
       trades,
     } = sessionAsset;
 
-    // TODO: check if it isn't too long since the price change (because we are (a-)waiting for this method to finish)
+    const now = Date.now();
 
     const openTrades = sessionAsset.getOpenTrades();
     if (
@@ -167,6 +167,12 @@ export class Trader implements TraderInterface {
     }
 
     const assetPrice = this._getAssetPairPrice(assetPair);
+    const assetPriceEntryNewest = assetPrice.getNewestEntry();
+    const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
+    if (now - assetPriceEntryNewest.timestamp > updateIntervalTime) {
+      return null;
+    }
+
     if (strategy.minimumDailyVolume !== -1) {
       const assetPriceStatisticsNewest = assetPrice.getNewestStatistics();
       if (
@@ -184,30 +190,26 @@ export class Trader implements TraderInterface {
     );
 
     if (
-      percentage === null || // No trough yet
-      percentage === 0 || // That means that we are currently in a trough!
+      !percentage ||
       percentage < strategy.buyTroughUptrendThresholdPercentage
     ) {
       return null;
     }
 
     // Execute buy!
-    const { tradeAmount } = sessionAsset.strategy;
     const assetPairSymbol = AssetPair.toKey(assetPair);
-    const assetPriceNewest = assetPrice.getNewestEntry();
     const orderFees = await this.session.exchange.getAssetFees(
       assetPairSymbol,
-      tradeAmount,
+      strategy.tradeAmount,
       ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
     )
 
-    const now = Date.now();
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.BUY,
-      tradeAmount,
+      strategy.tradeAmount,
       id
     );
     const exchangeTrade = new ExchangeTrade(
@@ -227,7 +229,7 @@ export class Trader implements TraderInterface {
 
     // Now that we "pseudo" created the trade, change the status to open
     // That will later happen when you actually buy the asset on the exchange.
-    exchangeTrade.buyPrice = parseFloat(assetPriceNewest.price); // TODO: we'll get that back from the response
+    exchangeTrade.buyPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
 
     logger.notice(chalk.green.bold(
@@ -256,7 +258,7 @@ export class Trader implements TraderInterface {
     // Exectute sell!
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceNewest = assetPrice.getNewestEntry();
+    const assetPriceEntryNewest = assetPrice.getNewestEntry();
 
     const order = this._createNewOrder(
       exchangeTrade.assetPair,
@@ -278,7 +280,7 @@ export class Trader implements TraderInterface {
 
     // Now that we "pseudo" created the trade, change the status to closed
     // That will later happen when you actually sell the asset on the exchange.
-    exchangeTrade.sellPrice = parseFloat(assetPriceNewest.price); // TODO: we'll get that back from the response
+    exchangeTrade.sellPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
     logger.notice(chalk.green.bold(
