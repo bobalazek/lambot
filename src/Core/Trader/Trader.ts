@@ -87,20 +87,20 @@ export class Trader implements TraderInterface {
   async processCurrentTrades(): Promise<void> {
     logger.debug('Starting to process trades ...');
 
-    this.session.assets.forEach((sessionAsset) => {
-      sessionAsset.getOpenTrades().forEach(async (exchangeTrade) => {
+    this.session.assets.forEach(async (sessionAsset) => {
+      for (const exchangeTrade of sessionAsset.getOpenTrades()) {
         await this.checkForSellSignal(exchangeTrade, sessionAsset);
-      });
+      }
     });
   }
 
   async processPotentialTrades(): Promise<void> {
     logger.debug('Starting to process new potential trades ...');
 
-    this.session.assets.forEach((sessionAsset) => {
-      this.getSortedAssetPairs(sessionAsset).forEach(async (assetPair) => {
+    this.session.assets.forEach(async (sessionAsset) => {
+      for (const assetPair of this.getSortedAssetPairs(sessionAsset)) {
         await this.checkForBuySignal(assetPair, sessionAsset);
-      });
+      }
     });
   }
 
@@ -497,14 +497,14 @@ export class Trader implements TraderInterface {
     exchangeTrade.buyOrder = buyOrder;
     exchangeTrade.buyPrice = parseFloat(buyOrder.price);
 
+    sessionAsset.trades.push(exchangeTrade);
+
+    SessionManager.save(this.session);
+
     logger.notice(chalk.green.bold(
       `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
       `because there was a ${profitPercentage.toPrecision(3)}% profit since the trough!`
     ));
-
-    sessionAsset.trades.push(exchangeTrade);
-
-    SessionManager.save(this.session);
 
     return exchangeTrade;
   }
@@ -541,12 +541,12 @@ export class Trader implements TraderInterface {
     exchangeTrade.sellPrice = parseFloat(sellOrder.price);
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
+    SessionManager.save(this.session);
+
     logger.notice(chalk.green.bold(
       `I am selling "${assetPairSymbol}". ` +
       `I made (${colorTextPercentageByValue(exchangeTrade.getFinalProfitPercentage())}) profit!`
     ));
-
-    SessionManager.save(this.session);
 
     return exchangeTrade;
   }
