@@ -59,7 +59,9 @@ export interface StrategyParametersInterface {
   // so we would still consider a buy?
   // For example: In {buyTroughUptrendThresholdMaximumAgeSeconds} seconds,
   // we expect the price to jump {buyTroughUptrendThresholdPercentage}% of profit
-  // so we actually but this asset.
+  // so we actually but this asset. However, if session.config.warmupPeriodSeconds
+  // is set to lower than that, it will only go trough that time range,
+  // before trying to find if it can buy an asset.
   buyTroughUptrendThresholdMaximumAgeSeconds: number;
 }
 

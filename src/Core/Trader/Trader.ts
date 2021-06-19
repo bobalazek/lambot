@@ -8,6 +8,8 @@ import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
 import { calculatePercentage, colorTextByValue } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
+import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
+import { SessionManager } from '../Session/SessionManager';
 
 export interface TraderInterface {
   session: Session;
@@ -18,14 +20,16 @@ export interface TraderInterface {
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
   getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
-  checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
-  checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder>;
+  checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
+  checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
 }
 
 export enum TraderStatusEnum {
   STOPPED = 'STOPPED',
   RUNNING = 'RUNNING',
 }
+
+const ID_PREFIX = 'LAMBOT_';
 
 export class Trader implements TraderInterface {
   session: Session;
@@ -129,7 +133,7 @@ export class Trader implements TraderInterface {
     });
   }
 
-  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
     const {
       strategy,
       trades,
@@ -186,16 +190,22 @@ export class Trader implements TraderInterface {
     }
 
     // Execute buy!
+    const { tradeAmount } = sessionAsset.strategy;
     const assetPairSymbol = AssetPair.toKey(assetPair);
     const assetPriceNewest = assetPrice.getNewestEntry();
+    const orderFees = await this.session.exchange.getAssetFees(
+      assetPairSymbol,
+      tradeAmount,
+      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
+    )
 
     const now = Date.now();
-    const id = 'LAMBOT_' + this.session.id + '_' + assetPairSymbol + '_' + now;
+    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
       assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.BUY,
-      sessionAsset.strategy.tradeAmount,
+      tradeAmount,
       id
     );
     const exchangeTrade = new ExchangeTrade(
@@ -206,8 +216,8 @@ export class Trader implements TraderInterface {
       ExchangeTradeStatusEnum.BUY_PENDING,
       now
     );
-    exchangeTrade.buyPrice = parseFloat(assetPriceNewest.price);
     exchangeTrade.buyOrder = order;
+    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
 
     sessionAsset.trades.push(exchangeTrade);
 
@@ -215,6 +225,7 @@ export class Trader implements TraderInterface {
 
     // Now that we "pseudo" created the trade, change the status to open
     // That will later happen when you actually buy the asset on the exchange.
+    exchangeTrade.buyPrice = parseFloat(assetPriceNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
 
     logger.notice(chalk.green.bold(
@@ -222,10 +233,12 @@ export class Trader implements TraderInterface {
       `because there was a ${percentage.toPrecision(3)}% profit since the trough!`
     ));
 
-    return order;
+    SessionManager.save(this.session);
+
+    return exchangeTrade;
   }
 
-  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeOrder> {
+  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
     const {
       strategy,
     } = sessionAsset;
@@ -248,7 +261,6 @@ export class Trader implements TraderInterface {
       sessionAsset.strategy.tradeAmount,
       exchangeTrade.id
     );
-    exchangeTrade.sellPrice = parseFloat(assetPriceNewest.price);
     exchangeTrade.sellOrder = order;
     exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
 
@@ -262,13 +274,17 @@ export class Trader implements TraderInterface {
 
     // Now that we "pseudo" created the trade, change the status to closed
     // That will later happen when you actually sell the asset on the exchange.
+    exchangeTrade.sellPrice = parseFloat(assetPriceNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
     logger.notice(chalk.green.bold(
-      `I am selling "${assetPairSymbol}". I made "${profitAmount.toPrecision(3)}" (${colorTextByValue(profitPercentage)}) profit!`
+      `I am selling "${assetPairSymbol}". ` +
+      `I made "${profitAmount.toPrecision(3)}" (${colorTextByValue(profitPercentage)}) profit!`
     ));
 
-    return order;
+    SessionManager.save(this.session);
+
+    return exchangeTrade;
   }
 
   /***** Helpers *****/

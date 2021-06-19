@@ -9,8 +9,10 @@ export interface ExchangeTradeInterface {
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
   timestamp: number;
-  buyPrice: number; // At which price did we buy the asset?
-  sellPrice: number; // At which price did we sell the asset?
+  buyPrice: number;
+  sellPrice: number;
+  buyFeesPercentage: number;
+  sellFeesPercentage: number;
   triggerSellPercentage: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
@@ -39,10 +41,12 @@ export class ExchangeTrade {
   timestamp: number;
   buyPrice: number;
   sellPrice: number;
-  buyOrder: ExchangeOrder;
-  sellOrder: ExchangeOrder;
+  buyFeesPercentage: number;
+  sellFeesPercentage: number;
   peakProfitPercentage: number; // What was the highest profit percentage we reached?
   triggerSellPercentage: number; // At what relative percentage (currentPrice compared to buyPrice) should we sell?
+  buyOrder: ExchangeOrder;
+  sellOrder: ExchangeOrder;
 
   constructor(
     id: string,
@@ -71,10 +75,12 @@ export class ExchangeTrade {
       timestamp: this.timestamp,
       buyPrice: this.buyPrice,
       sellPrice: this.sellPrice,
-      buyOrder: this.buyOrder?.toExport(),
-      sellOrder: this.sellOrder?.toExport(),
+      buyFeesPercentage: this.buyFeesPercentage,
+      sellFeesPercentage: this.sellFeesPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
       triggerSellPercentage: this.triggerSellPercentage,
+      buyOrder: this.buyOrder?.toExport(),
+      sellOrder: this.sellOrder?.toExport(),
     };
   }
 
@@ -95,12 +101,12 @@ export class ExchangeTrade {
       exchangeTrade.sellPrice = data.sellPrice;
     }
 
-    if (data.buyOrder) {
-      exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
+    if (data.buyFeesPercentage) {
+      exchangeTrade.buyFeesPercentage = data.buyFeesPercentage;
     }
 
-    if (data.sellOrder) {
-      exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
+    if (data.sellFeesPercentage) {
+      exchangeTrade.sellFeesPercentage = data.sellFeesPercentage;
     }
 
     if (data.peakProfitPercentage) {
@@ -109,6 +115,14 @@ export class ExchangeTrade {
 
     if (data.triggerSellPercentage) {
       exchangeTrade.triggerSellPercentage = data.triggerSellPercentage;
+    }
+
+    if (data.buyOrder) {
+      exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
+    }
+
+    if (data.sellOrder) {
+      exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
     }
 
     return exchangeTrade;

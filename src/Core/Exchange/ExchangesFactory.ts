@@ -8,7 +8,7 @@ export enum ExchangesEnum {
 }
 
 export class ExchangesFactory {
-  static get(key: ExchangesEnum | string, apiCredentials?: ExchangeApiCredentialsInterface): Exchange {
+  static get(key: ExchangesEnum, apiCredentials?: ExchangeApiCredentialsInterface): Exchange {
     switch (key) {
       case ExchangesEnum.BINANCE:
         if (!apiCredentials) {
