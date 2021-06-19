@@ -1,6 +1,7 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
+import { calculatePercentage } from '../../Utils/Helpers';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
@@ -11,11 +12,13 @@ export interface ExchangeTradeInterface {
   timestamp: number;
   buyPrice: number;
   sellPrice: number;
+  currentPrice: number;
   buyFeesPercentage: number;
   sellFeesPercentage: number;
   triggerSellPercentage: number; // At which price should we trigger a sell? This can be floating, if we have a trailing take profit
   buyOrder: ExchangeOrderInterface;
   sellOrder: ExchangeOrderInterface;
+  getCurrentProfitPercentage(currentPrice: number): number;
   toExport(): unknown;
 }
 
@@ -62,6 +65,13 @@ export class ExchangeTrade {
     this.type = type;
     this.status = status;
     this.timestamp = timestamp;
+  }
+
+  getCurrentProfitPercentage(currentPrice: number): number {
+    return calculatePercentage(
+      currentPrice,
+      this.buyPrice
+    );
   }
 
   /***** Export/Import *****/

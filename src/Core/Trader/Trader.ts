@@ -196,7 +196,7 @@ export class Trader implements TraderInterface {
       return null;
     }
 
-    // Execute buy!
+    /***** Execute buy! *****/
     const assetPairSymbol = AssetPair.toKey(assetPair);
     const orderFees = await this.session.exchange.getAssetFees(
       assetPairSymbol,
@@ -227,8 +227,6 @@ export class Trader implements TraderInterface {
 
     // TODO: send to exchange
 
-    // Now that we "pseudo" created the trade, change the status to open
-    // That will later happen when you actually buy the asset on the exchange.
     exchangeTrade.buyPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.OPEN;
 
@@ -247,18 +245,16 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
-    // TODO: check if it isn't too long since the price change (because we are (a-)waiting for this method to finish)
-
-    const currentProfitPercentage = this._getExchangeTradeCurrentProfitPercentage(
-      exchangeTrade
-    );
+    const now = Date.now();
+    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+    const assetPriceEntryNewest = assetPrice.getNewestEntry();
+    const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
+    const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
 
     return null;
 
-    // Exectute sell!
+    /***** Execute sell! *****/
     const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
-    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceEntryNewest = assetPrice.getNewestEntry();
 
     const order = this._createNewOrder(
       exchangeTrade.assetPair,
@@ -270,18 +266,12 @@ export class Trader implements TraderInterface {
     exchangeTrade.sellOrder = order;
     exchangeTrade.status = ExchangeTradeStatusEnum.SELL_PENDING;
 
-    const profitAmount = exchangeTrade.buyPrice - exchangeTrade.sellPrice;
-    const profitPercentage = calculatePercentage(
-      exchangeTrade.buyPrice,
-      exchangeTrade.sellPrice
-    );
-
     // TODO: send to exchange
 
-    // Now that we "pseudo" created the trade, change the status to closed
-    // That will later happen when you actually sell the asset on the exchange.
     exchangeTrade.sellPrice = parseFloat(assetPriceEntryNewest.price); // TODO: we'll get that back from the response
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
+
+    const profitAmount = exchangeTrade.buyPrice - exchangeTrade.sellPrice;
 
     logger.notice(chalk.green.bold(
       `I am selling "${assetPairSymbol}". ` +
@@ -378,13 +368,9 @@ export class Trader implements TraderInterface {
     this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
         const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-        const assetPriceNewest = assetPrice.getNewestEntry();
-        const currentAssetPrice = parseFloat(assetPriceNewest.price);
-        const buyAssetPrice = exchangeTrade.buyPrice;
-        const currentProfitPercentage = calculatePercentage(
-          currentAssetPrice,
-          buyAssetPrice
-        );
+        const assetPriceEntryNewest = assetPrice.getNewestEntry();
+        const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
+        const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
         const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
 
         hasAnyOpenTrades = true;
@@ -392,8 +378,8 @@ export class Trader implements TraderInterface {
         logger.info(
           chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
           ` @ ${currentAssetPrice}` +
-          ` (bought @ ${buyAssetPrice}; ${timeAgoSeconds} seconds ago)` +
-          ` current profit: ${colorTextByValue(currentProfitPercentage)}`
+          ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
+          ` current profit: ${colorTextByValue(profitPercentage)}`
         );
       });
     });
@@ -470,16 +456,6 @@ export class Trader implements TraderInterface {
   _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
     return this.session.exchange.assetPairPrices.get(
       AssetPair.toKey(assetPair)
-    );
-  }
-
-  _getExchangeTradeCurrentProfitPercentage(exchangeTrade: ExchangeTrade) {
-    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceNewest = assetPrice.getNewestEntry();
-
-    return calculatePercentage(
-      parseFloat(assetPriceNewest.price),
-      exchangeTrade.buyPrice
     );
   }
 }
