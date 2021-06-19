@@ -110,17 +110,17 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
-    const maximumAge = strategy.buyTroughUptrendMaximumAgeSeconds * 1000;
+    const uptrendMaximumAgeTime = strategy.buyTroughUptrendMaximumAgeSeconds * 1000;
 
     // Sort by assets that had the biggest increase since the last largest trough
     return [...assetPairs].sort((assetPairA, assetPairB) => {
       const percentageA = this._getLargestTroughPercentage(
         assetPairA,
-        maximumAge
+        uptrendMaximumAgeTime
       );
       const percentageB = this._getLargestTroughPercentage(
         assetPairB,
-        maximumAge
+        uptrendMaximumAgeTime
       );
 
       if (percentageA === null) {
@@ -429,12 +429,12 @@ export class Trader implements TraderInterface {
 
   _getLargestTroughPercentage(
     assetPair: AssetPair,
-    maximumAge: number
+    uptrendMaximumAgeTime: number
   ): number {
     const assetPrice = this._getAssetPairPrice(assetPair);
     const newestPriceEntry = assetPrice.getNewestEntry();
     const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
-      maximumAge
+      uptrendMaximumAgeTime
     );
     if (
       !newestPriceEntry ||
