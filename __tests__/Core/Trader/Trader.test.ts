@@ -9,8 +9,12 @@ import {
   sessionAssets,
   assetPricesResponse,
   assetStatisticsResponse,
+  assetPairsResponse,
+  accountAssetsResponse,
 } from '../../__fixtures__/TraderFixtures';
+import logger from '../../../src/Utils/Logger';
 
+logger.isEnabled = false;
 jest.useFakeTimers();
 
 describe('Trader', () => {
@@ -20,6 +24,8 @@ describe('Trader', () => {
     const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
     exchange.getAssetPrices = jest.fn().mockReturnValue(assetPricesResponse);
     exchange.getAssetStatistics = jest.fn().mockReturnValue(assetStatisticsResponse);
+    exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
+    exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
     const session = new Session(
       'TEST_SESSION',
@@ -40,8 +46,6 @@ describe('Trader', () => {
 
     const sessionAsset = trader.session.assets[0];
 
-    //console.log(trader.session.exchange.assetPairPrices)
-
-    // TODO
+    console.log(trader.session.exchange.assetPairPrices)
   });
 });

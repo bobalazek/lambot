@@ -9,9 +9,21 @@ Yes, you read that right. This Bot could possibly catapult you to the moon, so y
 
 ## Concepts
 
+### Manager
+
+Boots everything up, including the exchange and trader.
+
+### Trader
+
+Does the actual trading stuff.
+
 ### Exchange
 
 That one is pretty self expainatory.
+
+### Strategy
+
+Here are all the parameters for our strategy defined: max orders, stop loss, take profit, ...
 
 ### Session
 
@@ -22,12 +34,7 @@ A session or a round would basically just be a wrapper for everything we do.
 A session asset consists of one base asset (the one you want to earn profit in) and asset pairs.
 Asset pairs in this case are the assets you want to trade the current asset with.
 For example: You have a base asset USDT and you want to trade with USDTBTC, USSDTETH, ...
-
-## TODO
-
-* Jest tests
-* Messaging app (like telegram) notifications when buy/sell/trade updates ...
-
+Each session can also have it's own strategy.
 
 ## Disclaimer
 

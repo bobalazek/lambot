@@ -16,6 +16,8 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
+  addAsset(sessionAsset: SessionAsset): SessionAsset;
+  clearAssets(): void;
   getAllAssetPairs(): Set<string>;
   toString(): string;
   toExport(): unknown;
@@ -60,6 +62,13 @@ export class Session implements SessionInterface {
         new ExchangeAssetPrice()
       );
     });
+
+    return sessionAsset;
+  }
+
+  clearAssets() {
+    this.assets = [];
+    this.exchange.assetPairPrices.clear();
   }
 
   getAllAssetPairs(): Set<string> {

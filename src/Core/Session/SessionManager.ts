@@ -76,12 +76,18 @@ export class SessionManager {
   ): Promise<Session> {
     const sessionFilePath = this.getPathById(id);
     if (fs.existsSync(sessionFilePath)) {
-      const sessionLoaded = await this.load(id);
+      const session = await this.load(id);
 
-      // TODO: what to do if parameters are different?
+      // Just to make sure, we will override the config and session assets in case they changed.
+      session.config = config;
+      session.assets.forEach((sessionAsset, index) => {
+        sessionAsset.strategy = sessionAssets[index].strategy;
 
-      if (sessionLoaded) {
-        return sessionLoaded;
+        // TODO: also find and replace different asset pairs?
+      });
+
+      if (session) {
+        return session;
       }
     }
 
