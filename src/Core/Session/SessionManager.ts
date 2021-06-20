@@ -86,6 +86,8 @@ export class SessionManager {
         // TODO: also find and replace different asset pairs?
       });
 
+      // TODO: check for if the orders are still open
+
       if (session) {
         return session;
       }

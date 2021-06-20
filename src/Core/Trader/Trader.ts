@@ -19,6 +19,8 @@ export interface TraderInterface {
   startTime: number;
   start(): void;
   stop(): void;
+  tick(updateIntervalTime: number): void;
+  tickStatistics(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
   getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
@@ -36,8 +38,8 @@ const ID_PREFIX = 'LAMBOT_';
 export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
+  intervalStatistics: ReturnType<typeof setInterval>;
   interval: ReturnType<typeof setInterval>;
-  statisticsInterval: ReturnType<typeof setInterval>;
   startTime: number;
 
   constructor(session: Session) {
@@ -51,28 +53,18 @@ export class Trader implements TraderInterface {
 
     // Price statistics update
     const updateStatisticsIntervalTime = this.session.config.assetPriceStatisticsUpdateIntervalSeconds * 1000;
-    await this._updateAssetPriceStatistics();
-    this.statisticsInterval = setInterval(async () => {
-      await this._updateAssetPriceStatistics();
-    }, updateStatisticsIntervalTime);
+    await this.tickStatistics();
+    this.intervalStatistics = setInterval(
+      this.tickStatistics,
+      updateStatisticsIntervalTime
+    );
 
     // Price update
     const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
-    this.interval = setInterval(async () => {
-      const now = Date.now();
-
-      await this._updateAssetPrices(now);
-
-      this._printAssetPriceUpdates(now);
-
-      const processingStartTime = Date.now();
-
-      await this._processTrades(now);
-
-      this._printOpenTradeUpdates(now);
-
-      this._cleanupAssetPrices(processingStartTime, updateIntervalTime);
-    }, updateIntervalTime);
+    this.interval = setInterval(
+      this.tick.bind(this, updateIntervalTime),
+      updateIntervalTime
+    );
 
     return true;
   }
@@ -80,8 +72,28 @@ export class Trader implements TraderInterface {
   stop() {
     this.status = TraderStatusEnum.STOPPED;
 
+    clearInterval(this.intervalStatistics);
     clearInterval(this.interval);
-    clearInterval(this.statisticsInterval);
+  }
+
+  async tick(updateIntervalTime: number) {
+    const now = Date.now();
+
+    await this._updateAssetPrices(now);
+
+    this._printAssetPriceUpdates(now);
+
+    const processingStartTime = Date.now();
+
+    await this._processTrades(now);
+
+    this._printOpenTradeUpdates(now);
+
+    this._cleanupAssetPrices(processingStartTime, updateIntervalTime);
+  }
+
+  async tickStatistics() {
+    await this._updateAssetPriceStatistics();
   }
 
   async processCurrentTrades(): Promise<void> {
