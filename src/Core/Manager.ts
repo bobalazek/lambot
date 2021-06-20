@@ -36,8 +36,6 @@ export class Manager {
 
     this.trader = new Trader(this.session);
 
-    await this.trader.start();
-
     if (memoryUsageMonitoringIntervalSeconds) {
       this._startMemoryUsageMonitoring(
         memoryUsageMonitoringIntervalSeconds * 1000

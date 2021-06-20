@@ -30,7 +30,9 @@ const sessionId = programOptions.session;
 // A workaround for the top-level-await issue
 (async() => {
   // Config
-  const sessionConfig = new SessionConfig({});
+  const sessionConfig = new SessionConfig({
+    assetPriceUpdateIntervalSeconds: 2,
+  });
   const exchangeKey = ExchangesEnum.BINANCE;
   const sessionAssets = [
     new SessionAsset(
@@ -89,5 +91,6 @@ const sessionId = programOptions.session;
     sessionAssets
   );
 
-  await Manager.boot(session, isTestMode);
+  const trader = await Manager.boot(session, isTestMode);
+  await trader.start();
 })();

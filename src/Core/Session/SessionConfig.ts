@@ -1,10 +1,24 @@
 export interface SessionConfigInterface {
-  warmupPeriodSeconds: number; // How long do we wait until we actually start trading?
-  assetPriceUpdateIntervalSeconds: number; // At which interval we want to update the prices?
-  assetPriceStatisticsUpdateIntervalSeconds: number; // After how many seconds do we want to update the asset price statistis?
-  showAssetPriceUpdates: boolean; // Should we show the current price & staus for all the assets?
-  showOpenTradeUpdates: boolean; // Should we show the status of all the current open trades?
-  memoryUsageMonitoringIntervalSeconds: number; // At which interval we want to display the memory usage? Set to 0 if disabled
+  // How long do we wait until we actually start trading?
+  warmupPeriodSeconds: number;
+
+  // At which interval we want to update the prices?
+  assetPriceUpdateIntervalSeconds: number;
+
+  // After how many seconds do we want to update the asset price statistis?
+  // Set to 0 if disabled, altough it will run at least once in trader.start()
+  assetPriceStatisticsUpdateIntervalSeconds: number;
+
+  // Should we show the current price & staus for all the assets?
+  showAssetPriceUpdates: boolean;
+
+  // Should we show the status of all the current open trades?
+  showOpenTradeUpdates: boolean;
+
+  // At which interval we want to display the memory usage? Set to 0 if disabled
+  memoryUsageMonitoringIntervalSeconds: number;
+
+  // Methods
   toExport(): unknown;
 }
 
@@ -18,7 +32,7 @@ export class SessionConfig implements SessionConfigInterface {
 
   constructor({
     warmupPeriodSeconds = 60,
-    assetPriceUpdateIntervalSeconds = 2,
+    assetPriceUpdateIntervalSeconds = 1,
     assetPriceStatisticsUpdateIntervalSeconds = 300,
     showAssetPriceUpdates = false,
     showOpenTradeUpdates = true,

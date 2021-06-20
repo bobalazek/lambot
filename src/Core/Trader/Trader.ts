@@ -51,20 +51,26 @@ export class Trader implements TraderInterface {
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
-    // Price statistics update
-    const updateStatisticsIntervalTime = this.session.config.assetPriceStatisticsUpdateIntervalSeconds * 1000;
+    // Price statistics update (needed for initial sort in the tick)
     await this.tickStatistics();
-    this.intervalStatistics = setInterval(
-      this.tickStatistics,
-      updateStatisticsIntervalTime
-    );
+
+    const updateStatisticsIntervalTime = this.session.config.assetPriceStatisticsUpdateIntervalSeconds * 1000;
+    if (updateStatisticsIntervalTime) {
+      this.intervalStatistics = setInterval(
+        this.tickStatistics.bind(this),
+        updateStatisticsIntervalTime
+      );
+    }
+
 
     // Price update
     const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
-    this.interval = setInterval(
-      this.tick.bind(this, updateIntervalTime),
-      updateIntervalTime
-    );
+    if (updateIntervalTime) {
+      this.interval = setInterval(
+        this.tick.bind(this, updateIntervalTime),
+        updateIntervalTime
+      );
+    }
 
     return true;
   }
@@ -344,7 +350,7 @@ export class Trader implements TraderInterface {
       }
 
       assetPrice.addEntry({
-        timestamp: now,
+        timestamp: priceData.timestamp,
         price: priceData.price,
       });
 

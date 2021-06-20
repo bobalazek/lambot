@@ -21,27 +21,95 @@ export const sessionAssets = [
   ),
 ];
 
-export const assetPricesResponse: ExchangeResponseAssetPriceEntryInterface[] = [
-  {
-    symbol: 'ETHUSDT',
-    timestamp: 0,
-    price: '1.000',
-  },
-  {
-    symbol: 'BTCUSDT',
-    timestamp: 0,
-    price: '1.000',
-  },
-  {
-    symbol: 'BNBUSDT',
-    timestamp: 0,
-    price: '1.000',
-  },
-  {
-    symbol: 'BCHUSDT',
-    timestamp: 0,
-    price: '1.000',
-  },
+export const assetPricesResponses: ExchangeResponseAssetPriceEntryInterface[][] = [
+  [
+    {
+      symbol: 'ETHUSDT',
+      timestamp: 0,
+      price: '1.000',
+    },
+    {
+      symbol: 'BTCUSDT',
+      timestamp: 0,
+      price: '1.000',
+    },
+    {
+      symbol: 'BNBUSDT',
+      timestamp: 0,
+      price: '1.000',
+    },
+    {
+      symbol: 'BCHUSDT',
+      timestamp: 0,
+      price: '1.000',
+    },
+  ],
+  [
+    {
+      symbol: 'ETHUSDT',
+      timestamp: 1000,
+      price: '0.500',
+    },
+    {
+      symbol: 'BTCUSDT',
+      timestamp: 1000,
+      price: '2.500',
+    },
+    {
+      symbol: 'BNBUSDT',
+      timestamp: 1000,
+      price: '1.000',
+    },
+    {
+      symbol: 'BCHUSDT',
+      timestamp: 1000,
+      price: '3.000',
+    },
+  ],
+  [
+    {
+      symbol: 'ETHUSDT',
+      timestamp: 2000,
+      price: '1.500',
+    },
+    {
+      symbol: 'BTCUSDT',
+      timestamp: 2000,
+      price: '0.800',
+    },
+    {
+      symbol: 'BNBUSDT',
+      timestamp: 2000,
+      price: '1.000',
+    },
+    {
+      symbol: 'BCHUSDT',
+      timestamp: 2000,
+      price: '0.200',
+    },
+  ],
+  [
+    {
+      symbol: 'ETHUSDT',
+      timestamp: 2000,
+      price: '1.000',
+    },
+    {
+      symbol: 'BTCUSDT',
+      timestamp: 2000,
+      price: '1.200',
+    },
+    {
+      symbol: 'BNBUSDT',
+      timestamp: 2000,
+      price: '1.000',
+    },
+    {
+      symbol: 'BCHUSDT',
+      timestamp: 2000,
+      price: '1.300',
+    },
+  ],
 ];
 
 export const assetStatisticsResponse: ExchangeResponseAssetPriceStatisticsInterface[] = [

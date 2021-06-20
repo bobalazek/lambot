@@ -205,8 +205,12 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
         : null;
 
       const price = parseFloat(entry.price);
-      const prevPrice = parseFloat(prevEntry?.price);
-      const nextPrice = parseFloat(nextEntry?.price);
+      const prevPrice = prevEntry
+        ? parseFloat(prevEntry.price)
+        : null;
+      const nextPrice = nextEntry
+        ? parseFloat(nextEntry?.price)
+        : null;
 
       const relativePricePercentage = prevEntry
         ? calculatePercentage(price, prevPrice)
