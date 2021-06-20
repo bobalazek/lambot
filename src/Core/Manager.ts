@@ -27,7 +27,9 @@ export class Manager {
     ));
 
     logger.info(chalk.cyan(
-      `Session ID: ${this.session.id}; Exchange: ${this.session.exchange.name}`
+      `Exchange: ${this.session.exchange.name}; ` +
+      `Session ID: ${this.session.id}; ` +
+      `Session config: ${JSON.stringify(this.session.config)}`
     ));
 
     await this.session.exchange.boot(this.session);

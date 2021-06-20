@@ -173,9 +173,7 @@ export class Exchange implements ExchangeInterface {
     ));
     this.session.assets.forEach((sessionAsset) => {
       logger.info(chalk.bold(
-        sessionAsset.toString() +
-        '; ' +
-        'Strategy: ' + JSON.stringify(sessionAsset.strategy)
+        `${sessionAsset.toString()}; Strategy: ${JSON.stringify(sessionAsset.strategy)}`
       ));
     });
   }
