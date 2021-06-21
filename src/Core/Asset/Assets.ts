@@ -64,6 +64,7 @@ export class Assets {
   static readonly HT = new Asset('HT', 'Huobi Token');
   static readonly EGLD = new Asset('EGLD', 'Elrond');
   static readonly NU = new Asset('NU', 'NuCypher');
+  static readonly BEAM = new Asset('BEAM', 'Beam');
 
   static getBySymbol(symbol: string): Asset {
     if (this[symbol]) {

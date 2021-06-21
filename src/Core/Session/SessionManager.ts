@@ -81,12 +81,51 @@ export class SessionManager {
       // Just to make sure, we will override the config and session assets in case they changed.
       session.config = config;
       session.assets.forEach((sessionAsset, index) => {
-        sessionAsset.strategy = sessionAssets[index].strategy;
+        const configSessionAsset = sessionAssets[index];
+        if (sessionAsset.asset.getKey() !== configSessionAsset.asset.getKey()) {
+          logger.critical(chalk.red.bold(
+            `The base asset does not match between the loaded session and your current config. ` +
+            `Either change your base asset back to ${sessionAsset.asset.getKey()}, or start a new session!`
+          ));
 
-        // TODO: also find and replace different asset pairs?
+          process.exit(1);
+        }
+
+        if (JSON.stringify(sessionAsset.assetPairs) !== JSON.stringify(configSessionAsset.assetPairs)) {
+          sessionAsset.assetPairs.forEach((assetPair, subIndex) => {
+            const configAssetPair = configSessionAsset.assetPairs[subIndex];
+            if (JSON.stringify(assetPair) !== JSON.stringify(configAssetPair)) {
+              logger.critical(chalk.red.bold(
+                `Assets in the new config don't match those in your current config. ` +
+                `You can only add new asset pairs, if you append them at the end of the array. ` +
+                `You can NOT remove or reorder any existing asset pairs in the array!`
+              ));
+
+              process.exit(1);
+            }
+          });
+
+          const assetPairsCount = sessionAsset.assetPairs.length;
+          const configAssetPairsCount = configSessionAsset.assetPairs.length;
+          if (configAssetPairsCount > assetPairsCount) {
+            for (let i = assetPairsCount; i < configAssetPairsCount; i++) {
+              const newAssetPair = configSessionAsset.assetPairs[i]
+              session.addAssetPair(newAssetPair);
+
+              logger.debug(
+                `Adding a new asset pair to the loaded session: ${newAssetPair.toString()}`
+              );
+            }
+          }
+        }
+
+        sessionAsset.strategy = configSessionAsset.strategy;
+
+        const openTrades = sessionAsset.getOpenTrades();
+        if (openTrades.length > 0) {
+          // TODO: check for any open trades on the exchange
+        }
       });
-
-      // TODO: check for if the orders are still open
 
       if (session) {
         return session;

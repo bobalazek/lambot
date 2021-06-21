@@ -77,6 +77,7 @@ const sessionId = programOptions.session;
         new AssetPair(Assets.ZEC, Assets.USDT),
         new AssetPair(Assets.MANA, Assets.USDT),
         new AssetPair(Assets.EGLD, Assets.USDT),
+        new AssetPair(Assets.BEAM, Assets.USDT),
       ],
       new DefaultStrategy({}),
       SessionAssetTradingTypeEnum.SPOT

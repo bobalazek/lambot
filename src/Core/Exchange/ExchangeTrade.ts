@@ -19,7 +19,7 @@ export interface ExchangeTradeInterface {
   buyOrder?: ExchangeOrderInterface;
   sellOrder?: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
-  getFinalProfitPercentage(): number;
+  getProfitPercentage(): number;
   toExport(): unknown;
 }
 
@@ -43,6 +43,7 @@ export class ExchangeTrade {
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
   timestamp: number;
+  amount?: string;
   buyPrice?: number;
   sellPrice?: number;
   buyFeesPercentage?: number;
@@ -87,7 +88,7 @@ export class ExchangeTrade {
   /**
    * Gets the final profit of this trade - must be called after the sellPrice is set.
    */
-  getFinalProfitPercentage(includingFees: boolean = false): number {
+  getProfitPercentage(includingFees: boolean = false): number {
     const sellPrice = includingFees
       ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)
       : this.sellPrice;
@@ -110,6 +111,7 @@ export class ExchangeTrade {
       type: this.type,
       status: this.status,
       timestamp: this.timestamp,
+      amount: this.amount,
       buyPrice: this.buyPrice,
       sellPrice: this.sellPrice,
       buyFeesPercentage: this.buyFeesPercentage,
@@ -130,6 +132,10 @@ export class ExchangeTrade {
       data.status,
       data.timestamp
     );
+
+    if (data.amount) {
+      exchangeTrade.amount = data.amount;
+    }
 
     if (data.buyPrice) {
       exchangeTrade.buyPrice = data.buyPrice;

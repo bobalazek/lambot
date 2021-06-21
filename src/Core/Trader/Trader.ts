@@ -11,6 +11,7 @@ import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 import { Manager } from '../Manager';
+import { ID_PREFIX } from '../../Constants';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
@@ -32,8 +33,6 @@ export enum TraderStatusEnum {
   STOPPED = 'STOPPED',
   RUNNING = 'RUNNING',
 }
-
-const ID_PREFIX = 'LAMBOT_';
 
 export class Trader implements TraderInterface {
   session: Session;
@@ -61,7 +60,6 @@ export class Trader implements TraderInterface {
         updateStatisticsIntervalTime
       );
     }
-
 
     // Price update
     const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
@@ -315,7 +313,7 @@ export class Trader implements TraderInterface {
       const assetPrice = session.exchange.assetPairPrices.get(statisticsData.symbol);
       if (!assetPrice) {
         logger.info(chalk.red.bold(
-          `Assset price for symbol "${statisticsData.symbol}" not found.`
+          `Asset price for symbol "${statisticsData.symbol}" not found.`
         ));
 
         process.exit(1);
@@ -343,7 +341,7 @@ export class Trader implements TraderInterface {
       const assetPrice = session.exchange.assetPairPrices.get(priceData.symbol);
       if (!assetPrice) {
         logger.info(chalk.red.bold(
-          `Assset price for symbol "${priceData.symbol}" not found.`
+          `Asset price for symbol "${priceData.symbol}" not found.`
         ));
 
         process.exit(1);
@@ -392,7 +390,7 @@ export class Trader implements TraderInterface {
           chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
           ` @ ${currentAssetPrice}` +
           ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
-          ` current profit: ${colorTextPercentageByValue(profitPercentage)}`
+          ` current profit: ${colorTextPercentageByValue(profitPercentage)} (excluding fees)`
         );
       });
     });
@@ -514,6 +512,7 @@ export class Trader implements TraderInterface {
     exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
     exchangeTrade.buyOrder = buyOrder;
     exchangeTrade.buyPrice = parseFloat(buyOrder.price);
+    exchangeTrade.amount = buyOrder.amount;
 
     sessionAsset.trades.push(exchangeTrade);
 
@@ -539,7 +538,7 @@ export class Trader implements TraderInterface {
       exchangeTrade.assetPair,
       sessionAsset,
       ExchangeOrderSideEnum.SELL,
-      sessionAsset.strategy.tradeAmount,
+      exchangeTrade.amount,
       assetPriceEntryNewest.price
     );
     const orderFees = await this.session.exchange.getAssetFees(
@@ -563,7 +562,7 @@ export class Trader implements TraderInterface {
 
     logger.notice(chalk.green.bold(
       `I am selling "${assetPairSymbol}". ` +
-      `I made (${colorTextPercentageByValue(exchangeTrade.getFinalProfitPercentage())}) profit!`
+      `I made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
     ));
 
     return exchangeTrade;

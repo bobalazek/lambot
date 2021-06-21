@@ -17,6 +17,7 @@ export interface SessionInterface {
   startedAt: number;
   endedAt: number;
   addAsset(sessionAsset: SessionAsset): SessionAsset;
+  addAssetPair(assetPair: AssetPair): AssetPair;
   clearAssets(): void;
   getAllAssetPairs(): Set<string>;
   toString(): string;
@@ -57,13 +58,19 @@ export class Session implements SessionInterface {
     this.assets.push(sessionAsset);
 
     sessionAsset.assetPairs.forEach((assetPair) => {
-      this.exchange.assetPairPrices.set(
-        AssetPair.toKey(assetPair),
-        new ExchangeAssetPrice()
-      );
+      this.addAssetPair(assetPair);
     });
 
     return sessionAsset;
+  }
+
+  addAssetPair(assetPair: AssetPair) {
+    this.exchange.assetPairPrices.set(
+      AssetPair.toKey(assetPair),
+      new ExchangeAssetPrice()
+    );
+
+    return assetPair;
   }
 
   clearAssets() {
