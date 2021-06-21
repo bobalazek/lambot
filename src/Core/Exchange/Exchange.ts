@@ -184,7 +184,7 @@ export class Exchange implements ExchangeInterface {
       exchangeOpenTradesMap.set(openTrade.id, openTrade);
     });
 
-    logger.debug(`Found ${exchangeOpenTrades.length} open trades.`);
+    logger.debug(`Found ${exchangeOpenTrades.length} open trades on the exchange.`);
 
     this.session.assets.forEach((sessionAsset) => {
       const sessionAssetOpenTrades = sessionAsset.getOpenTrades();
