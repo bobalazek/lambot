@@ -67,12 +67,16 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
+    const dataOrParams = symbol
+      ? {
+        symbol,
+      }
+      : {};
+
     const response = await this._doRequest(
       RequestMethodEnum.GET,
       'https://api.binance.com/api/v3/openOrders',
-      {
-        symbol,
-      },
+      dataOrParams,
       true
     );
 
