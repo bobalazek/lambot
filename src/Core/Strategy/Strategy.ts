@@ -13,6 +13,7 @@ export interface StrategyParametersInterface {
 
   /********* Take Profit **********/
   // How much do we want to get profit, until we trigger a sell?
+  // Note: This DOES NOT take the fees into account!
   takeProfitPercentage: number;
 
   // Should we enable trailing take profit?
@@ -26,6 +27,7 @@ export interface StrategyParametersInterface {
   stopLossEnabled: boolean;
 
   // How much can we lose until we trigger a sell?
+  // Note: This DOES NOT take the fees into account!
   stopLossPercentage: number;
 
   // How long should we wait until we actually sell if it troughs below a certain value?

@@ -171,7 +171,7 @@ export class Exchange implements ExchangeInterface {
 
   async _checkPersistenceData(): Promise<boolean> {
     if (!this.session.isLoadedFromPersistence) {
-      return true;
+      return false;
     }
 
     logger.debug('Checking persistence data ...');
@@ -205,6 +205,8 @@ export class Exchange implements ExchangeInterface {
         ));
       });
     });
+
+    return true;
   }
 
   _printTradableAssets() {
