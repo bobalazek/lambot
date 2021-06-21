@@ -16,6 +16,7 @@ export interface SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
+  isLoadedFromPersistence: boolean;
   addAsset(sessionAsset: SessionAsset): SessionAsset;
   addAssetPair(assetPair: AssetPair): AssetPair;
   clearAssets(): void;
@@ -39,6 +40,7 @@ export class Session implements SessionInterface {
   createdAt: number;
   startedAt: number;
   endedAt: number;
+  isLoadedFromPersistence: boolean;
 
   constructor(
     id: string,
@@ -52,6 +54,7 @@ export class Session implements SessionInterface {
     this.status = SessionStatusEnum.STARTED;
     this.createdAt = Date.now();
     this.startedAt = Date.now();
+    this.isLoadedFromPersistence = false;
   }
 
   addAsset(sessionAsset: SessionAsset) {

@@ -55,7 +55,7 @@ export class SessionAsset implements SessionAssetInterface {
   getOpenTrades(): ExchangeTrade[] {
     return this.trades.filter((trade) => {
       return trade.status === ExchangeTradeStatusEnum.OPEN;
-    })
+    });
   }
 
   /***** Export/Import *****/

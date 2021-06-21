@@ -28,7 +28,7 @@ export interface ExchangeInterface {
   assetPairPrices: ExchangeAssetPricesMap;
   session: Session;
   boot(session: Session): Promise<boolean>;
-  getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]>;
+  getAccountOrders(type: ExchangeAccountTypeEnum, symbol?: string): Promise<ExchangeOrder[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
@@ -73,6 +73,8 @@ export class Exchange implements ExchangeInterface {
 
     await this._setupAccounts();
 
+    await this._checkPersistenceData();
+
     this._printTradableAssets();
 
     await SessionManager.save(this.session);
@@ -81,7 +83,7 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string): Promise<ExchangeOrder[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol?: string): Promise<ExchangeOrder[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 
@@ -150,12 +152,12 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** Helpers *****/
-  async _setupAccounts() {
+  async _setupAccounts(): Promise<any> {
     const accountTypes = [...new Set(this.session.assets.map((sessionAsset) => {
       return sessionAsset.tradingType;
     }))];
 
-    await asyncForEach(accountTypes, async (accountType) => {
+    return await asyncForEach(accountTypes, async (accountType) => {
       const exchangeAccountType = this.getAccountType(accountType);
       const exchangeAccount = new ExchangeAccount(exchangeAccountType);
       const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);
@@ -164,6 +166,44 @@ export class Exchange implements ExchangeInterface {
         exchangeAccount.assets.set(key, exchangeAccountAsset);
       });
       this.accounts.set(exchangeAccountType, exchangeAccount);
+    });
+  }
+
+  async _checkPersistenceData(): Promise<boolean> {
+    if (!this.session.isLoadedFromPersistence) {
+      return true;
+    }
+
+    logger.debug('Checking persistence data ...');
+
+    const exchangeOpenTrades = await this.getAccountOrders(
+      ExchangeAccountTypeEnum.SPOT
+    );
+    const exchangeOpenTradesMap = new Map();
+    exchangeOpenTrades.forEach((openTrade) => {
+      exchangeOpenTradesMap.set(openTrade.id, openTrade);
+    });
+
+    this.session.assets.forEach((sessionAsset) => {
+      const sessionAssetOpenTrades = sessionAsset.getOpenTrades();
+      sessionAssetOpenTrades.forEach((sessionAssetOpenTrade) => {
+        if (exchangeOpenTradesMap.has(sessionAssetOpenTrade.id)) {
+          return;
+        }
+
+        for (let i = 0; i < sessionAsset.trades.length; i++) {
+          if (sessionAsset.trades[i].id !== sessionAssetOpenTrade.id) {
+            continue;
+          }
+
+          sessionAsset.trades.splice(i, 1);
+        }
+
+        logger.info(chalk.bold(
+          `Seems like you closed the trade with ID "${sessionAssetOpenTrade.id}" manually on the exchange, ` +
+          `so we are removing this trade from our trades array.`
+        ));
+      });
     });
   }
 

@@ -133,39 +133,39 @@ export class ExchangeTrade {
       data.timestamp
     );
 
-    if (data.amount) {
+    if (typeof data.amount !== 'undefined') {
       exchangeTrade.amount = data.amount;
     }
 
-    if (data.buyPrice) {
+    if (typeof data.buyPrice !== 'undefined') {
       exchangeTrade.buyPrice = data.buyPrice;
     }
 
-    if (data.sellPrice) {
+    if (typeof data.sellPrice !== 'undefined') {
       exchangeTrade.sellPrice = data.sellPrice;
     }
 
-    if (data.buyFeesPercentage) {
+    if (typeof data.buyFeesPercentage !== 'undefined') {
       exchangeTrade.buyFeesPercentage = data.buyFeesPercentage;
     }
 
-    if (data.sellFeesPercentage) {
+    if (typeof data.sellFeesPercentage !== 'undefined') {
       exchangeTrade.sellFeesPercentage = data.sellFeesPercentage;
     }
 
-    if (data.peakProfitPercentage) {
+    if (typeof data.peakProfitPercentage !== 'undefined') {
       exchangeTrade.peakProfitPercentage = data.peakProfitPercentage;
     }
 
-    if (data.triggerStopLossPercentage) {
+    if (typeof data.triggerStopLossPercentage !== 'undefined') {
       exchangeTrade.triggerStopLossPercentage = data.triggerStopLossPercentage;
     }
 
-    if (data.buyOrder) {
+    if (typeof data.buyOrder !== 'undefined') {
       exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
     }
 
-    if (data.sellOrder) {
+    if (typeof data.sellOrder !== 'undefined') {
       exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
     }
 

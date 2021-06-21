@@ -79,6 +79,7 @@ export class SessionManager {
       const session = await this.load(id);
 
       // Just to make sure, we will override the config and session assets in case they changed.
+      session.isLoadedFromPersistence = true;
       session.config = config;
       session.assets.forEach((sessionAsset, index) => {
         const configSessionAsset = sessionAssets[index];
@@ -120,11 +121,6 @@ export class SessionManager {
         }
 
         sessionAsset.strategy = configSessionAsset.strategy;
-
-        const openTrades = sessionAsset.getOpenTrades();
-        if (openTrades.length > 0) {
-          // TODO: check for any open trades on the exchange
-        }
       });
 
       if (session) {
