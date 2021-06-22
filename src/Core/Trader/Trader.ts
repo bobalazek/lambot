@@ -230,6 +230,7 @@ export class Trader implements TraderInterface {
       strategy,
     } = sessionAsset;
 
+    const now = Date.now();
     const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPriceEntryNewest = assetPrice.getNewestEntry();
     const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
@@ -240,6 +241,13 @@ export class Trader implements TraderInterface {
       exchangeTrade.peakProfitPercentage < currentProfitPercentage
     ) {
       exchangeTrade.peakProfitPercentage = currentProfitPercentage;
+    }
+
+    if (
+      exchangeTrade.troughProfitPercentage === null ||
+      exchangeTrade.troughProfitPercentage > currentProfitPercentage
+    ) {
+      exchangeTrade.troughProfitPercentage = currentProfitPercentage;
     }
 
     if (exchangeTrade.triggerStopLossPercentage === null) {
@@ -288,7 +296,25 @@ export class Trader implements TraderInterface {
         );
       }
 
-      // TODO: set timeout when to execute
+      if (!exchangeTrade.triggerStopLossSellAt) {
+        exchangeTrade.triggerStopLossSellAt = now;
+      }
+
+      const stopLossTimeoutTime = strategy.stopLossTimeoutSeconds * 1000;
+      if (now - exchangeTrade.triggerStopLossSellAt > stopLossTimeoutTime) {
+        return this._executeSell(
+          exchangeTrade,
+          sessionAsset,
+          assetPriceEntryNewest
+        );
+      }
+    } else if (
+      strategy.stopLossEnabled &&
+      currentProfitPercentage > exchangeTrade.triggerStopLossPercentage &&
+      exchangeTrade.triggerStopLossSellAt
+    ) {
+      // We are out of the stop loss percentage, so let's reset the timer!
+      exchangeTrade.triggerStopLossSellAt = null;
     }
 
     return null;

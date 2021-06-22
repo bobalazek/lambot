@@ -14,8 +14,10 @@ export interface ExchangeTradeInterface {
   sellPrice?: number;
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
-  peakProfitPercentage?: number; // What is the peak prot we reached?
+  peakProfitPercentage?: number; // What is the peak profit we reached?
+  troughProfitPercentage?: number; // What is the trough profit we reached?
   triggerStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger (can be positive or negative?
+  triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
   buyOrder?: ExchangeOrderInterface;
   sellOrder?: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
@@ -49,7 +51,9 @@ export class ExchangeTrade {
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
   peakProfitPercentage?: number;
+  troughProfitPercentage?: number;
   triggerStopLossPercentage?: number;
+  triggerStopLossSellAt?: number;
   buyOrder?: ExchangeOrder;
   sellOrder?: ExchangeOrder;
 
@@ -68,7 +72,9 @@ export class ExchangeTrade {
     this.status = status;
     this.timestamp = timestamp;
     this.peakProfitPercentage = null;
+    this.troughProfitPercentage = null;
     this.triggerStopLossPercentage = null;
+    this.triggerStopLossSellAt = null;
   }
 
   /**
@@ -117,7 +123,9 @@ export class ExchangeTrade {
       buyFeesPercentage: this.buyFeesPercentage,
       sellFeesPercentage: this.sellFeesPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
+      troughProfitPercentage: this.troughProfitPercentage,
       triggerStopLossPercentage: this.triggerStopLossPercentage,
+      triggerStopLossSellAt: this.triggerStopLossSellAt,
       buyOrder: this.buyOrder?.toExport(),
       sellOrder: this.sellOrder?.toExport(),
     };
@@ -157,8 +165,16 @@ export class ExchangeTrade {
       exchangeTrade.peakProfitPercentage = data.peakProfitPercentage;
     }
 
+    if (typeof data.troughProfitPercentage !== 'undefined') {
+      exchangeTrade.troughProfitPercentage = data.troughProfitPercentage;
+    }
+
     if (typeof data.triggerStopLossPercentage !== 'undefined') {
       exchangeTrade.triggerStopLossPercentage = data.triggerStopLossPercentage;
+    }
+
+    if (typeof data.triggerStopLossSellAt !== 'undefined') {
+      exchangeTrade.triggerStopLossSellAt = data.triggerStopLossSellAt;
     }
 
     if (typeof data.buyOrder !== 'undefined') {
