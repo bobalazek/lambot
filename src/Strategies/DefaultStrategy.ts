@@ -1,17 +1,11 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeAssetPriceEntryInterface, ExchangeAssetPriceInterface } from '../Core/Exchange/ExchangeAssetPrice';
-import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
-import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
-import { Manager } from '../Core/Manager';
 import { SessionAsset } from '../Core/Session/SessionAsset';
-import { SessionManager } from '../Core/Session/SessionManager';
 import { Strategy } from '../Core/Strategy/Strategy';
 import { calculatePercentage, colorTextPercentageByValue } from '../Utils/Helpers';
-import { ID_PREFIX } from '../Constants';
 import logger from '../Utils/Logger';
 
 export class DefaultStrategy extends Strategy {

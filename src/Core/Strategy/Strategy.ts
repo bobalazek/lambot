@@ -7,7 +7,6 @@ import { StrategyParametersInterface } from './StrategyParameters';
 import { ID_PREFIX } from '../../Constants';
 import { Manager } from '../Manager';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
-import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 import { SessionManager } from '../Session/SessionManager';
 
 export interface StrategyInterface {
