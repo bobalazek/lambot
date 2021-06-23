@@ -4,7 +4,7 @@ import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/Exch
 import { Manager } from '../../../src/Core/Manager';
 import { Session } from '../../../src/Core/Session/Session';
 import { SessionConfig } from '../../../src/Core/Session/SessionConfig';
-import { Trader } from '../../../src/Core/Trader/Trader';
+import { Trader } from '../../../src/Core/Trader';
 import {
   sessionAssets,
   assetPricesResponses,

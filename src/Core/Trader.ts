@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 
-import { AssetPair } from '../Asset/AssetPair';
-import { Session } from '../Session/Session';
-import { colorTextPercentageByValue } from '../../Utils/Helpers';
-import logger from '../../Utils/Logger';
+import { AssetPair } from './Asset/AssetPair';
+import { Session } from './Session/Session';
+import { colorTextPercentageByValue } from '../Utils/Helpers';
+import logger from '../Utils/Logger';
 
 export interface TraderInterface {
   session: Session;
