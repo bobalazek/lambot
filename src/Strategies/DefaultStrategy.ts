@@ -17,21 +17,24 @@ export class DefaultStrategy extends Strategy {
     buyTroughUptrendPercentage = 0.1,
     buyTroughUptrendMaximumAgeSeconds = 90,
   }) {
-    super({
-      tradeAmount,
-      maximumOpenTrades,
-      maximumOpenTradesPerAssetPair,
-      minimumDailyVolume,
-      takeProfitPercentage,
-      trailingTakeProfitEnabled,
-      trailingTakeProfitSlipPercentage,
-      stopLossEnabled,
-      stopLossPercentage,
-      stopLossTimeoutSeconds,
-      trailingStopLossEnabled,
-      trailingStopLossPercentage,
-      buyTroughUptrendPercentage,
-      buyTroughUptrendMaximumAgeSeconds,
-    });
+    super(
+      'Default',
+      {
+        tradeAmount,
+        maximumOpenTrades,
+        maximumOpenTradesPerAssetPair,
+        minimumDailyVolume,
+        takeProfitPercentage,
+        trailingTakeProfitEnabled,
+        trailingTakeProfitSlipPercentage,
+        stopLossEnabled,
+        stopLossPercentage,
+        stopLossTimeoutSeconds,
+        trailingStopLossEnabled,
+        trailingStopLossPercentage,
+        buyTroughUptrendPercentage,
+        buyTroughUptrendMaximumAgeSeconds,
+      }
+    );
   }
 }

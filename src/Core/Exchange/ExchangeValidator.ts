@@ -76,8 +76,8 @@ export class ExchangeValidator {
 
         // Check if trailing take profit is enabled and we have no slippage set
         if (
-          sessionAsset.strategy.trailingTakeProfitEnabled &&
-          !(sessionAsset.strategy.trailingTakeProfitSlipPercentage > 0)
+          sessionAsset.strategy.parameters.trailingTakeProfitEnabled &&
+          !(sessionAsset.strategy.parameters.trailingTakeProfitSlipPercentage > 0)
         ) {
           logger.critical(chalk.red.bold(
             `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
@@ -88,8 +88,8 @@ export class ExchangeValidator {
 
         // Check if trailing take profit is enabled and we have no slippage set
         if (
-          sessionAsset.strategy.trailingStopLossEnabled &&
-          !(sessionAsset.strategy.trailingStopLossPercentage > 0)
+          sessionAsset.strategy.parameters.trailingStopLossEnabled &&
+          !(sessionAsset.strategy.parameters.trailingStopLossPercentage > 0)
         ) {
           logger.critical(chalk.red.bold(
             `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
@@ -100,11 +100,11 @@ export class ExchangeValidator {
 
         // Check if our order amount is too small or big
         const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
-        const tradeAmount = parseFloat(sessionAsset.strategy.tradeAmount);
+        const tradeAmount = parseFloat(sessionAsset.strategy.parameters.tradeAmount);
         if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
           logger.critical(chalk.red.bold(
             `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.tradeAmount}". ` +
+            `You specified: "${sessionAsset.strategy.parameters.tradeAmount}". ` +
             `Maximum: "${exhangeAssetPair.amountMaximum}"`
           ));
 
@@ -112,7 +112,7 @@ export class ExchangeValidator {
         } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
           logger.critical(chalk.red.bold(
             `The order amount for "${assetPairSymbol}" is too small for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.tradeAmount}". ` +
+            `You specified: "${sessionAsset.strategy.parameters.tradeAmount}". ` +
             `Minimum: "${exhangeAssetPair.amountMinimum}"`
           ));
 

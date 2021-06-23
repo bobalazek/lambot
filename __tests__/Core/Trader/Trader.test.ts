@@ -95,7 +95,7 @@ describe('Trader', () => {
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPricesResponses.length);
     expect(assetPairPriceSecondaryChanges).toHaveLength(assetPricesResponses.length);
 
-    const sortedAssetPairs = trader.getSortedAssetPairs(sessionAsset);
+    const sortedAssetPairs = sessionAsset.strategy.getSortedAssetPairs(sessionAsset);
 
     expect(sortedAssetPairs[0].assetBase).toBe(Assets.BCH);
     expect(sortedAssetPairs[1].assetBase).toBe(Assets.ETH);

@@ -24,9 +24,6 @@ export interface TraderInterface {
   tickStatistics(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
-  getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
-  checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
-  checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
 }
 
 export enum TraderStatusEnum {
@@ -70,6 +67,10 @@ export class Trader implements TraderInterface {
       );
     }
 
+    this.session.assets.forEach(async (sessionAsset) => {
+      await sessionAsset.strategy.boot(this.session);
+    });
+
     return true;
   }
 
@@ -105,7 +106,7 @@ export class Trader implements TraderInterface {
 
     this.session.assets.forEach(async (sessionAsset) => {
       for (const exchangeTrade of sessionAsset.getOpenTrades()) {
-        await this.checkForSellSignal(exchangeTrade, sessionAsset);
+        await sessionAsset.strategy.checkForSellSignal(exchangeTrade, sessionAsset);
       }
     });
   }
@@ -114,210 +115,10 @@ export class Trader implements TraderInterface {
     logger.debug('Starting to process new potential trades ...');
 
     this.session.assets.forEach(async (sessionAsset) => {
-      for (const assetPair of this.getSortedAssetPairs(sessionAsset)) {
-        await this.checkForBuySignal(assetPair, sessionAsset);
+      for (const assetPair of sessionAsset.strategy.getSortedAssetPairs(sessionAsset)) {
+        await sessionAsset.strategy.checkForBuySignal(assetPair, sessionAsset);
       }
     });
-  }
-
-  getSortedAssetPairs(sessionAsset: SessionAsset) {
-    const {
-      assetPairs,
-      strategy,
-    } = sessionAsset;
-
-    const uptrendMaximumAgeTime = strategy.buyTroughUptrendMaximumAgeSeconds * 1000;
-
-    // Sort by assets that had the biggest increase since the last largest trough
-    return [...assetPairs].sort((assetPairA, assetPairB) => {
-      const percentageA = this._getLargestTroughPercentage(
-        assetPairA,
-        uptrendMaximumAgeTime
-      );
-      const percentageB = this._getLargestTroughPercentage(
-        assetPairB,
-        uptrendMaximumAgeTime
-      );
-
-      if (percentageA === null) {
-        return 1;
-      }
-
-      if (percentageB === null) {
-        return -1;
-      }
-
-      return percentageB - percentageA;
-    });
-  }
-
-  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
-    const {
-      strategy,
-      trades,
-    } = sessionAsset;
-
-    const now = Date.now();
-
-    const openTrades = sessionAsset.getOpenTrades();
-    if (
-      strategy.maximumOpenTrades !== -1 &&
-      openTrades.length >= strategy.maximumOpenTrades
-    ) {
-      return null;
-    }
-
-    const sessionAssetAssetPairTrades = trades.filter((exchangeTrade) => {
-      return (
-        AssetPair.toKey(exchangeTrade.assetPair) === AssetPair.toKey(assetPair) &&
-        (
-          exchangeTrade.status === ExchangeTradeStatusEnum.OPEN ||
-          exchangeTrade.status === ExchangeTradeStatusEnum.BUY_PENDING
-        )
-      );
-    });
-
-    if (
-      strategy.maximumOpenTradesPerAssetPair !== -1 &&
-      sessionAssetAssetPairTrades.length >= strategy.maximumOpenTradesPerAssetPair
-    ) {
-      return null;
-    }
-
-    const assetPrice = this._getAssetPairPrice(assetPair);
-    const assetPriceEntryNewest = assetPrice.getNewestEntry();
-    const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
-    if (now - assetPriceEntryNewest.timestamp > updateIntervalTime) {
-      return null;
-    }
-
-    if (strategy.minimumDailyVolume !== -1) {
-      const assetPriceStatisticsNewest = assetPrice.getNewestStatistics();
-      if (
-        !assetPriceStatisticsNewest ||
-        parseFloat(assetPriceStatisticsNewest.volume) < strategy.minimumDailyVolume
-      ) {
-        return null;
-      }
-    }
-
-    const uptrendMaximumAgeTime = strategy.buyTroughUptrendMaximumAgeSeconds * 1000;
-    const profitPercentage = this._getLargestTroughPercentage(
-      assetPair,
-      uptrendMaximumAgeTime
-    );
-
-    if (
-      !profitPercentage ||
-      profitPercentage < strategy.buyTroughUptrendPercentage
-    ) {
-      return null;
-    }
-
-    // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
-
-    return await this._executeBuy(
-      now,
-      assetPair,
-      sessionAsset,
-      assetPriceEntryNewest,
-      profitPercentage
-    );
-  }
-
-  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
-    const {
-      strategy,
-    } = sessionAsset;
-
-    const now = Date.now();
-    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceEntryNewest = assetPrice.getNewestEntry();
-    const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
-    const currentProfitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
-
-    if (
-      exchangeTrade.peakProfitPercentage === null ||
-      exchangeTrade.peakProfitPercentage < currentProfitPercentage
-    ) {
-      exchangeTrade.peakProfitPercentage = currentProfitPercentage;
-    }
-
-    if (
-      exchangeTrade.troughProfitPercentage === null ||
-      exchangeTrade.troughProfitPercentage > currentProfitPercentage
-    ) {
-      exchangeTrade.troughProfitPercentage = currentProfitPercentage;
-    }
-
-    if (exchangeTrade.triggerStopLossPercentage === null) {
-      exchangeTrade.triggerStopLossPercentage = -strategy.stopLossPercentage;
-    }
-
-    const expectedTriggerStopLossPercentage = exchangeTrade.peakProfitPercentage - strategy.trailingStopLossPercentage;
-    if (
-      strategy.trailingStopLossEnabled &&
-      strategy.trailingStopLossPercentage < exchangeTrade.peakProfitPercentage - exchangeTrade.triggerStopLossPercentage &&
-      exchangeTrade.triggerStopLossPercentage < expectedTriggerStopLossPercentage
-    ) {
-      exchangeTrade.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
-    }
-
-    if (currentProfitPercentage > strategy.takeProfitPercentage) {
-      if (!strategy.trailingTakeProfitEnabled) {
-        return this._executeSell(
-          exchangeTrade,
-          sessionAsset,
-          assetPriceEntryNewest
-        );
-      }
-
-      if (
-        strategy.trailingTakeProfitEnabled &&
-        exchangeTrade.peakProfitPercentage - currentProfitPercentage < strategy.trailingTakeProfitSlipPercentage
-      ) {
-        return this._executeSell(
-          exchangeTrade,
-          sessionAsset,
-          assetPriceEntryNewest
-        );
-      }
-    }
-
-    if (
-      strategy.stopLossEnabled &&
-      currentProfitPercentage < exchangeTrade.triggerStopLossPercentage
-    ) {
-      if (strategy.stopLossTimeoutSeconds === 0) {
-        return this._executeSell(
-          exchangeTrade,
-          sessionAsset,
-          assetPriceEntryNewest
-        );
-      }
-
-      if (!exchangeTrade.triggerStopLossSellAt) {
-        exchangeTrade.triggerStopLossSellAt = now;
-      }
-
-      const stopLossTimeoutTime = strategy.stopLossTimeoutSeconds * 1000;
-      if (now - exchangeTrade.triggerStopLossSellAt > stopLossTimeoutTime) {
-        return this._executeSell(
-          exchangeTrade,
-          sessionAsset,
-          assetPriceEntryNewest
-        );
-      }
-    } else if (
-      strategy.stopLossEnabled &&
-      currentProfitPercentage > exchangeTrade.triggerStopLossPercentage &&
-      exchangeTrade.triggerStopLossSellAt
-    ) {
-      // We are out of the stop loss percentage, so let's reset the timer!
-      exchangeTrade.triggerStopLossSellAt = null;
-    }
-
-    return null;
   }
 
   /***** Helpers *****/
@@ -404,7 +205,9 @@ export class Trader implements TraderInterface {
     logger.info(chalk.bold('Open trade updates:'));
     this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-        const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+        const assetPrice = this.session.exchange.assetPairPrices.get(
+          AssetPair.toKey(exchangeTrade.assetPair)
+        );
         const assetPriceEntryNewest = assetPrice.getNewestEntry();
         const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
         const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
@@ -448,149 +251,5 @@ export class Trader implements TraderInterface {
         exchangeAssetPrice.cleanupEntries(0.5);
       });
     }
-  }
-
-  _createNewOrder(
-    idPrefix: string,
-    assetPair: AssetPair,
-    sessionAsset: SessionAsset,
-    orderSide: ExchangeOrderSideEnum,
-    amount: string,
-    price: string
-  ) {
-    return new ExchangeOrder(
-      idPrefix + '_' + orderSide,
-      assetPair,
-      orderSide,
-      amount,
-      price,
-      ExchangeOrderTypeEnum.MARKET,
-      this.session.exchange.getAccountType(sessionAsset.tradingType)
-    );
-  }
-
-  _getLargestTroughPercentage(
-    assetPair: AssetPair,
-    uptrendMaximumAgeTime: number
-  ): number {
-    const assetPrice = this._getAssetPairPrice(assetPair);
-    const newestPriceEntry = assetPrice.getNewestEntry();
-    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
-      uptrendMaximumAgeTime
-    );
-    if (
-      !newestPriceEntry ||
-      !largestTroughPriceEntry
-    ) {
-      return null;
-    }
-
-    return calculatePercentage(
-      parseFloat(newestPriceEntry.price),
-      parseFloat(largestTroughPriceEntry.price)
-    );
-  }
-
-  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
-    return this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(assetPair)
-    );
-  }
-
-  async _executeBuy(
-    now: number,
-    assetPair: AssetPair,
-    sessionAsset: SessionAsset,
-    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface,
-    profitPercentage: number
-  ): Promise<ExchangeTrade> {
-    const assetPairSymbol = AssetPair.toKey(assetPair);
-
-    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
-    const order = this._createNewOrder(
-      id,
-      assetPair,
-      sessionAsset,
-      ExchangeOrderSideEnum.BUY,
-      sessionAsset.strategy.tradeAmount,
-      assetPriceEntryNewest.price
-    );
-    const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
-      sessionAsset.strategy.tradeAmount,
-      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
-    );
-
-    const buyOrder: ExchangeOrder = !Manager.isTestMode
-      ? await this.session.exchange.addAccountOrder(
-        ExchangeAccountTypeEnum.SPOT,
-        order
-      )
-      : order;
-    const exchangeTrade = new ExchangeTrade(
-      id,
-      assetPair.assetBase,
-      assetPair,
-      ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
-      now
-    );
-    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
-    exchangeTrade.buyOrder = buyOrder;
-    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
-    exchangeTrade.amount = buyOrder.amount;
-
-    sessionAsset.trades.push(exchangeTrade);
-
-    SessionManager.save(this.session);
-
-    logger.notice(chalk.green.bold(
-      `I am buying "${assetPairSymbol}" @ ${exchangeTrade.buyPrice}, ` +
-      `because there was a ${profitPercentage.toPrecision(3)}% profit since the trough!`
-    ));
-
-    return exchangeTrade;
-  }
-
-  async _executeSell(
-    exchangeTrade: ExchangeTrade,
-    sessionAsset: SessionAsset,
-    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface
-  ): Promise<ExchangeTrade> {
-    const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
-
-    const order = this._createNewOrder(
-      exchangeTrade.id,
-      exchangeTrade.assetPair,
-      sessionAsset,
-      ExchangeOrderSideEnum.SELL,
-      exchangeTrade.amount,
-      assetPriceEntryNewest.price
-    );
-    const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
-      sessionAsset.strategy.tradeAmount,
-      ExchangeOrderFeesTypeEnum.TAKER // It's a market buy, so we are a taker.
-    );
-
-    const sellOrder: ExchangeOrder = !Manager.isTestMode
-      ? await this.session.exchange.addAccountOrder(
-        ExchangeAccountTypeEnum.SPOT,
-        order
-      )
-      : order;
-    exchangeTrade.sellFeesPercentage = orderFees.amountPercentage;
-    exchangeTrade.sellOrder = sellOrder;
-    exchangeTrade.sellPrice = parseFloat(sellOrder.price);
-    exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
-
-    SessionManager.save(this.session);
-
-    logger.notice(chalk.green.bold(
-      `I am selling "${assetPairSymbol}". ` +
-      `I made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
-    ));
-
-    return exchangeTrade;
   }
 }
