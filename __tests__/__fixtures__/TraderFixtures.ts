@@ -1,5 +1,6 @@
 import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
+import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPriceEntry';
@@ -17,7 +18,8 @@ export const sessionAssets = [
       new AssetPair(Assets.BCH, Assets.USDT),
     ],
     new DefaultStrategy({}),
-    SessionAssetTradingTypeEnum.SPOT
+    SessionAssetTradingTypeEnum.SPOT,
+    ExchangeOrderTypeEnum.MARKET
   ),
 ];
 

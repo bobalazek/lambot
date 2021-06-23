@@ -1,6 +1,7 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
+import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 import { Strategy } from '../Strategy/Strategy';
 
@@ -9,6 +10,7 @@ export interface SessionAssetInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
   tradingType: SessionAssetTradingTypeEnum;
+  orderType: ExchangeOrderTypeEnum;
   trades: ExchangeTrade[];
   getOpenTrades(): ExchangeTrade[];
   getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
@@ -27,18 +29,21 @@ export class SessionAsset implements SessionAssetInterface {
   assetPairs: AssetPair[];
   strategy: Strategy;
   tradingType: SessionAssetTradingTypeEnum;
+  orderType: ExchangeOrderTypeEnum;
   trades: ExchangeTrade[];
 
   constructor(
     asset: Asset,
     assetPairs: AssetPair[],
     strategy: Strategy,
-    tradingType: SessionAssetTradingTypeEnum
+    tradingType: SessionAssetTradingTypeEnum,
+    orderType: ExchangeOrderTypeEnum
   ) {
     this.asset = asset;
     this.assetPairs = assetPairs;
     this.strategy = strategy;
     this.tradingType = tradingType;
+    this.orderType = orderType;
     this.trades = [];
   }
 
@@ -75,6 +80,7 @@ export class SessionAsset implements SessionAssetInterface {
       }),
       strategy: this.strategy.toExport(),
       tradingType: this.tradingType,
+      orderType: this.orderType,
       trades: this.trades.map((trade) => {
         return trade.toExport();
       }),
@@ -88,7 +94,8 @@ export class SessionAsset implements SessionAssetInterface {
         return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(data.strategy),
-      data.tradingType
+      data.tradingType,
+      data.orderType
     );
 
     if (data.trades) {

@@ -9,6 +9,7 @@ import { SessionManager } from './Core/Session/SessionManager';
 import { SessionAsset, SessionAssetTradingTypeEnum } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
 import { DefaultStrategy } from './Strategies/DefaultStrategy';
+import { ExchangeOrderTypeEnum } from './Core/Exchange/ExchangeOrder';
 
 // Prepare environment variables
 dotenv.config();
@@ -80,7 +81,8 @@ const sessionId = programOptions.session;
         new AssetPair(Assets.BEAM, Assets.USDT),
       ],
       new DefaultStrategy({}),
-      SessionAssetTradingTypeEnum.SPOT
+      SessionAssetTradingTypeEnum.SPOT,
+      ExchangeOrderTypeEnum.MARKET
     ),
   ];
 

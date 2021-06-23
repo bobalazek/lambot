@@ -4,6 +4,8 @@ import { AssetPair } from './Asset/AssetPair';
 import { Session } from './Session/Session';
 import { colorTextPercentageByValue } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
+import { ExchangeTrade } from './Exchange/ExchangeTrade';
+import { SessionAsset } from './Session/SessionAsset';
 
 export interface TraderInterface {
   session: Session;
