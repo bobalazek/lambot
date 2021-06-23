@@ -1,13 +1,13 @@
 import { AssetPair } from '../Asset/AssetPair';
+import { Manager } from '../Manager';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
+import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { Session } from '../Session/Session';
 import { SessionAsset } from '../Session/SessionAsset';
 import { StrategyParametersInterface } from './StrategyParameters';
-import { ID_PREFIX } from '../../Constants';
-import { Manager } from '../Manager';
-import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { SessionManager } from '../Session/SessionManager';
+import { ID_PREFIX } from '../../Constants';
 
 export interface StrategyInterface {
   name: string;
@@ -15,8 +15,14 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
-  checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
-  checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade>;
+  checkForBuySignal(
+    assetPair: AssetPair,
+    sessionAsset: SessionAsset
+  ): Promise<ExchangeTrade>;
+  checkForSellSignal(
+    exchangeTrade: ExchangeTrade,
+    sessionAsset: SessionAsset
+  ): Promise<ExchangeTrade>;
   executeBuy(
     assetPair: AssetPair,
     sessionAsset: SessionAsset,
