@@ -168,10 +168,22 @@ export class DefaultStrategy extends Strategy {
         );
       }
 
+      // Once we reach over this takeProfitPercentage threshold, we should set the stop loss percentage
+      // to that value, to prevent dipping down again when the trigger doesn't execute
+      // because of trailing take profit enabled.
+      exchangeTrade.triggerStopLossPercentage = this.parameters.takeProfitPercentage;
+
       const slipSincePeakProfitPercentage = exchangeTrade.peakProfitPercentage - currentProfitPercentage;
       if (
         this.parameters.trailingTakeProfitEnabled &&
-        this.parameters.trailingTakeProfitSlipPercentage > slipSincePeakProfitPercentage
+        slipSincePeakProfitPercentage === 0 // We are peaking right now!
+      ) {
+        return null;
+      }
+
+      if (
+        this.parameters.trailingTakeProfitEnabled &&
+        this.parameters.trailingTakeProfitSlipPercentage < slipSincePeakProfitPercentage
       ) {
         return this._executeSell(
           exchangeTrade,
@@ -179,6 +191,18 @@ export class DefaultStrategy extends Strategy {
           assetPriceEntryNewest
         );
       }
+    }
+
+    // Just to make sure that we trigger a sell when the currentProfitPercentage is less than the trigger.
+    // This basically covers the case when we have trailingTakeProfitEnabled,
+    // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
+    // so it doesn't every again fall below this value.
+    if (currentProfitPercentage < exchangeTrade.triggerStopLossPercentage) {
+      return this._executeSell(
+        exchangeTrade,
+        sessionAsset,
+        assetPriceEntryNewest
+      );
     }
 
     if (
@@ -210,7 +234,7 @@ export class DefaultStrategy extends Strategy {
       currentProfitPercentage > exchangeTrade.triggerStopLossPercentage &&
       exchangeTrade.triggerStopLossSellAt
     ) {
-      // We are out of the stop loss percentage, so let's reset the timer!
+      // We are out of the stop loss percentage loss, so let's reset the timer!
       exchangeTrade.triggerStopLossSellAt = null;
     }
 
