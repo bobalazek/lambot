@@ -1,17 +1,8 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
-import { ExchangeAssetPriceEntryInterface, ExchangeAssetPriceInterface } from '../Exchange/ExchangeAssetPrice';
-import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
-import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { Session } from '../Session/Session';
-import { SessionAsset } from '../Session/SessionAsset';
-import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
-import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
-import { SessionManager } from '../Session/SessionManager';
-import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
-import { Manager } from '../Manager';
-import { ID_PREFIX } from '../../Constants';
+import { colorTextPercentageByValue } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 
 export interface TraderInterface {
