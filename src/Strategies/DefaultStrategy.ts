@@ -150,9 +150,10 @@ export class DefaultStrategy extends Strategy {
     }
 
     const expectedTriggerStopLossPercentage = exchangeTrade.peakProfitPercentage - this.parameters.trailingStopLossPercentage;
+    const diffStopLossPercentage = exchangeTrade.peakProfitPercentage - exchangeTrade.triggerStopLossPercentage;
     if (
       this.parameters.trailingStopLossEnabled &&
-      this.parameters.trailingStopLossPercentage < exchangeTrade.peakProfitPercentage - exchangeTrade.triggerStopLossPercentage &&
+      this.parameters.trailingStopLossPercentage < diffStopLossPercentage &&
       exchangeTrade.triggerStopLossPercentage < expectedTriggerStopLossPercentage
     ) {
       exchangeTrade.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
@@ -167,9 +168,10 @@ export class DefaultStrategy extends Strategy {
         );
       }
 
+      const slipSincePeakProfitPercentage = exchangeTrade.peakProfitPercentage - currentProfitPercentage;
       if (
         this.parameters.trailingTakeProfitEnabled &&
-        exchangeTrade.peakProfitPercentage - currentProfitPercentage < this.parameters.trailingTakeProfitSlipPercentage
+        this.parameters.trailingTakeProfitSlipPercentage > slipSincePeakProfitPercentage
       ) {
         return this._executeSell(
           exchangeTrade,
