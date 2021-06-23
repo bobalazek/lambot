@@ -6,7 +6,7 @@ export async function asyncForEach<T>(array: Array<T>, callback: (item: T, index
   }
 }
 
-export function colorTextPercentageByValue(value: number) {
+export function colorTextPercentageByValue(value: number): string {
   if (value > 0) {
     return chalk.green('+' + value.toPrecision(3) + '%');
   } else if (value < 0) {
@@ -16,6 +16,40 @@ export function colorTextPercentageByValue(value: number) {
   return value.toPrecision(3) + '%';
 }
 
-export function calculatePercentage(a: number, b: number) {
+export function calculatePercentage(a: number, b: number): number {
   return ((a - b) / b) * 100;
+}
+
+export function timeframeToSeconds(timeframe: string): number {
+  const amount = parseInt(timeframe);
+  const unit = timeframe.trim().replace('' + amount, '');
+
+  switch (unit) {
+    case 'ms':
+    case 'millisecond':
+    case 'milliseconds':
+      return amount * 0.001;
+    case 's':
+    case 'second':
+    case 'seconds':
+      return amount;
+    case 'm':
+    case 'minute':
+    case 'minutes':
+      return amount * 60;
+    case 'h':
+    case 'hour':
+    case 'hours':
+      return amount * 3600;
+    case 'd':
+    case 'day':
+    case 'days':
+      return amount * 86400;
+    case 'w':
+    case 'week':
+    case 'weeks':
+      return amount * 604800;
+    default:
+      throw new Error('Invalid unit provided.');
+  }
 }

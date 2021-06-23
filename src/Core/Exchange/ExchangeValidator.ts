@@ -7,12 +7,21 @@ import logger from '../../Utils/Logger';
 export class ExchangeValidator {
   public static async validate(exchange: Exchange) {
     const {
+      warmupPeriodSeconds,
       assetPriceUpdateIntervalSeconds,
     } = exchange.session.config;
 
     logger.debug(chalk.italic(
       'Starting session and exchange validation ...'
     ));
+
+    if (warmupPeriodSeconds < 60) {
+      logger.warning(chalk.yellow(
+        `It is NOT recommended to set the warmup period to less than 60 seconds, ` +
+        `because in the first minutes we do a few of heavy requests to the exchange, ` +
+        `which may cause certain requests to rate-limit later on!`
+      ));
+    }
 
     if (assetPriceUpdateIntervalSeconds < 1) {
       logger.critical(chalk.red.bold(
