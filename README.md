@@ -36,6 +36,10 @@ Asset pairs in this case are the assets you want to trade the current asset with
 For example: You have a base asset USDT and you want to trade with USDTBTC, USSDTETH, ...
 Each session can also have it's own strategy.
 
+## TODO
+
+* Have a separate Importer and Exporter class or even a "...Converter" class, that will have the toExport and fromImport methods for all the classes we need to import/export? "...Serializer" (serialize/deserialize), ...?
+
 ## Disclaimer
 
 All investment strategies and investments involve risk of loss.

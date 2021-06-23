@@ -5,7 +5,7 @@ import chalk from 'chalk';
 
 import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
+import {  AssetPairStringConverterInterface } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
@@ -34,7 +34,7 @@ export class BinanceExchange extends Exchange {
       'binance',
       'Binance',
       apiCredentials,
-      new AssetPairStringConverterDefault()
+      new AssetPairStringConverterBinance()
     );
 
     if (!apiCredentials.key || !apiCredentials.secret) {
@@ -396,5 +396,14 @@ export class BinanceExchange extends Exchange {
     ));
 
     return response;
+  }
+}
+
+export class AssetPairStringConverterBinance implements AssetPairStringConverterInterface {
+  convert(assetPair: AssetPair): string {
+    return (
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
+    );
   }
 }
