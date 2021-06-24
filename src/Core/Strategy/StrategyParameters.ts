@@ -8,9 +8,6 @@ export interface StrategyParametersInterface {
   // How many open trades are we allowed to have for this asset AND this asset pair? Set -1 for unlimited.
   maximumOpenTradesPerAssetPair: number;
 
-  // What's the minimum daily volume we need to even consider this trade? Set -1 for no limit.
-  minimumDailyVolume: number;
-
   /********* Take Profit **********/
   // How much do we want to get profit, until we trigger a sell?
   // Note: This DOES NOT take the fees into account!

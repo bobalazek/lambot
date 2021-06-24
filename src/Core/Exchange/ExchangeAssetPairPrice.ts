@@ -18,9 +18,6 @@ export interface ExchangeAssetPairPriceInterface {
   getNewestChange(): ExchangeAssetPairPriceChangeInterface;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
-  getStatistics(): ExchangeAssetPairPriceStatisticsInterface[];
-  getNewestStatistics(): ExchangeAssetPairPriceStatisticsInterface;
-  addStatistics(entry: ExchangeAssetPairPriceStatisticsInterface): ExchangeAssetPairPriceStatisticsInterface;
   getPriceText(): string;
 }
 
@@ -34,12 +31,6 @@ export interface ExchangeAssetPairPriceChangeInterface {
 export interface ExchangeAssetPairPriceEntryInterface {
   timestamp: number;
   price: string;
-}
-
-export interface ExchangeAssetPairPriceStatisticsInterface {
-  volume: string;
-  tradesCount: number;
-  timestamp: number;
 }
 
 export interface ExchangeAssetPairPriceTrend {
@@ -68,7 +59,6 @@ export class ExchangeAssetPairPrice implements ExchangeAssetPairPriceInterface {
   private _entriesPeakIndexes: Array<number>;
   private _entriesTroughIndexes: Array<number>;
   private _changes: ExchangeAssetPairPriceChangeInterface[];
-  private _statistics: ExchangeAssetPairPriceStatisticsInterface[];
 
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
@@ -77,7 +67,6 @@ export class ExchangeAssetPairPrice implements ExchangeAssetPairPriceInterface {
     this._entriesPeakIndexes = [];
     this._entriesTroughIndexes = [];
     this._changes = [];
-    this._statistics = [];
   }
 
   getEntries(): ExchangeAssetPairPriceEntryInterface[] {
@@ -325,24 +314,6 @@ export class ExchangeAssetPairPrice implements ExchangeAssetPairPriceInterface {
     this._entries.splice(0, Math.ceil(this._entries.length * ratio));
 
     this.processEntries();
-  }
-
-  getStatistics(): ExchangeAssetPairPriceStatisticsInterface[] {
-    return this._statistics;
-  }
-
-  getNewestStatistics(): ExchangeAssetPairPriceStatisticsInterface {
-    if (this._statistics.length === 0) {
-      return null;
-    }
-
-    return this._statistics[this._statistics.length - 1];
-  }
-
-  addStatistics(statistics: ExchangeAssetPairPriceStatisticsInterface): ExchangeAssetPairPriceStatisticsInterface {
-    this._statistics.push(statistics);
-
-    return statistics;
   }
 
   getPriceText(): string {

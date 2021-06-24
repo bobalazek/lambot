@@ -4,7 +4,6 @@ import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
-import { ExchangeResponseAssetPairPriceStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceStatistics';
 import { SessionAsset, SessionAssetTradingTypeEnum } from '../../src/Core/Session/SessionAsset';
 import { DefaultStrategy } from '../../src/Strategies/DefaultStrategy';
 
@@ -112,33 +111,6 @@ export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterf
       price: '1.300',
     },
   ],
-];
-
-export const assetStatisticsResponse: ExchangeResponseAssetPairPriceStatisticsInterface[] = [
-  {
-    symbol: 'ETHUSDT',
-    timestamp: 0,
-    volume: '10000',
-    tradesCount: 1000,
-  },
-  {
-    symbol: 'BTCUSDT',
-    timestamp: 0,
-    volume: '10000',
-    tradesCount: 1000,
-  },
-  {
-    symbol: 'BNBUSDT',
-    timestamp: 0,
-    volume: '10000',
-    tradesCount: 1000,
-  },
-  {
-    symbol: 'BCHUSDT',
-    timestamp: 0,
-    volume: '10000',
-    tradesCount: 1000,
-  },
 ];
 
 export const assetPairsResponse: ExchangeResponseAssetPairInterface[] = [

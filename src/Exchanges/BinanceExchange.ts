@@ -13,7 +13,6 @@ import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } fr
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
-import { ExchangeResponseAssetPairPriceStatisticsInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceStatistics';
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session } from '../Core/Session/Session';
@@ -273,31 +272,6 @@ export class BinanceExchange extends Exchange {
     }
 
     return assetPairPrices;
-  }
-
-  async getAssetPairStatistics(): Promise<ExchangeResponseAssetPairPriceStatisticsInterface[]> {
-    logger.debug(chalk.italic(
-      'Fetching asset prices ...'
-    ));
-
-    const response = await this._doRequest(
-      RequestMethodEnum.GET,
-      'https://api.binance.com/api/v3/ticker/24hr'
-    );
-
-    const assetStatistics: ExchangeResponseAssetPairPriceStatisticsInterface[] = [];
-    for (let i = 0; i < response.data.length; i++) {
-      const statisticsData = response.data[i];
-
-      assetStatistics.push({
-        symbol: statisticsData.symbol,
-        volume: statisticsData.volume,
-        tradesCount: statisticsData.count,
-        timestamp: statisticsData.closeTime,
-      });
-    }
-
-    return assetStatistics;
   }
 
   async getAssetFees(

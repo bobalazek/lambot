@@ -12,7 +12,6 @@ export interface TraderInterface {
   start(): void;
   stop(): void;
   tick(updateIntervalTime: number): void;
-  tickStatistics(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
 }
@@ -25,7 +24,6 @@ export enum TraderStatusEnum {
 export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
-  intervalStatistics: ReturnType<typeof setInterval>;
   interval: ReturnType<typeof setInterval>;
   startTime: number;
 
@@ -38,18 +36,6 @@ export class Trader implements TraderInterface {
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
-    // Price statistics update (needed for initial sort in the tick)
-    await this.tickStatistics();
-
-    const updateStatisticsIntervalTime = this.session.config.assetPairPriceStatisticsUpdateIntervalSeconds * 1000;
-    if (updateStatisticsIntervalTime) {
-      this.intervalStatistics = setInterval(
-        this.tickStatistics.bind(this),
-        updateStatisticsIntervalTime
-      );
-    }
-
-    // Price update
     const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (updateIntervalTime) {
       this.interval = setInterval(
@@ -68,7 +54,6 @@ export class Trader implements TraderInterface {
   stop() {
     this.status = TraderStatusEnum.STOPPED;
 
-    clearInterval(this.intervalStatistics);
     clearInterval(this.interval);
   }
 
@@ -92,10 +77,6 @@ export class Trader implements TraderInterface {
     );
   }
 
-  async tickStatistics() {
-    await this._updateAssetPairPriceStatistics();
-  }
-
   async processCurrentTrades(): Promise<void> {
     logger.debug('Starting to process trades ...');
 
@@ -117,34 +98,6 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
-  async _updateAssetPairPriceStatistics() {
-    const {
-      session,
-    } = this;
-    const assetPairs = session.getAllAssetPairs();
-
-    logger.debug(`Updating asset price statistics ...`);
-
-    const assetStatistics = await session.exchange.getAssetPairStatistics();
-    for (let i = 0; i < assetStatistics.length; i++) {
-      const statisticsData = assetStatistics[i];
-      if (!assetPairs.has(statisticsData.symbol)) {
-        continue;
-      }
-
-      const assetPairPrice = session.exchange.assetPairPrices.get(statisticsData.symbol);
-      if (!assetPairPrice) {
-        logger.info(chalk.red.bold(
-          `Asset price for symbol "${statisticsData.symbol}" not found.`
-        ));
-
-        process.exit(1);
-      }
-
-      assetPairPrice.addStatistics(statisticsData);
-    }
-  }
-
   async _updateAssetPairPrices(now: number) {
     const {
       session,

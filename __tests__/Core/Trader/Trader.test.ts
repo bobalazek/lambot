@@ -8,7 +8,6 @@ import { Trader } from '../../../src/Core/Trader';
 import {
   sessionAssets,
   assetPairPricesResponses,
-  assetStatisticsResponse,
   assetPairsResponse,
   accountAssetsResponse,
 } from '../../__fixtures__/TraderFixtures';
@@ -26,7 +25,6 @@ describe('Trader', () => {
 
     const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
     exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
-    exchange.getAssetPairStatistics = jest.fn().mockReturnValue(assetStatisticsResponse);
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
@@ -69,11 +67,9 @@ describe('Trader', () => {
     const assetPairPrice = trader.session.exchange.assetPairPrices.get('ETHUSDT');
     const assetPairPriceEntries = assetPairPrice.getEntries();
     const assetPairPriceChanges = assetPairPrice.getChanges();
-    const assetPairPriceStatistics = assetPairPrice.getStatistics();
 
     expect(assetPairPriceEntries).toHaveLength(1);
     expect(assetPairPriceChanges).toHaveLength(0);
-    expect(assetPairPriceStatistics).toHaveLength(1);
 
     // Next ticks
     jest.spyOn(Date, 'now').mockImplementation(() => 1000);

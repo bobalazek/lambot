@@ -13,7 +13,6 @@ export class DefaultStrategy extends Strategy {
     tradeAmount = '15',
     maximumOpenTrades = 5,
     maximumOpenTradesPerAssetPair = 1,
-    minimumDailyVolume = 10000,
     takeProfitPercentage = 2,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.1,
@@ -31,7 +30,6 @@ export class DefaultStrategy extends Strategy {
         tradeAmount,
         maximumOpenTrades,
         maximumOpenTradesPerAssetPair,
-        minimumDailyVolume,
         takeProfitPercentage,
         trailingTakeProfitEnabled,
         trailingTakeProfitSlipPercentage,
@@ -85,15 +83,7 @@ export class DefaultStrategy extends Strategy {
       return null;
     }
 
-    if (this.parameters.minimumDailyVolume !== -1) {
-      const assetPairPriceStatisticsNewest = assetPairPrice.getNewestStatistics();
-      if (
-        !assetPairPriceStatisticsNewest ||
-        parseFloat(assetPairPriceStatisticsNewest.volume) < this.parameters.minimumDailyVolume
-      ) {
-        return null;
-      }
-    }
+    // TODO: implement minimum hourly/daily volume
 
     const uptrendMaximumAgeTime = this.parameters.buyTroughUptrendMaximumAgeSeconds * 1000;
     const profitPercentageSinceTrough = this._getLargestTroughPercentage(
