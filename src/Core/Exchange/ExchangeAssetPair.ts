@@ -7,9 +7,16 @@ import {
   ExchangeAssetPairPriceTrendStatusEnum,
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
+import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
+
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
+  // Candlesticks
+  getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
+  getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
+  addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
+  // Price entries
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[];
   getPriceEntriesPeakIndexes(): number[];
   getPriceEntriesTroughIndexes(): number[];
@@ -18,9 +25,11 @@ export interface ExchangeAssetPairInterface {
   getLastTroughPriceEntry(): ExchangeAssetPairPriceEntryInterface;
   getLargestPeakPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
   getLargestTroughPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface;
-  addPriceEntry(entry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
+  addPriceEntry(priceEntry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
+  // Price changes
   getPriceChanges(): ExchangeAssetPairPriceChangeInterface[];
   getNewestPriceChange(): ExchangeAssetPairPriceChangeInterface;
+  // Helpers
   processPriceEntries(): void;
   cleanupPriceEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(): string;
@@ -30,6 +39,7 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
 
+  private _candlesticks: ExchangeAssetPairCandlestickInterface[];
   private _priceEntries: ExchangeAssetPairPriceEntryInterface[];
   private _priceEntriesPeakIndexes: Array<number>;
   private _priceEntriesTroughIndexes: Array<number>;
@@ -38,12 +48,33 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
 
+    this._candlesticks = [];
+    this._priceChanges = [];
     this._priceEntries = [];
     this._priceEntriesPeakIndexes = [];
     this._priceEntriesTroughIndexes = [];
-    this._priceChanges = [];
   }
 
+  /***** Candlesticks *****/
+  getCandlesticks(): ExchangeAssetPairCandlestickInterface[] {
+    return this._candlesticks;
+  }
+
+  getNewestCandlestick(): ExchangeAssetPairCandlestickInterface {
+    if (this._candlesticks.length === 0) {
+      return null;
+    }
+
+    return this._candlesticks[this._candlesticks.length - 1];
+  }
+
+  addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface {
+    this._candlesticks.push(candlestick);
+
+    return candlestick;
+  }
+
+  /***** Price entries *****/
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[] {
     return this._priceEntries;
   }
@@ -134,12 +165,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return largestTroughEntry;
   }
 
-  addPriceEntry(entry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface {
-    this._priceEntries.push(entry);
+  addPriceEntry(priceEntry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface {
+    this._priceEntries.push(priceEntry);
 
-    return entry;
+    return priceEntry;
   }
 
+  /***** Price changes *****/
   getPriceChanges(): ExchangeAssetPairPriceChangeInterface[] {
     return this._priceChanges;
   }
@@ -152,6 +184,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceChanges[this._priceChanges.length - 1];
   }
 
+  /***** Helpers *****/
   processPriceEntries(): void {
     const entriesCount = this._priceEntries.length;
     if (entriesCount < 2) {
