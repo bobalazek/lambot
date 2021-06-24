@@ -22,7 +22,6 @@ export interface SessionInterface {
   clearAssets(): void;
   getAllAssetPairs(): Set<string>;
   toString(): string;
-  toExport(): unknown;
 }
 
 export enum SessionStatusEnum {

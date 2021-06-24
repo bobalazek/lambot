@@ -15,7 +15,6 @@ export interface SessionAssetInterface {
   getOpenTrades(): ExchangeTrade[];
   getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
   toString(assetPairConverter: AssetPairStringConverterInterface): string;
-  toExport(): unknown;
 }
 
 export enum SessionAssetTradingTypeEnum {

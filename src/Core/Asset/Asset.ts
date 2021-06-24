@@ -1,9 +1,6 @@
 export interface AssetInterface {
   symbol: string;
   name: string;
-  getKey(): string;
-  toString(): string;
-  toExport(): unknown;
 }
 
 export class Asset implements AssetInterface {

@@ -9,8 +9,6 @@ export interface AssetPairDataInterface {
 
 export interface AssetPairInterface extends AssetPairDataInterface {
   toExchangeSymbolString(converter: AssetPairStringConverterInterface): string;
-  toString(): string;
-  toExport(): unknown;
 }
 
 export class AssetPair implements AssetPairInterface {

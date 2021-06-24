@@ -10,8 +10,6 @@ export interface ExchangeOrderInterface {
   type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
-  toString(): string;
-  toExport(): unknown;
 }
 
 export enum ExchangeOrderSideEnum {

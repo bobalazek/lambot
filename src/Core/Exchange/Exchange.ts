@@ -36,7 +36,6 @@ export interface ExchangeInterface {
   getAssetStatistics(): Promise<ExchangeResponseAssetPriceStatisticsInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
   getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum;
-  toExport(): unknown;
 }
 
 export class Exchange implements ExchangeInterface {

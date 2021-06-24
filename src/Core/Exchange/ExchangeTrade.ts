@@ -22,7 +22,6 @@ export interface ExchangeTradeInterface {
   sellOrder?: ExchangeOrderInterface;
   getCurrentProfitPercentage(currentPrice: number): number;
   getProfitPercentage(): number;
-  toExport(): unknown;
 }
 
 export enum ExchangeTradeTypeEnum {

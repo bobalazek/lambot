@@ -34,7 +34,6 @@ export interface StrategyInterface {
     sessionAsset: SessionAsset,
     price: string
   ): Promise<ExchangeTrade>;
-  toExport(): unknown;
 }
 
 export class Strategy implements StrategyInterface {

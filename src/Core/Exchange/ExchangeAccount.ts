@@ -5,7 +5,6 @@ export interface ExchangeAccountInterface {
   type: ExchangeAccountTypeEnum;
   assets: ExchangeAccountAssetsMap;
   trades: ExchangeTrade[];
-  toExport(): unknown;
 }
 
 export enum ExchangeAccountTypeEnum {
