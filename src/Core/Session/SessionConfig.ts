@@ -3,14 +3,14 @@ export interface SessionConfigInterface {
   warmupPeriodSeconds: number;
 
   // At which interval we want to update the prices?
-  assetPriceUpdateIntervalSeconds: number;
+  assetPairPriceUpdateIntervalSeconds: number;
 
   // After how many seconds do we want to update the asset price statistis?
   // Set to 0 if disabled, altough it will run at least once in trader.start()
-  assetPriceStatisticsUpdateIntervalSeconds: number;
+  assetPairPriceStatisticsUpdateIntervalSeconds: number;
 
   // Should we show the current price & staus for all the assets?
-  showAssetPriceUpdates: boolean;
+  showAssetPairPriceUpdates: boolean;
 
   // Should we show the status of all the current open trades?
   showOpenTradeUpdates: boolean;
@@ -21,24 +21,24 @@ export interface SessionConfigInterface {
 
 export class SessionConfig implements SessionConfigInterface {
   warmupPeriodSeconds: number;
-  assetPriceUpdateIntervalSeconds: number;
-  assetPriceStatisticsUpdateIntervalSeconds: number;
-  showAssetPriceUpdates: boolean;
+  assetPairPriceUpdateIntervalSeconds: number;
+  assetPairPriceStatisticsUpdateIntervalSeconds: number;
+  showAssetPairPriceUpdates: boolean;
   showOpenTradeUpdates: boolean;
   memoryUsageMonitoringIntervalSeconds: number;
 
   constructor({
     warmupPeriodSeconds = 60,
-    assetPriceUpdateIntervalSeconds = 1,
-    assetPriceStatisticsUpdateIntervalSeconds = 300,
-    showAssetPriceUpdates = false,
+    assetPairPriceUpdateIntervalSeconds = 1,
+    assetPairPriceStatisticsUpdateIntervalSeconds = 300,
+    showAssetPairPriceUpdates = false,
     showOpenTradeUpdates = true,
     memoryUsageMonitoringIntervalSeconds = 30,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
-    this.assetPriceUpdateIntervalSeconds = assetPriceUpdateIntervalSeconds;
-    this.assetPriceStatisticsUpdateIntervalSeconds = assetPriceStatisticsUpdateIntervalSeconds;
-    this.showAssetPriceUpdates = showAssetPriceUpdates;
+    this.assetPairPriceUpdateIntervalSeconds = assetPairPriceUpdateIntervalSeconds;
+    this.assetPairPriceStatisticsUpdateIntervalSeconds = assetPairPriceStatisticsUpdateIntervalSeconds;
+    this.showAssetPairPriceUpdates = showAssetPairPriceUpdates;
     this.showOpenTradeUpdates = showOpenTradeUpdates;
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
   }
@@ -47,9 +47,9 @@ export class SessionConfig implements SessionConfigInterface {
   toExport() {
     return {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
-      assetPriceUpdateIntervalSeconds: this.assetPriceUpdateIntervalSeconds,
-      assetPriceStatisticsUpdateIntervalSeconds: this.assetPriceStatisticsUpdateIntervalSeconds,
-      showAssetPriceUpdates: this.showAssetPriceUpdates,
+      assetPairPriceUpdateIntervalSeconds: this.assetPairPriceUpdateIntervalSeconds,
+      assetPairPriceStatisticsUpdateIntervalSeconds: this.assetPairPriceStatisticsUpdateIntervalSeconds,
+      showAssetPairPriceUpdates: this.showAssetPairPriceUpdates,
       showOpenTradeUpdates: this.showOpenTradeUpdates,
       memoryUsageMonitoringIntervalSeconds: this.memoryUsageMonitoringIntervalSeconds,
     };
@@ -58,9 +58,9 @@ export class SessionConfig implements SessionConfigInterface {
   static fromImport(data: any): SessionConfig {
     return new SessionConfig({
       warmupPeriodSeconds: data.warmupPeriodSeconds,
-      assetPriceUpdateIntervalSeconds: data.assetPriceUpdateIntervalSeconds,
-      assetPriceStatisticsUpdateIntervalSeconds: data.assetPriceStatisticsUpdateIntervalSeconds,
-      showAssetPriceUpdates: data.showAssetPriceUpdates,
+      assetPairPriceUpdateIntervalSeconds: data.assetPairPriceUpdateIntervalSeconds,
+      assetPairPriceStatisticsUpdateIntervalSeconds: data.assetPairPriceStatisticsUpdateIntervalSeconds,
+      showAssetPairPriceUpdates: data.showAssetPairPriceUpdates,
       showOpenTradeUpdates: data.showOpenTradeUpdates,
       memoryUsageMonitoringIntervalSeconds: data.memoryUsageMonitoringIntervalSeconds,
     });

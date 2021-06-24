@@ -1,72 +1,78 @@
 import chalk from 'chalk';
 
+import { AssetPair } from '../Asset/AssetPair';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
-export interface ExchangeAssetPriceInterface {
-  getEntries(): ExchangeAssetPriceEntryInterface[];
+export interface ExchangeAssetPairPriceInterface {
+  assetPair: AssetPair;
+  getEntries(): ExchangeAssetPairPriceEntryInterface[];
   getEntriesPeakIndexes(): number[];
   getEntriesTroughIndexes(): number[];
-  getNewestEntry(): ExchangeAssetPriceEntryInterface;
-  getLastPeakEntry(): ExchangeAssetPriceEntryInterface;
-  getLastTroughEntry(): ExchangeAssetPriceEntryInterface;
-  getLargestPeakEntry(maximumAge: number): ExchangeAssetPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
-  getLargestTroughEntry(maximumAge: number): ExchangeAssetPriceEntryInterface;
-  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface;
-  getChanges(): ExchangeAssetPriceChangeInterface[];
-  getNewestChange(): ExchangeAssetPriceChangeInterface;
+  getNewestEntry(): ExchangeAssetPairPriceEntryInterface;
+  getLastPeakEntry(): ExchangeAssetPairPriceEntryInterface;
+  getLastTroughEntry(): ExchangeAssetPairPriceEntryInterface;
+  getLargestPeakEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
+  getLargestTroughEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface;
+  addEntry(entry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
+  getChanges(): ExchangeAssetPairPriceChangeInterface[];
+  getNewestChange(): ExchangeAssetPairPriceChangeInterface;
   processEntries(): void;
   cleanupEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
-  getStatistics(): ExchangeAssetPriceStatisticsInterface[];
-  getNewestStatistics(): ExchangeAssetPriceStatisticsInterface;
-  addStatistics(entry: ExchangeAssetPriceStatisticsInterface): ExchangeAssetPriceStatisticsInterface;
+  getStatistics(): ExchangeAssetPairPriceStatisticsInterface[];
+  getNewestStatistics(): ExchangeAssetPairPriceStatisticsInterface;
+  addStatistics(entry: ExchangeAssetPairPriceStatisticsInterface): ExchangeAssetPairPriceStatisticsInterface;
   getPriceText(): string;
 }
 
-export interface ExchangeAssetPriceChangeInterface {
+export interface ExchangeAssetPairPriceChangeInterface {
   relativePricePercentage: number; // relative to the previous entry - ((price - prevPrice) / prevPrice) * 100
   price: number;
   prevPrice: number;
   timestamp: number;
 }
 
-export interface ExchangeAssetPriceEntryInterface {
+export interface ExchangeAssetPairPriceEntryInterface {
   timestamp: number;
   price: string;
 }
 
-export interface ExchangeAssetPriceStatisticsInterface {
+export interface ExchangeAssetPairPriceStatisticsInterface {
   volume: string;
   tradesCount: number;
   timestamp: number;
 }
 
-export interface ExchangeAssetPriceTrend {
-  status: ExchangeAssetPriceTrendStatusEnum;
+export interface ExchangeAssetPairPriceTrend {
+  status: ExchangeAssetPairPriceTrendStatusEnum;
   trendPercentage: number;
 }
 
-export enum ExchangeAssetPriceTrendStatusEnum {
+export enum ExchangeAssetPairPriceTrendStatusEnum {
   UPTREND = 'UPTREND',
   DOWNTREND = 'DOWNTREND',
   SIDEWAYS_TREND  = 'SIDEWAYS_TREND',
 }
 
-export const ExchangeAssetTrendIconMap = new Map<ExchangeAssetPriceTrendStatusEnum, string>([
-  [ExchangeAssetPriceTrendStatusEnum.UPTREND, '🟢'],
-  [ExchangeAssetPriceTrendStatusEnum.DOWNTREND, '🔴'],
-  [ExchangeAssetPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],
+export const ExchangeAssetTrendIconMap = new Map<ExchangeAssetPairPriceTrendStatusEnum, string>([
+  [ExchangeAssetPairPriceTrendStatusEnum.UPTREND, '🟢'],
+  [ExchangeAssetPairPriceTrendStatusEnum.DOWNTREND, '🔴'],
+  [ExchangeAssetPairPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],
 ]);
 
-export type ExchangeAssetPricesMap = Map<string, ExchangeAssetPriceInterface>;
+export type ExchangeAssetPairPricesMap = Map<string, ExchangeAssetPairPriceInterface>;
 
-export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
-  private _entries: ExchangeAssetPriceEntryInterface[];
+export class ExchangeAssetPairPrice implements ExchangeAssetPairPriceInterface {
+  assetPair: AssetPair;
+
+  private _entries: ExchangeAssetPairPriceEntryInterface[];
   private _entriesPeakIndexes: Array<number>;
   private _entriesTroughIndexes: Array<number>;
-  private _changes: ExchangeAssetPriceChangeInterface[];
-  private _statistics: ExchangeAssetPriceStatisticsInterface[];
+  private _changes: ExchangeAssetPairPriceChangeInterface[];
+  private _statistics: ExchangeAssetPairPriceStatisticsInterface[];
 
-  constructor() {
+  constructor(assetPair: AssetPair) {
+    this.assetPair = assetPair;
+
     this._entries = [];
     this._entriesPeakIndexes = [];
     this._entriesTroughIndexes = [];
@@ -74,7 +80,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._statistics = [];
   }
 
-  getEntries(): ExchangeAssetPriceEntryInterface[] {
+  getEntries(): ExchangeAssetPairPriceEntryInterface[] {
     return this._entries;
   }
 
@@ -86,7 +92,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entriesTroughIndexes;
   }
 
-  getNewestEntry(): ExchangeAssetPriceEntryInterface {
+  getNewestEntry(): ExchangeAssetPairPriceEntryInterface {
     if (this._entries.length === 0) {
       return null;
     }
@@ -94,7 +100,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries[this._entries.length - 1];
   }
 
-  getLastPeakEntry(): ExchangeAssetPriceEntryInterface {
+  getLastPeakEntry(): ExchangeAssetPairPriceEntryInterface {
     if (this._entriesPeakIndexes.length === 0) {
       return null;
     }
@@ -102,7 +108,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries[this._entriesPeakIndexes[this._entriesPeakIndexes.length - 1]];
   }
 
-  getLastTroughEntry(): ExchangeAssetPriceEntryInterface {
+  getLastTroughEntry(): ExchangeAssetPairPriceEntryInterface {
     if (this._entriesTroughIndexes.length === 0) {
       return null;
     }
@@ -110,13 +116,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._entries[this._entriesTroughIndexes[this._entriesTroughIndexes.length - 1]];
   }
 
-  getLargestPeakEntry(maximumAge: number = -1): ExchangeAssetPriceEntryInterface {
+  getLargestPeakEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface {
     if (this._entriesPeakIndexes.length === 0) {
       return null;
     }
 
     const now = Date.now();
-    let largestPeakEntry: ExchangeAssetPriceEntryInterface = null;
+    let largestPeakEntry: ExchangeAssetPairPriceEntryInterface = null;
     for (let i = this._entriesPeakIndexes.length - 1; i >= 0; i--) {
       const entry = this._entries[this._entriesPeakIndexes[i]];
       if (
@@ -137,13 +143,13 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return largestPeakEntry;
   }
 
-  getLargestTroughEntry(maximumAge: number = -1): ExchangeAssetPriceEntryInterface {
+  getLargestTroughEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface {
     if (this._entriesTroughIndexes.length === 0) {
       return null;
     }
 
     const now = Date.now();
-    let largestTroughEntry: ExchangeAssetPriceEntryInterface = null;
+    let largestTroughEntry: ExchangeAssetPairPriceEntryInterface = null;
     for (let i = this._entriesTroughIndexes.length - 1; i >= 0; i--) {
       const entry = this._entries[this._entriesTroughIndexes[i]];
       if (
@@ -164,17 +170,17 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return largestTroughEntry;
   }
 
-  addEntry(entry: ExchangeAssetPriceEntryInterface): ExchangeAssetPriceEntryInterface {
+  addEntry(entry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface {
     this._entries.push(entry);
 
     return entry;
   }
 
-  getChanges(): ExchangeAssetPriceChangeInterface[] {
+  getChanges(): ExchangeAssetPairPriceChangeInterface[] {
     return this._changes;
   }
 
-  getNewestChange(): ExchangeAssetPriceChangeInterface {
+  getNewestChange(): ExchangeAssetPairPriceChangeInterface {
     if (this._changes.length === 0) {
       return null;
     }
@@ -194,7 +200,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this._entriesPeakIndexes = [];
     this._entriesTroughIndexes = [];
 
-    const changes: ExchangeAssetPriceChangeInterface[] = [];
+    const changes: ExchangeAssetPairPriceChangeInterface[] = [];
     for (let i = 0; i < entriesCount; i++) {
       const entry = this._entries[i];
       const prevEntry = i > 0
@@ -321,11 +327,11 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     this.processEntries();
   }
 
-  getStatistics(): ExchangeAssetPriceStatisticsInterface[] {
+  getStatistics(): ExchangeAssetPairPriceStatisticsInterface[] {
     return this._statistics;
   }
 
-  getNewestStatistics(): ExchangeAssetPriceStatisticsInterface {
+  getNewestStatistics(): ExchangeAssetPairPriceStatisticsInterface {
     if (this._statistics.length === 0) {
       return null;
     }
@@ -333,7 +339,7 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     return this._statistics[this._statistics.length - 1];
   }
 
-  addStatistics(statistics: ExchangeAssetPriceStatisticsInterface): ExchangeAssetPriceStatisticsInterface {
+  addStatistics(statistics: ExchangeAssetPairPriceStatisticsInterface): ExchangeAssetPairPriceStatisticsInterface {
     this._statistics.push(statistics);
 
     return statistics;
@@ -361,10 +367,10 @@ export class ExchangeAssetPrice implements ExchangeAssetPriceInterface {
     if (changesNewest) {
       const percentage = changesNewest.relativePricePercentage;
       const status = percentage > 0
-        ? ExchangeAssetPriceTrendStatusEnum.UPTREND
+        ? ExchangeAssetPairPriceTrendStatusEnum.UPTREND
         : (percentage < 0
-          ? ExchangeAssetPriceTrendStatusEnum.DOWNTREND
-          : ExchangeAssetPriceTrendStatusEnum.SIDEWAYS_TREND
+          ? ExchangeAssetPairPriceTrendStatusEnum.DOWNTREND
+          : ExchangeAssetPairPriceTrendStatusEnum.SIDEWAYS_TREND
         );
 
       string += ' ' + ExchangeAssetTrendIconMap.get(status);

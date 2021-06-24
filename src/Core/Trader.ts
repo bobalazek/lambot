@@ -41,7 +41,7 @@ export class Trader implements TraderInterface {
     // Price statistics update (needed for initial sort in the tick)
     await this.tickStatistics();
 
-    const updateStatisticsIntervalTime = this.session.config.assetPriceStatisticsUpdateIntervalSeconds * 1000;
+    const updateStatisticsIntervalTime = this.session.config.assetPairPriceStatisticsUpdateIntervalSeconds * 1000;
     if (updateStatisticsIntervalTime) {
       this.intervalStatistics = setInterval(
         this.tickStatistics.bind(this),
@@ -50,7 +50,7 @@ export class Trader implements TraderInterface {
     }
 
     // Price update
-    const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
+    const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (updateIntervalTime) {
       this.interval = setInterval(
         this.tick.bind(this, updateIntervalTime),
@@ -75,9 +75,9 @@ export class Trader implements TraderInterface {
   async tick(updateIntervalTime: number) {
     const now = Date.now();
 
-    await this._updateAssetPrices(now);
+    await this._updateAssetPairPrices(now);
 
-    this._printAssetPriceUpdates(now);
+    this._printAssetPairPriceUpdates(now);
 
     const processingStartTime = Date.now();
 
@@ -85,7 +85,7 @@ export class Trader implements TraderInterface {
 
     this._printOpenTradeUpdates(now);
 
-    this._cleanupAssetPrices(
+    this._cleanupAssetPairPrices(
       now,
       processingStartTime,
       updateIntervalTime
@@ -93,7 +93,7 @@ export class Trader implements TraderInterface {
   }
 
   async tickStatistics() {
-    await this._updateAssetPriceStatistics();
+    await this._updateAssetPairPriceStatistics();
   }
 
   async processCurrentTrades(): Promise<void> {
@@ -117,7 +117,7 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
-  async _updateAssetPriceStatistics() {
+  async _updateAssetPairPriceStatistics() {
     const {
       session,
     } = this;
@@ -125,15 +125,15 @@ export class Trader implements TraderInterface {
 
     logger.debug(`Updating asset price statistics ...`);
 
-    const assetStatistics = await session.exchange.getAssetStatistics();
+    const assetStatistics = await session.exchange.getAssetPairStatistics();
     for (let i = 0; i < assetStatistics.length; i++) {
       const statisticsData = assetStatistics[i];
       if (!assetPairs.has(statisticsData.symbol)) {
         continue;
       }
 
-      const assetPrice = session.exchange.assetPairPrices.get(statisticsData.symbol);
-      if (!assetPrice) {
+      const assetPairPrice = session.exchange.assetPairPrices.get(statisticsData.symbol);
+      if (!assetPairPrice) {
         logger.info(chalk.red.bold(
           `Asset price for symbol "${statisticsData.symbol}" not found.`
         ));
@@ -141,11 +141,11 @@ export class Trader implements TraderInterface {
         process.exit(1);
       }
 
-      assetPrice.addStatistics(statisticsData);
+      assetPairPrice.addStatistics(statisticsData);
     }
   }
 
-  async _updateAssetPrices(now: number) {
+  async _updateAssetPairPrices(now: number) {
     const {
       session,
     } = this;
@@ -153,15 +153,15 @@ export class Trader implements TraderInterface {
 
     logger.debug(`Updating asset prices ...`);
 
-    const assetPrices = await session.exchange.getAssetPrices();
-    for (let i = 0; i < assetPrices.length; i++) {
-      const priceData = assetPrices[i];
+    const assetPairPrices = await session.exchange.getAssetPairPrices();
+    for (let i = 0; i < assetPairPrices.length; i++) {
+      const priceData = assetPairPrices[i];
       if (!assetPairs.has(priceData.symbol)) {
         continue;
       }
 
-      const assetPrice = session.exchange.assetPairPrices.get(priceData.symbol);
-      if (!assetPrice) {
+      const assetPairPrice = session.exchange.assetPairPrices.get(priceData.symbol);
+      if (!assetPairPrice) {
         logger.info(chalk.red.bold(
           `Asset price for symbol "${priceData.symbol}" not found.`
         ));
@@ -169,23 +169,23 @@ export class Trader implements TraderInterface {
         process.exit(1);
       }
 
-      assetPrice.addEntry({
+      assetPairPrice.addEntry({
         timestamp: priceData.timestamp,
         price: priceData.price,
       });
 
-      assetPrice.processEntries();
+      assetPairPrice.processEntries();
     }
   }
 
-  _printAssetPriceUpdates(now: number) {
-    if (!this.session.config.showAssetPriceUpdates) {
+  _printAssetPairPriceUpdates(now: number) {
+    if (!this.session.config.showAssetPairPriceUpdates) {
       return;
     }
 
     logger.info(chalk.bold('Asset pair price updates:'));
-    this.session.exchange.assetPairPrices.forEach((exchangeAssetPrice, key) => {
-      const priceText = exchangeAssetPrice.getPriceText();
+    this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice, key) => {
+      const priceText = exchangeAssetPairPrice.getPriceText();
 
       logger.info(chalk.bold(key) + ' - ' + priceText);
     });
@@ -200,19 +200,19 @@ export class Trader implements TraderInterface {
     logger.info(chalk.bold('Open trade updates:'));
     this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
-        const assetPrice = this.session.exchange.assetPairPrices.get(
+        const assetPairPrice = this.session.exchange.assetPairPrices.get(
           exchangeTrade.assetPair.getKey()
         );
-        const assetPriceEntryNewest = assetPrice.getNewestEntry();
-        const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
-        const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
+        const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+        const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+        const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
         const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
 
         hasAnyOpenTrades = true;
 
         logger.info(
           chalk.bold(exchangeTrade.assetPair.getKey()) +
-          ` @ ${currentAssetPrice}` +
+          ` @ ${currentAssetPairPrice}` +
           ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
           ` current profit: ${colorTextPercentageByValue(profitPercentage)} (excluding fees)`
         );
@@ -236,7 +236,7 @@ export class Trader implements TraderInterface {
     }
   }
 
-  _cleanupAssetPrices(
+  _cleanupAssetPairPrices(
     tickStartTime: number,
     processingStartTime: number,
     updateIntervalTime: number
@@ -246,8 +246,8 @@ export class Trader implements TraderInterface {
     logger.debug(`Processing a tick took ${processingTime}ms.`);
 
     if (processingTime > updateIntervalTime / 2) {
-      this.session.exchange.assetPairPrices.forEach((exchangeAssetPrice) => {
-        exchangeAssetPrice.cleanupEntries(0.5);
+      this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
+        exchangeAssetPairPrice.cleanupEntries(0.5);
       });
     }
   }

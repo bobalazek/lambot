@@ -7,7 +7,7 @@ import { SessionConfig } from '../../../src/Core/Session/SessionConfig';
 import { Trader } from '../../../src/Core/Trader';
 import {
   sessionAssets,
-  assetPricesResponses,
+  assetPairPricesResponses,
   assetStatisticsResponse,
   assetPairsResponse,
   accountAssetsResponse,
@@ -25,8 +25,8 @@ describe('Trader', () => {
     jest.useFakeTimers();
 
     const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-    exchange.getAssetPrices = jest.fn().mockReturnValue(assetPricesResponses[0]);
-    exchange.getAssetStatistics = jest.fn().mockReturnValue(assetStatisticsResponse);
+    exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
+    exchange.getAssetPairStatistics = jest.fn().mockReturnValue(assetStatisticsResponse);
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
@@ -77,23 +77,23 @@ describe('Trader', () => {
 
     // Next ticks
     jest.spyOn(Date, 'now').mockImplementation(() => 1000);
-    trader.session.exchange.getAssetPrices = jest.fn().mockReturnValue(assetPricesResponses[1]);
+    trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[1]);
     await trader.tick(1000);
 
     jest.spyOn(Date, 'now').mockImplementation(() => 2000);
-    trader.session.exchange.getAssetPrices = jest.fn().mockReturnValue(assetPricesResponses[2]);
+    trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[2]);
     await trader.tick(1000);
 
     jest.spyOn(Date, 'now').mockImplementation(() => 3000);
-    trader.session.exchange.getAssetPrices = jest.fn().mockReturnValue(assetPricesResponses[3]);
+    trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[3]);
     await trader.tick(1000);
 
     const assetPairPriceSecondary = trader.session.exchange.assetPairPrices.get('ETHUSDT');
     const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getEntries();
     const assetPairPriceSecondaryChanges = assetPairPriceSecondary.getChanges();
 
-    expect(assetPairPriceSecondaryEntries).toHaveLength(assetPricesResponses.length);
-    expect(assetPairPriceSecondaryChanges).toHaveLength(assetPricesResponses.length);
+    expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);
+    expect(assetPairPriceSecondaryChanges).toHaveLength(assetPairPricesResponses.length);
 
     const sortedAssetPairs = sessionAsset.strategy.getSortedAssetPairs(sessionAsset);
 

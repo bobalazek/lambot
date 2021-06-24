@@ -3,8 +3,8 @@ import { Assets } from '../../src/Core/Asset/Assets';
 import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
-import { ExchangeResponseAssetPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPriceEntry';
-import { ExchangeResponseAssetPriceStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPriceStatistics';
+import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
+import { ExchangeResponseAssetPairPriceStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceStatistics';
 import { SessionAsset, SessionAssetTradingTypeEnum } from '../../src/Core/Session/SessionAsset';
 import { DefaultStrategy } from '../../src/Strategies/DefaultStrategy';
 
@@ -23,7 +23,7 @@ export const sessionAssets = [
   ),
 ];
 
-export const assetPricesResponses: ExchangeResponseAssetPriceEntryInterface[][] = [
+export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterface[][] = [
   [
     {
       symbol: 'ETHUSDT',
@@ -114,7 +114,7 @@ export const assetPricesResponses: ExchangeResponseAssetPriceEntryInterface[][] 
   ],
 ];
 
-export const assetStatisticsResponse: ExchangeResponseAssetPriceStatisticsInterface[] = [
+export const assetStatisticsResponse: ExchangeResponseAssetPairPriceStatisticsInterface[] = [
   {
     symbol: 'ETHUSDT',
     timestamp: 0,

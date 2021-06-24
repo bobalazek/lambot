@@ -32,7 +32,7 @@ const sessionId = programOptions.session;
 (async() => {
   // Config
   const sessionConfig = new SessionConfig({
-    assetPriceUpdateIntervalSeconds: 2,
+    assetPairPriceUpdateIntervalSeconds: 2,
   });
   const exchangeKey = ExchangesEnum.BINANCE;
   const sessionAssets = [

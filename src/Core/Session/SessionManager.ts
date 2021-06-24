@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
 
-import { AssetPair } from '../Asset/AssetPair';
+import { Manager } from '../Manager';
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
 import { SessionAsset } from './SessionAsset';
@@ -138,6 +138,9 @@ export class SessionManager {
   }
 
   static getPathById(id: string): string {
-    return path.resolve(DATA_SESSIONS_DIR, id + '.json');
+    const suffix = Manager.isTestMode
+      ? '.testing'
+      : '.production';
+    return path.resolve(DATA_SESSIONS_DIR, id + suffix + '.json');
   }
 }

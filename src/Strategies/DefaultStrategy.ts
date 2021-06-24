@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { ExchangeAssetPriceEntryInterface, ExchangeAssetPriceInterface } from '../Core/Exchange/ExchangeAssetPrice';
+import { ExchangeAssetPairPriceEntryInterface, ExchangeAssetPairPriceInterface } from '../Core/Exchange/ExchangeAssetPairPrice';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
 import { SessionAsset } from '../Core/Session/SessionAsset';
 import { Strategy } from '../Core/Strategy/Strategy';
@@ -78,18 +78,18 @@ export class DefaultStrategy extends Strategy {
       return null;
     }
 
-    const assetPrice = this._getAssetPairPrice(assetPair);
-    const assetPriceEntryNewest = assetPrice.getNewestEntry();
-    const updateIntervalTime = this.session.config.assetPriceUpdateIntervalSeconds * 1000;
-    if (now - assetPriceEntryNewest.timestamp > updateIntervalTime) {
+    const assetPairPrice = this._getAssetPairPrice(assetPair);
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+    const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
+    if (now - assetPairPriceEntryNewest.timestamp > updateIntervalTime) {
       return null;
     }
 
     if (this.parameters.minimumDailyVolume !== -1) {
-      const assetPriceStatisticsNewest = assetPrice.getNewestStatistics();
+      const assetPairPriceStatisticsNewest = assetPairPrice.getNewestStatistics();
       if (
-        !assetPriceStatisticsNewest ||
-        parseFloat(assetPriceStatisticsNewest.volume) < this.parameters.minimumDailyVolume
+        !assetPairPriceStatisticsNewest ||
+        parseFloat(assetPairPriceStatisticsNewest.volume) < this.parameters.minimumDailyVolume
       ) {
         return null;
       }
@@ -113,17 +113,17 @@ export class DefaultStrategy extends Strategy {
     return await this._executeBuy(
       assetPair,
       sessionAsset,
-      assetPriceEntryNewest,
+      assetPairPriceEntryNewest,
       profitPercentageSinceTrough
     );
   }
 
   async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
     const now = Date.now();
-    const assetPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPriceEntryNewest = assetPrice.getNewestEntry();
-    const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
-    const currentProfitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPrice);
+    const assetPairPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+    const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+    const currentProfitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
 
     if (
       exchangeTrade.peakProfitPercentage === null ||
@@ -158,7 +158,7 @@ export class DefaultStrategy extends Strategy {
         return this._executeSell(
           exchangeTrade,
           sessionAsset,
-          assetPriceEntryNewest
+          assetPairPriceEntryNewest
         );
       }
 
@@ -182,7 +182,7 @@ export class DefaultStrategy extends Strategy {
         return this._executeSell(
           exchangeTrade,
           sessionAsset,
-          assetPriceEntryNewest
+          assetPairPriceEntryNewest
         );
       }
     }
@@ -195,7 +195,7 @@ export class DefaultStrategy extends Strategy {
       return this._executeSell(
         exchangeTrade,
         sessionAsset,
-        assetPriceEntryNewest
+        assetPairPriceEntryNewest
       );
     }
 
@@ -207,7 +207,7 @@ export class DefaultStrategy extends Strategy {
         return this._executeSell(
           exchangeTrade,
           sessionAsset,
-          assetPriceEntryNewest
+          assetPairPriceEntryNewest
         );
       }
 
@@ -220,7 +220,7 @@ export class DefaultStrategy extends Strategy {
         return this._executeSell(
           exchangeTrade,
           sessionAsset,
-          assetPriceEntryNewest
+          assetPairPriceEntryNewest
         );
       }
     } else if (
@@ -270,9 +270,9 @@ export class DefaultStrategy extends Strategy {
     assetPair: AssetPair,
     uptrendMaximumAgeTime: number
   ): number {
-    const assetPrice = this._getAssetPairPrice(assetPair);
-    const newestPriceEntry = assetPrice.getNewestEntry();
-    const largestTroughPriceEntry = assetPrice.getLargestTroughEntry(
+    const assetPairPrice = this._getAssetPairPrice(assetPair);
+    const newestPriceEntry = assetPairPrice.getNewestEntry();
+    const largestTroughPriceEntry = assetPairPrice.getLargestTroughEntry(
       uptrendMaximumAgeTime
     );
     if (
@@ -288,7 +288,7 @@ export class DefaultStrategy extends Strategy {
     );
   }
 
-  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
+  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPairPriceInterface {
     return this.session.exchange.assetPairPrices.get(
       assetPair.getKey()
     );
@@ -297,13 +297,13 @@ export class DefaultStrategy extends Strategy {
   async _executeBuy(
     assetPair: AssetPair,
     sessionAsset: SessionAsset,
-    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface,
+    assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface,
     profitPercentageSinceTrough: number
   ): Promise<ExchangeTrade> {
     const exchangeTrade = await this.executeBuy(
       assetPair,
       sessionAsset,
-      assetPriceEntryNewest.price,
+      assetPairPriceEntryNewest.price,
       ExchangeTradeTypeEnum.LONG
     );
 
@@ -318,12 +318,12 @@ export class DefaultStrategy extends Strategy {
   async _executeSell(
     exchangeTrade: ExchangeTrade,
     sessionAsset: SessionAsset,
-    assetPriceEntryNewest: ExchangeAssetPriceEntryInterface
+    assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface
   ): Promise<ExchangeTrade> {
     await this.executeSell(
       exchangeTrade,
       sessionAsset,
-      assetPriceEntryNewest.price
+      assetPairPriceEntryNewest.price
     );
 
     logger.notice(chalk.green.bold(
