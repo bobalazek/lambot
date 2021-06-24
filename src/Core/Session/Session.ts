@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
 import { Exchange } from '../Exchange/Exchange';
-import { ExchangeAssetPairPrice } from '../Exchange/ExchangeAssetPairPrice';
+import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
 import { SessionAsset } from './SessionAsset';
 import { SessionConfig } from './SessionConfig';
 import logger from '../../Utils/Logger';
@@ -69,7 +69,7 @@ export class Session implements SessionInterface {
   addAssetPair(assetPair: AssetPair) {
     this.exchange.assetPairPrices.set(
       assetPair.getKey(),
-      new ExchangeAssetPairPrice(assetPair)
+      new ExchangeAssetPair(assetPair)
     );
 
     return assetPair;

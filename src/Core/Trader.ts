@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 
-import { AssetPair } from './Asset/AssetPair';
 import { Session } from './Session/Session';
 import { colorTextPercentageByValue } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
@@ -122,12 +121,12 @@ export class Trader implements TraderInterface {
         process.exit(1);
       }
 
-      assetPairPrice.addEntry({
+      assetPairPrice.addPriceEntry({
         timestamp: priceData.timestamp,
         price: priceData.price,
       });
 
-      assetPairPrice.processEntries();
+      assetPairPrice.processPriceEntries();
     }
   }
 
@@ -156,7 +155,7 @@ export class Trader implements TraderInterface {
         const assetPairPrice = this.session.exchange.assetPairPrices.get(
           exchangeTrade.assetPair.getKey()
         );
-        const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+        const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
         const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
         const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
         const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
@@ -200,7 +199,7 @@ export class Trader implements TraderInterface {
 
     if (processingTime > updateIntervalTime / 2) {
       this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
-        exchangeAssetPairPrice.cleanupEntries(0.5);
+        exchangeAssetPairPrice.cleanupPriceEntries(0.5);
       });
     }
   }

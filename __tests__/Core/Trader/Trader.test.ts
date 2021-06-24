@@ -65,8 +65,8 @@ describe('Trader', () => {
     expect(sessionAsset.trades).toHaveLength(0);
 
     const assetPairPrice = trader.session.exchange.assetPairPrices.get('ETHUSDT');
-    const assetPairPriceEntries = assetPairPrice.getEntries();
-    const assetPairPriceChanges = assetPairPrice.getChanges();
+    const assetPairPriceEntries = assetPairPrice.getPriceEntries();
+    const assetPairPriceChanges = assetPairPrice.getPriceChanges();
 
     expect(assetPairPriceEntries).toHaveLength(1);
     expect(assetPairPriceChanges).toHaveLength(0);
@@ -85,8 +85,8 @@ describe('Trader', () => {
     await trader.tick(1000);
 
     const assetPairPriceSecondary = trader.session.exchange.assetPairPrices.get('ETHUSDT');
-    const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getEntries();
-    const assetPairPriceSecondaryChanges = assetPairPriceSecondary.getChanges();
+    const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getPriceEntries();
+    const assetPairPriceSecondaryChanges = assetPairPriceSecondary.getPriceChanges();
 
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);
     expect(assetPairPriceSecondaryChanges).toHaveLength(assetPairPricesResponses.length);

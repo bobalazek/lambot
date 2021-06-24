@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { ExchangeAssetPairPriceEntryInterface, ExchangeAssetPairPriceInterface } from '../Core/Exchange/ExchangeAssetPairPrice';
+import { ExchangeAssetPairInterface } from '../Core/Exchange/ExchangeAssetPair';
+import { ExchangeAssetPairPriceEntryInterface } from '../Core/Exchange/ExchangeAssetPairPrice';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
 import { SessionAsset } from '../Core/Session/SessionAsset';
 import { Strategy } from '../Core/Strategy/Strategy';
@@ -77,7 +78,7 @@ export class DefaultStrategy extends Strategy {
     }
 
     const assetPairPrice = this._getAssetPairPrice(assetPair);
-    const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
     const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (now - assetPairPriceEntryNewest.timestamp > updateIntervalTime) {
       return null;
@@ -111,7 +112,7 @@ export class DefaultStrategy extends Strategy {
   async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
     const now = Date.now();
     const assetPairPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
-    const assetPairPriceEntryNewest = assetPairPrice.getNewestEntry();
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
     const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
     const currentProfitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
 
@@ -261,8 +262,8 @@ export class DefaultStrategy extends Strategy {
     uptrendMaximumAgeTime: number
   ): number {
     const assetPairPrice = this._getAssetPairPrice(assetPair);
-    const newestPriceEntry = assetPairPrice.getNewestEntry();
-    const largestTroughPriceEntry = assetPairPrice.getLargestTroughEntry(
+    const newestPriceEntry = assetPairPrice.getNewestPriceEntry();
+    const largestTroughPriceEntry = assetPairPrice.getLargestTroughPriceEntry(
       uptrendMaximumAgeTime
     );
     if (
@@ -278,7 +279,7 @@ export class DefaultStrategy extends Strategy {
     );
   }
 
-  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPairPriceInterface {
+  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPairInterface {
     return this.session.exchange.assetPairPrices.get(
       assetPair.getKey()
     );
