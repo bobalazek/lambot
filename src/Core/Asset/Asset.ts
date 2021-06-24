@@ -16,10 +16,6 @@ export class Asset implements AssetInterface {
     return this.symbol;
   }
 
-  toString(): string {
-    return this.getKey();
-  }
-
   toExport() {
     return {
       symbol: this.symbol,

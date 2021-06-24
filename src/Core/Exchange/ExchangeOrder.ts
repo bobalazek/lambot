@@ -58,8 +58,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     this.exchangeResponse = exchangeResponse;
   }
 
-  /***** Export/Import *****/
-  toString() {
+  getKey() {
     return JSON.stringify({
       id: this.id,
       side: this.side,
@@ -70,6 +69,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     });
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       id: this.id,

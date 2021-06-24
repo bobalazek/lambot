@@ -14,7 +14,7 @@ export interface SessionAssetInterface {
   trades: ExchangeTrade[];
   getOpenTrades(): ExchangeTrade[];
   getAssetPairs(assetPairConverter: AssetPairStringConverterInterface): Set<string>;
-  toString(assetPairConverter: AssetPairStringConverterInterface): string;
+  getKey(assetPairConverter: AssetPairStringConverterInterface): string;
 }
 
 export enum SessionAssetTradingTypeEnum {
@@ -50,7 +50,7 @@ export class SessionAsset implements SessionAssetInterface {
     const assetPairs = new Set<string>();
 
     this.assetPairs.forEach((assetPair) => {
-      assetPairs.add(AssetPair.toKey(assetPair));
+      assetPairs.add(assetPair.getKey());
     });
 
     return assetPairs;
@@ -62,15 +62,15 @@ export class SessionAsset implements SessionAssetInterface {
     });
   }
 
-  /***** Export/Import *****/
-  toString(): string {
+  getKey(): string {
     const assetPairsString = this.assetPairs.map((assetPair) => {
-      return assetPair.toString();
+      return assetPair.getKey();
     }).join(', ');
 
-    return `Base asset: ${this.asset.toString()}; Asset pairs: ${assetPairsString}`;
+    return `Base asset: ${this.asset.getKey()}; Asset pairs: ${assetPairsString}`;
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       asset: this.asset.toExport(),

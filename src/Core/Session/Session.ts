@@ -21,7 +21,7 @@ export interface SessionInterface {
   addAssetPair(assetPair: AssetPair): AssetPair;
   clearAssets(): void;
   getAllAssetPairs(): Set<string>;
-  toString(): string;
+  getKey(): string;
 }
 
 export enum SessionStatusEnum {
@@ -68,7 +68,7 @@ export class Session implements SessionInterface {
 
   addAssetPair(assetPair: AssetPair) {
     this.exchange.assetPairPrices.set(
-      AssetPair.toKey(assetPair),
+      assetPair.getKey(),
       new ExchangeAssetPrice()
     );
 
@@ -92,18 +92,18 @@ export class Session implements SessionInterface {
     return assetPairs;
   }
 
-  /***** Export/Import *****/
-  toString() {
+  getKey() {
     return JSON.stringify({
       id: this.id,
       exchange: this.exchange.key,
       createdAt: this.createdAt,
       assets: this.assets.map((sessionAsset) => {
-        return sessionAsset.toString();
+        return sessionAsset.getKey();
       }),
     });
   }
 
+  /***** Export/Import *****/
   toExport() {
     return {
       id: this.id,

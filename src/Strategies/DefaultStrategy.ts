@@ -63,7 +63,7 @@ export class DefaultStrategy extends Strategy {
 
     const sessionAssetAssetPairTrades = trades.filter((exchangeTrade) => {
       return (
-        AssetPair.toKey(exchangeTrade.assetPair) === AssetPair.toKey(assetPair) &&
+        exchangeTrade.assetPair.getKey() === assetPair.getKey() &&
         (
           exchangeTrade.status === ExchangeTradeStatusEnum.OPEN ||
           exchangeTrade.status === ExchangeTradeStatusEnum.BUY_PENDING
@@ -290,7 +290,7 @@ export class DefaultStrategy extends Strategy {
 
   _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPriceInterface {
     return this.session.exchange.assetPairPrices.get(
-      AssetPair.toKey(assetPair)
+      assetPair.getKey()
     );
   }
 
@@ -308,7 +308,7 @@ export class DefaultStrategy extends Strategy {
     );
 
     logger.notice(chalk.green.bold(
-      `I am buying "${assetPair.toString()}" @ ${exchangeTrade.buyPrice}, ` +
+      `I am buying "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}, ` +
       `because there was a ${profitPercentageSinceTrough.toPrecision(3)}% profit since the trough!`
     ));
 
@@ -327,7 +327,7 @@ export class DefaultStrategy extends Strategy {
     );
 
     logger.notice(chalk.green.bold(
-      `I am selling "${exchangeTrade.assetPair.toString()}". ` +
+      `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
       `I made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
     ));
 

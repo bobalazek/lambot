@@ -126,7 +126,7 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
-    const orderSymbol = order.assetPair.toExchangeSymbolString(this.assetPairConverter);
+    const orderSymbol = order.assetPair.getExchangeSymbolString(this.assetPairConverter);
     const orderType = order.type;
 
     const data: any = {

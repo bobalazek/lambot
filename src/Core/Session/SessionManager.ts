@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
 
+import { AssetPair } from '../Asset/AssetPair';
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { Session } from './Session';
 import { SessionAsset } from './SessionAsset';
@@ -114,7 +115,7 @@ export class SessionManager {
               session.addAssetPair(newAssetPair);
 
               logger.debug(
-                `Adding a new asset pair to the loaded session: ${newAssetPair.toString()}`
+                `Adding a new asset pair to the loaded session: ${newAssetPair.getKey()}`
               );
             }
           }

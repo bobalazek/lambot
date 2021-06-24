@@ -8,44 +8,60 @@ export interface AssetPairDataInterface {
 }
 
 export interface AssetPairInterface extends AssetPairDataInterface {
-  toExchangeSymbolString(converter: AssetPairStringConverterInterface): string;
+  symbol?: string;
+  getKey(): string;
+  getExchangeSymbolString(converter: AssetPairStringConverterInterface): string;
 }
 
 export class AssetPair implements AssetPairInterface {
   assetBase: Asset;
   assetQuote: Asset;
+  symbol?: string;
 
-  constructor(assetBase: Asset, assetQuote: Asset) {
+  constructor(assetBase: Asset, assetQuote: Asset, symbol?: string) {
     this.assetBase = assetBase;
     this.assetQuote = assetQuote;
+    this.symbol = symbol;
   }
 
-  toExchangeSymbolString(converter: AssetPairStringConverterInterface): string {
+  getKey(): string {
+    if (this.symbol) {
+      return this.symbol;
+    }
+
+    return AssetPairConverter.convert(this);
+  }
+
+  getExchangeSymbolString(converter: AssetPairStringConverterInterface): string {
+    if (this.symbol) {
+      return this.symbol;
+    }
+
     return converter.convert(this);
-  }
-
-  toString(): string {
-    return AssetPair.toKey(this);
   }
 
   toExport() {
     return {
       assetBase: this.assetBase.symbol,
       assetQuote: this.assetQuote.symbol,
+      symbol: this.symbol,
     };
   }
 
   static fromImport(data: any): AssetPair {
     return new AssetPair(
       Assets.getBySymbol(data.assetBase),
-      Assets.getBySymbol(data.assetQuote)
+      Assets.getBySymbol(data.assetQuote),
+      data.symbol
     );
   }
+}
 
-  static toKey(data: AssetPairDataInterface): string {
+export class AssetPairConverter {
+  static convert(assetPair: AssetPairDataInterface) {
     return (
-      data.assetBase.symbol +
-      data.assetQuote.symbol
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
     );
   }
 }

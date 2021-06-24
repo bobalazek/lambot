@@ -85,7 +85,11 @@ export class Trader implements TraderInterface {
 
     this._printOpenTradeUpdates(now);
 
-    this._cleanupAssetPrices(processingStartTime, updateIntervalTime);
+    this._cleanupAssetPrices(
+      now,
+      processingStartTime,
+      updateIntervalTime
+    );
   }
 
   async tickStatistics() {
@@ -197,7 +201,7 @@ export class Trader implements TraderInterface {
     this.session.assets.forEach((sessionAsset) => {
       sessionAsset.getOpenTrades().forEach((exchangeTrade) => {
         const assetPrice = this.session.exchange.assetPairPrices.get(
-          AssetPair.toKey(exchangeTrade.assetPair)
+          exchangeTrade.assetPair.getKey()
         );
         const assetPriceEntryNewest = assetPrice.getNewestEntry();
         const currentAssetPrice = parseFloat(assetPriceEntryNewest.price);
@@ -207,7 +211,7 @@ export class Trader implements TraderInterface {
         hasAnyOpenTrades = true;
 
         logger.info(
-          chalk.bold(AssetPair.toKey(exchangeTrade.assetPair)) +
+          chalk.bold(exchangeTrade.assetPair.getKey()) +
           ` @ ${currentAssetPrice}` +
           ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
           ` current profit: ${colorTextPercentageByValue(profitPercentage)} (excluding fees)`
@@ -232,7 +236,11 @@ export class Trader implements TraderInterface {
     }
   }
 
-  _cleanupAssetPrices(processingStartTime: number, updateIntervalTime: number) {
+  _cleanupAssetPrices(
+    tickStartTime: number,
+    processingStartTime: number,
+    updateIntervalTime: number
+  ) {
     // Cleanup entries if processing time takes too long
     const processingTime = Date.now() - processingStartTime;
     logger.debug(`Processing a tick took ${processingTime}ms.`);

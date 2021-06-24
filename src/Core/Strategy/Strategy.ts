@@ -71,7 +71,7 @@ export class Strategy implements StrategyInterface {
     tradeType: ExchangeTradeTypeEnum
   ): Promise<ExchangeTrade> {
     const now = Date.now();
-    const assetPairSymbol = AssetPair.toKey(assetPair);
+    const assetPairSymbol = assetPair.getKey();
 
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = this._createNewOrder(
@@ -121,7 +121,7 @@ export class Strategy implements StrategyInterface {
     sessionAsset: SessionAsset,
     price: string
   ): Promise<ExchangeTrade> {
-    const assetPairSymbol = AssetPair.toKey(exchangeTrade.assetPair);
+    const assetPairSymbol = exchangeTrade.assetPair.getKey();
 
     const order = this._createNewOrder(
       exchangeTrade.id,

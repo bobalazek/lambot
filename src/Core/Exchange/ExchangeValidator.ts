@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { Exchange } from './Exchange';
-import { AssetPair } from '../Asset/AssetPair';
+import { AssetPairConverter } from '../Asset/AssetPair';
 import logger from '../../Utils/Logger';
 
 export class ExchangeValidator {
@@ -42,7 +42,7 @@ export class ExchangeValidator {
 
     const exhangeAssetPairs = await exchange.getAssetPairs();
     const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
-      const key = AssetPair.toKey(assetPair);
+      const key = AssetPairConverter.convert(assetPair);
       return [key, assetPair];
     }));
 
