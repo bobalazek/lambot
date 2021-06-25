@@ -5,15 +5,16 @@ import chalk from 'chalk';
 
 import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { AssetPair } from '../Core/Asset/AssetPair';
-import {  AssetPairStringConverterInterface } from '../Core/Asset/AssetPairStringConverter';
+import { AssetPairStringConverterInterface } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
-import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
+import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
+import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session } from '../Core/Session/Session';
 import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
@@ -22,7 +23,25 @@ import logger from '../Utils/Logger';
 enum RequestMethodEnum {
   GET = 'GET',
   POST = 'POST',
-};
+}
+
+const BinanceExchangeCandlestickTimeframesMap = new Map([
+  [60, '1m'],
+  [180, '3m'],
+  [300, '5m'],
+  [900, '15m'],
+  [1800, '30m'],
+  [3600, '1h'],
+  [7200, '2h'],
+  [14400, '4h'],
+  [21600, '6h'],
+  [28800, '8h'],
+  [43200, '12h'],
+  [86400, '1d'],
+  [259200, '3d'],
+  [604800, '1w'],
+  [2419200, '1M'],
+]);
 
 export class BinanceExchange extends Exchange {
   private _timeOffset: number;
@@ -262,16 +281,78 @@ export class BinanceExchange extends Exchange {
 
     const assetPairPrices: ExchangeResponseAssetPairPriceEntryInterface[] = [];
     for (let i = 0; i < response.data.length; i++) {
-      const assetData = response.data[i];
+      const data = response.data[i];
 
       assetPairPrices.push({
-        symbol: assetData.symbol,
-        price: assetData.price,
+        symbol: data.symbol,
+        price: data.price,
         timestamp: now,
       });
     }
 
     return assetPairPrices;
+  }
+
+  async getAssetPairCandlesticks(
+    symbol: string,
+    timeframeSeconds: number,
+    startTime?: number,
+    endTime?: number,
+    limit?: number
+  ): Promise<ExchangeResponseAssetPairCandlestickInterface[]> {
+    logger.debug(chalk.italic(
+      'Fetching asset pair candlesticks ...'
+    ));
+
+    if (!BinanceExchangeCandlestickTimeframesMap.has(timeframeSeconds)) {
+      logger.critical(chalk.red.bold('Invalid timeframeSeconds provided.'));
+
+      process.exit(1);
+    }
+
+    const interval = BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds);
+
+    const dataOrParams = {
+      symbol,
+      interval,
+    };
+
+    if (startTime) {
+      dataOrParams[startTime] = startTime;
+    }
+
+    if (endTime) {
+      dataOrParams[endTime] = endTime;
+    }
+
+    if (limit) {
+      dataOrParams[limit] = limit;
+    }
+
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/klines',
+      dataOrParams
+    );
+
+    const assetPairCandlesticks: ExchangeResponseAssetPairCandlestickInterface[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      const data = response.data[i];
+
+      assetPairCandlesticks.push({
+        symbol,
+        openTime: data[0],
+        closeTime: data[6],
+        openPrice: data[1],
+        highPrice: data[2],
+        lowPrice: data[3],
+        closePrice: data[4],
+        volume: data[5],
+        tradesCount: data[8],
+      });
+    }
+
+    return assetPairCandlesticks;
   }
 
   async getAssetFees(

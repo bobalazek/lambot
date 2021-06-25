@@ -6,8 +6,9 @@ import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from '.
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeAssetPairPricesMap } from './ExchangeAssetPairPrice';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
-import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
+import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
+import { ExchangeResponseAssetPairCandlestickInterface } from './Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
@@ -32,6 +33,13 @@ export interface ExchangeInterface {
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]>;
+  getAssetPairCandlesticks(
+    symbol: string,
+    timeframeSeconds: number,
+    startTime?: number,
+    endTime?: number,
+    limit?: number
+  ): Promise<ExchangeResponseAssetPairCandlestickInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
   getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum;
 }
@@ -98,6 +106,16 @@ export class Exchange implements ExchangeInterface {
 
   async getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]> {
     throw new Error('getAssetPairPrices() not implemented yet.');
+  }
+
+  async getAssetPairCandlesticks(
+    symbol: string,
+    timeframeSeconds: number,
+    startTime?: number,
+    endTime?: number,
+    limit?: number
+  ): Promise<ExchangeResponseAssetPairCandlestickInterface[]> {
+    throw new Error('getAssetPairCandlesticks() not implemented yet.');
   }
 
   async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface> {
