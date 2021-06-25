@@ -14,6 +14,8 @@ export class DefaultStrategy extends Strategy {
     tradeAmount = '15',
     maximumOpenTrades = 5,
     maximumOpenTradesPerAssetPair = 1,
+    priceIntervalSeconds = 2,
+    candlesticksIntervalSeconds = 60,
     takeProfitPercentage = 2,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.1,
@@ -31,6 +33,8 @@ export class DefaultStrategy extends Strategy {
         tradeAmount,
         maximumOpenTrades,
         maximumOpenTradesPerAssetPair,
+        priceIntervalSeconds,
+        candlesticksIntervalSeconds,
         takeProfitPercentage,
         trailingTakeProfitEnabled,
         trailingTakeProfitSlipPercentage,
@@ -79,10 +83,6 @@ export class DefaultStrategy extends Strategy {
 
     const assetPairPrice = this._getAssetPairPrice(assetPair);
     const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
-    const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
-    if (now - assetPairPriceEntryNewest.timestamp > updateIntervalTime) {
-      return null;
-    }
 
     // TODO: implement minimum hourly/daily volume
 

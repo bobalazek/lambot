@@ -42,16 +42,16 @@ export class AssetPair implements AssetPairInterface {
 
   toExport() {
     return {
-      assetBase: this.assetBase.symbol,
-      assetQuote: this.assetQuote.symbol,
+      assetBase: this.assetBase.toExport(),
+      assetQuote: this.assetQuote.toExport(),
       symbol: this.symbol,
     };
   }
 
   static fromImport(data: any): AssetPair {
     return new AssetPair(
-      Assets.getBySymbol(data.assetBase),
-      Assets.getBySymbol(data.assetQuote),
+      Asset.fromImport(data.assetBase),
+      Asset.fromImport(data.assetQuote),
       data.symbol
     );
   }

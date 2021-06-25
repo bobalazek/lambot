@@ -35,7 +35,7 @@ export class Trader implements TraderInterface {
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
-    const updateIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
+    const updateIntervalTime = 2000; // TODO
     if (updateIntervalTime) {
       this.interval = setInterval(
         this.tick.bind(this, updateIntervalTime),

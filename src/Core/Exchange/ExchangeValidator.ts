@@ -8,7 +8,6 @@ export class ExchangeValidator {
   public static async validate(exchange: Exchange) {
     const {
       warmupPeriodSeconds,
-      assetPairPriceUpdateIntervalSeconds,
     } = exchange.session.config;
 
     logger.debug(chalk.italic(
@@ -21,14 +20,6 @@ export class ExchangeValidator {
         `because in the first minutes we do a few of heavy requests to the exchange, ` +
         `which may cause certain requests to rate-limit later on!`
       ));
-    }
-
-    if (assetPairPriceUpdateIntervalSeconds < 1) {
-      logger.critical(chalk.red.bold(
-        `You cannot set the asset price update interval to less than 1!`
-      ));
-
-      process.exit(1);
     }
 
     const sessionAssets = exchange.session.assets;
