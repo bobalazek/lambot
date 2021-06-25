@@ -22,15 +22,6 @@ export class ExchangeValidator {
       ));
     }
 
-    const sessionAssets = exchange.session.assets;
-    if (sessionAssets.length === 0) {
-      logger.critical(chalk.red.bold(
-        'No assets found for this session!'
-      ));
-
-      process.exit(1);
-    }
-
     const exhangeAssetPairs = await exchange.getAssetPairs();
     const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
       const key = AssetPairConverter.convert(assetPair);
@@ -38,78 +29,75 @@ export class ExchangeValidator {
     }));
 
     // Do session asset validations
-    sessionAssets.forEach((sessionAsset) => {
-      const {
-        tradingType,
-      } = sessionAsset;
-      const sessionAssetAssetPairSet = sessionAsset.getAssetPairs();
+    const {
+      tradingType,
+    } = exchange.session;
 
-      sessionAssetAssetPairSet.forEach((assetPairSymbol) => {
-        // Check if that pair exists on the exchange
-        if (!exhangeAssetPairsMap.has(assetPairSymbol)) {
-          logger.critical(chalk.red.bold(
-            `Oh dear. We did not seem to have found the "${assetPairSymbol}" asset pair on the exchange.`
-          ));
+    exchange.session.getAssetPairs().forEach((assetPairSymbol) => {
+      // Check if that pair exists on the exchange
+      if (!exhangeAssetPairsMap.has(assetPairSymbol)) {
+        logger.critical(chalk.red.bold(
+          `Oh dear. We did not seem to have found the "${assetPairSymbol}" asset pair on the exchange.`
+        ));
 
-          process.exit(1);
-        }
+        process.exit(1);
+      }
 
-        const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
+      const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
 
-        // Check if we can to the trading type we specified
-        if (!exchangeAssetPair.tradingTypes.includes(tradingType)) {
-          logger.critical(chalk.red.bold(
-            `Trading type "${tradingType}" is not available for "${assetPairSymbol}".`
-          ));
+      // Check if we can to the trading type we specified
+      if (!exchangeAssetPair.tradingTypes.includes(tradingType)) {
+        logger.critical(chalk.red.bold(
+          `Trading type "${tradingType}" is not available for "${assetPairSymbol}".`
+        ));
 
-          process.exit(1);
-        }
+        process.exit(1);
+      }
 
-        // Check if trailing take profit is enabled and we have no slippage set
-        if (
-          sessionAsset.strategy.parameters.trailingTakeProfitEnabled &&
-          !(sessionAsset.strategy.parameters.trailingTakeProfitSlipPercentage > 0)
-        ) {
-          logger.critical(chalk.red.bold(
-            `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
-          ));
+      // Check if trailing take profit is enabled and we have no slippage set
+      if (
+        exchange.session.strategy.parameters.trailingTakeProfitEnabled &&
+        !(exchange.session.strategy.parameters.trailingTakeProfitSlipPercentage > 0)
+      ) {
+        logger.critical(chalk.red.bold(
+          `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
+        ));
 
-          process.exit(1);
-        }
+        process.exit(1);
+      }
 
-        // Check if trailing take profit is enabled and we have no slippage set
-        if (
-          sessionAsset.strategy.parameters.trailingStopLossEnabled &&
-          !(sessionAsset.strategy.parameters.trailingStopLossPercentage > 0)
-        ) {
-          logger.critical(chalk.red.bold(
-            `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
-          ));
+      // Check if trailing take profit is enabled and we have no slippage set
+      if (
+        exchange.session.strategy.parameters.trailingStopLossEnabled &&
+        !(exchange.session.strategy.parameters.trailingStopLossPercentage > 0)
+      ) {
+        logger.critical(chalk.red.bold(
+          `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
+        ));
 
-          process.exit(1);
-        }
+        process.exit(1);
+      }
 
-        // Check if our order amount is too small or big
-        const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
-        const tradeAmount = parseFloat(sessionAsset.strategy.parameters.tradeAmount);
-        if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
-          logger.critical(chalk.red.bold(
-            `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.parameters.tradeAmount}". ` +
-            `Maximum: "${exhangeAssetPair.amountMaximum}"`
-          ));
+      // Check if our order amount is too small or big
+      const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
+      const tradeAmount = parseFloat(exchange.session.strategy.parameters.tradeAmount);
+      if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
+        logger.critical(chalk.red.bold(
+          `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +
+          `You specified: "${exchange.session.strategy.parameters.tradeAmount}". ` +
+          `Maximum: "${exhangeAssetPair.amountMaximum}"`
+        ));
 
-          process.exit(1);
-        } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
-          logger.critical(chalk.red.bold(
-            `The order amount for "${assetPairSymbol}" is too small for this exchange asset. ` +
-            `You specified: "${sessionAsset.strategy.parameters.tradeAmount}". ` +
-            `Minimum: "${exhangeAssetPair.amountMinimum}"`
-          ));
+        process.exit(1);
+      } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
+        logger.critical(chalk.red.bold(
+          `The order amount for "${assetPairSymbol}" is too small for this exchange asset. ` +
+          `You specified: "${exchange.session.strategy.parameters.tradeAmount}". ` +
+          `Minimum: "${exhangeAssetPair.amountMinimum}"`
+        ));
 
-          process.exit(1);
-        }
-      });
+        process.exit(1);
+      }
     });
   }
 }

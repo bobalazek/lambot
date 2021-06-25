@@ -4,7 +4,6 @@ import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
 import { Session } from '../Session/Session';
-import { SessionAsset } from '../Session/SessionAsset';
 import { StrategyParametersInterface } from './StrategyParameters';
 import { SessionManager } from '../Session/SessionManager';
 import { ID_PREFIX } from '../../Constants';
@@ -14,26 +13,11 @@ export interface StrategyInterface {
   parameters: StrategyParametersInterface;
   session: Session;
   boot(session: Session): Promise<boolean>;
-  getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[];
-  checkForBuySignal(
-    assetPair: AssetPair,
-    sessionAsset: SessionAsset
-  ): Promise<ExchangeTrade>;
-  checkForSellSignal(
-    exchangeTrade: ExchangeTrade,
-    sessionAsset: SessionAsset
-  ): Promise<ExchangeTrade>;
-  executeBuy(
-    assetPair: AssetPair,
-    sessionAsset: SessionAsset,
-    price: string,
-    tradeType: ExchangeTradeTypeEnum
-  ): Promise<ExchangeTrade>;
-  executeSell(
-    exchangeTrade: ExchangeTrade,
-    sessionAsset: SessionAsset,
-    price: string
-  ): Promise<ExchangeTrade>;
+  getSortedAssetPairs(): AssetPair[];
+  checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade>;
+  checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade>;
+  executeBuy(assetPair: AssetPair, price: string, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
+  executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade>;
 }
 
 export class Strategy implements StrategyInterface {
@@ -52,21 +36,20 @@ export class Strategy implements StrategyInterface {
     return true;
   }
 
-  getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[] {
+  getSortedAssetPairs(): AssetPair[] {
     throw new Error('getSortedAssetPairs() not implemented yet.');
   }
 
-  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
+  async checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade> {
     throw new Error('checkForBuySignal() not implemented yet.');
   }
 
-  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
+  async checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade> {
     throw new Error('checkForSellSignal() not implemented yet.');
   }
 
   async executeBuy(
     assetPair: AssetPair,
-    sessionAsset: SessionAsset,
     price: string,
     tradeType: ExchangeTradeTypeEnum
   ): Promise<ExchangeTrade> {
@@ -77,7 +60,6 @@ export class Strategy implements StrategyInterface {
     const order = this._createNewOrder(
       id,
       assetPair,
-      sessionAsset,
       ExchangeOrderSideEnum.BUY,
       this.parameters.tradeAmount,
       price
@@ -85,14 +67,14 @@ export class Strategy implements StrategyInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       assetPairSymbol,
       this.parameters.tradeAmount,
-      sessionAsset.orderType === ExchangeOrderTypeEnum.LIMIT
+      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
         : ExchangeOrderFeesTypeEnum.TAKER
     );
 
     const buyOrder: ExchangeOrder = !Manager.isTestMode
       ? await this.session.exchange.addAccountOrder(
-        this.session.exchange.getAccountType(sessionAsset.tradingType),
+        this.session.exchange.getAccountType(this.session.tradingType),
         order
       )
       : order;
@@ -109,24 +91,19 @@ export class Strategy implements StrategyInterface {
     exchangeTrade.buyPrice = parseFloat(buyOrder.price);
     exchangeTrade.amount = buyOrder.amount;
 
-    sessionAsset.trades.push(exchangeTrade);
+    this.session.trades.push(exchangeTrade);
 
     SessionManager.save(this.session);
 
     return exchangeTrade;
   }
 
-  async executeSell(
-    exchangeTrade: ExchangeTrade,
-    sessionAsset: SessionAsset,
-    price: string
-  ): Promise<ExchangeTrade> {
+  async executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade> {
     const assetPairSymbol = exchangeTrade.assetPair.getKey();
 
     const order = this._createNewOrder(
       exchangeTrade.id,
       exchangeTrade.assetPair,
-      sessionAsset,
       ExchangeOrderSideEnum.SELL,
       exchangeTrade.amount,
       price
@@ -134,14 +111,14 @@ export class Strategy implements StrategyInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       assetPairSymbol,
       this.parameters.tradeAmount,
-      sessionAsset.orderType === ExchangeOrderTypeEnum.LIMIT
+      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
         : ExchangeOrderFeesTypeEnum.TAKER
     );
 
     const sellOrder: ExchangeOrder = !Manager.isTestMode
       ? await this.session.exchange.addAccountOrder(
-        this.session.exchange.getAccountType(sessionAsset.tradingType),
+        this.session.exchange.getAccountType(this.session.tradingType),
         order
       )
       : order;
@@ -206,7 +183,6 @@ export class Strategy implements StrategyInterface {
   _createNewOrder(
     idPrefix: string,
     assetPair: AssetPair,
-    sessionAsset: SessionAsset,
     orderSide: ExchangeOrderSideEnum,
     amount: string,
     price: string
@@ -218,7 +194,7 @@ export class Strategy implements StrategyInterface {
       amount,
       price,
       ExchangeOrderTypeEnum.MARKET,
-      this.session.exchange.getAccountType(sessionAsset.tradingType)
+      this.session.exchange.getAccountType(this.session.tradingType)
     );
   }
 }

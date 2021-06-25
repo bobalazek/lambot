@@ -16,8 +16,7 @@ import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/Ex
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
-import { Session } from '../Core/Session/Session';
-import { SessionAssetTradingTypeEnum } from '../Core/Session/SessionAsset';
+import { Session, SessionTradingTypeEnum } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
 
 enum RequestMethodEnum {
@@ -234,19 +233,19 @@ export class BinanceExchange extends Exchange {
         }
       });
 
-      let tradingTypes: SessionAssetTradingTypeEnum[] = [];
+      let tradingTypes: SessionTradingTypeEnum[] = [];
       if (
         symbolData.isSpotTradingAllowed &&
         symbolData.permissions.includes('SPOT')
       ) {
-        tradingTypes.push(SessionAssetTradingTypeEnum.SPOT);
+        tradingTypes.push(SessionTradingTypeEnum.SPOT);
       }
 
       if (
         symbolData.isMarginTradingAllowed &&
         symbolData.permissions.includes('MARGIN')
       ) {
-        tradingTypes.push(SessionAssetTradingTypeEnum.MARGIN);
+        tradingTypes.push(SessionTradingTypeEnum.MARGIN);
       }
 
       assetPairs.push({

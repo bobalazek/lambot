@@ -1,26 +1,8 @@
-import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
-import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
-import { SessionAsset, SessionAssetTradingTypeEnum } from '../../src/Core/Session/SessionAsset';
-import { DefaultStrategy } from '../../src/Strategies/DefaultStrategy';
-
-export const sessionAssets = [
-  new SessionAsset(
-    Assets.USDT,
-    [
-      new AssetPair(Assets.ETH, Assets.USDT),
-      new AssetPair(Assets.BTC, Assets.USDT),
-      new AssetPair(Assets.BNB, Assets.USDT),
-      new AssetPair(Assets.BCH, Assets.USDT),
-    ],
-    new DefaultStrategy({}),
-    SessionAssetTradingTypeEnum.SPOT,
-    ExchangeOrderTypeEnum.MARKET
-  ),
-];
+import { SessionTradingTypeEnum } from '../../src/Core/Session/Session';
 
 export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterface[][] = [
   [
@@ -122,7 +104,7 @@ export const assetPairsResponse: ExchangeResponseAssetPairInterface[] = [
     priceMinimum: '1',
     priceMaximum: '100000',
     tradingTypes: [
-      SessionAssetTradingTypeEnum.SPOT,
+      SessionTradingTypeEnum.SPOT,
     ],
   },
   {
@@ -133,7 +115,7 @@ export const assetPairsResponse: ExchangeResponseAssetPairInterface[] = [
     priceMinimum: '1',
     priceMaximum: '100000',
     tradingTypes: [
-      SessionAssetTradingTypeEnum.SPOT,
+      SessionTradingTypeEnum.SPOT,
     ],
   },
   {
@@ -144,7 +126,7 @@ export const assetPairsResponse: ExchangeResponseAssetPairInterface[] = [
     priceMinimum: '1',
     priceMaximum: '100000',
     tradingTypes: [
-      SessionAssetTradingTypeEnum.SPOT,
+      SessionTradingTypeEnum.SPOT,
     ],
   },
   {
@@ -155,7 +137,7 @@ export const assetPairsResponse: ExchangeResponseAssetPairInterface[] = [
     priceMinimum: '1',
     priceMaximum: '100000',
     tradingTypes: [
-      SessionAssetTradingTypeEnum.SPOT,
+      SessionTradingTypeEnum.SPOT,
     ],
   },
 ];

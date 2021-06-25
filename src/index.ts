@@ -6,10 +6,10 @@ import { Assets } from './Core/Asset/Assets';
 import { Manager } from './Core/Manager';
 import { ExchangesEnum } from './Core/Exchange/ExchangesFactory';
 import { SessionManager } from './Core/Session/SessionManager';
-import { SessionAsset, SessionAssetTradingTypeEnum } from './Core/Session/SessionAsset';
 import { SessionConfig } from './Core/Session/SessionConfig';
 import { DefaultStrategy } from './Strategies/DefaultStrategy';
 import { ExchangeOrderTypeEnum } from './Core/Exchange/ExchangeOrder';
+import { SessionTradingTypeEnum } from './Core/Session/Session';
 
 // Prepare environment variables
 dotenv.config();
@@ -30,42 +30,32 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
-  // Config
-  const sessionConfig = new SessionConfig({});
-  const exchangeKey = ExchangesEnum.BINANCE;
-  const sessionAssets = [
-    new SessionAsset(
-      Assets.USDT,
-      [
-        new AssetPair(Assets.ETH, Assets.USDT),
-        new AssetPair(Assets.ETC, Assets.USDT),
-        new AssetPair(Assets.BTC, Assets.USDT),
-        new AssetPair(Assets.BNB, Assets.USDT),
-        new AssetPair(Assets.BCH, Assets.USDT),
-        new AssetPair(Assets.ETC, Assets.USDT),
-        new AssetPair(Assets.LTC, Assets.USDT),
-        new AssetPair(Assets.DOGE, Assets.USDT),
-        new AssetPair(Assets.ADA, Assets.USDT),
-        new AssetPair(Assets.DOT, Assets.USDT),
-        new AssetPair(Assets.UNI, Assets.USDT),
-        new AssetPair(Assets.SOL, Assets.USDT),
-        new AssetPair(Assets.LINK, Assets.USDT),
-        new AssetPair(Assets.DAI, Assets.USDT),
-        new AssetPair(Assets.MATIC, Assets.USDT),
-        new AssetPair(Assets.ALGO, Assets.USDT),
-      ],
-      new DefaultStrategy({}),
-      SessionAssetTradingTypeEnum.SPOT,
-      ExchangeOrderTypeEnum.MARKET
-    ),
-  ];
-
-  // Init
   const session = await SessionManager.newOrLoad(
     sessionId,
-    sessionConfig,
-    exchangeKey,
-    sessionAssets
+    new SessionConfig({}),
+    ExchangesEnum.BINANCE,
+    Assets.USDT,
+    [
+      new AssetPair(Assets.ETH, Assets.USDT),
+      new AssetPair(Assets.ETC, Assets.USDT),
+      new AssetPair(Assets.BTC, Assets.USDT),
+      new AssetPair(Assets.BNB, Assets.USDT),
+      new AssetPair(Assets.BCH, Assets.USDT),
+      new AssetPair(Assets.ETC, Assets.USDT),
+      new AssetPair(Assets.LTC, Assets.USDT),
+      new AssetPair(Assets.DOGE, Assets.USDT),
+      new AssetPair(Assets.ADA, Assets.USDT),
+      new AssetPair(Assets.DOT, Assets.USDT),
+      new AssetPair(Assets.UNI, Assets.USDT),
+      new AssetPair(Assets.SOL, Assets.USDT),
+      new AssetPair(Assets.LINK, Assets.USDT),
+      new AssetPair(Assets.DAI, Assets.USDT),
+      new AssetPair(Assets.MATIC, Assets.USDT),
+      new AssetPair(Assets.ALGO, Assets.USDT),
+    ],
+    new DefaultStrategy({}),
+    SessionTradingTypeEnum.SPOT,
+    ExchangeOrderTypeEnum.MARKET
   );
 
   const trader = await Manager.boot(session, isTestMode);

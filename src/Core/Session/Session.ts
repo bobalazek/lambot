@@ -1,27 +1,41 @@
 import chalk from 'chalk';
 
+import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
+import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
-import { SessionAsset } from './SessionAsset';
+import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
+import { ExchangeTrade, ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 import { SessionConfig } from './SessionConfig';
+import { Strategy } from '../Strategy/Strategy';
 import logger from '../../Utils/Logger';
 
 export interface SessionInterface {
   id: string;
   exchange: Exchange;
   config: SessionConfig;
-  assets: SessionAsset[];
+  asset: Asset; // What is the default asset you want to trade in?
+  assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
+  strategy: Strategy;
+  tradingType: SessionTradingTypeEnum;
+  orderType: ExchangeOrderTypeEnum;
+  trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
   endedAt: number;
   isLoadedFromPersistence: boolean;
-  addAsset(sessionAsset: SessionAsset): SessionAsset;
+  getOpenTrades(): ExchangeTrade[];
+  getAssetPairs(): Set<string>;
   addAssetPair(assetPair: AssetPair): AssetPair;
-  clearAssets(): void;
-  getAllAssetPairs(): Set<string>;
   getKey(): string;
+}
+
+export enum SessionTradingTypeEnum {
+  SPOT = 'SPOT',
+  MARGIN = 'MARGIN',
+  FUTURES = 'FUTURES',
 }
 
 export enum SessionStatusEnum {
@@ -34,7 +48,12 @@ export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
   config: SessionConfig;
-  assets: SessionAsset[];
+  asset: Asset;
+  assetPairs: AssetPair[];
+  strategy: Strategy;
+  tradingType: SessionTradingTypeEnum;
+  orderType: ExchangeOrderTypeEnum;
+  trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
@@ -44,26 +63,43 @@ export class Session implements SessionInterface {
   constructor(
     id: string,
     exchange: Exchange,
-    config: SessionConfig
+    config: SessionConfig,
+    asset: Asset,
+    assetPairs: AssetPair[],
+    strategy: Strategy,
+    tradingType: SessionTradingTypeEnum,
+    orderType: ExchangeOrderTypeEnum
   ) {
     this.id = id;
     this.exchange = exchange;
     this.config = config;
-    this.assets = [];
+    this.asset = asset;
+    this.assetPairs = assetPairs;
+    this.strategy = strategy;
+    this.tradingType = tradingType;
+    this.orderType = orderType;
+
+    this.trades = [];
     this.status = SessionStatusEnum.STARTED;
     this.createdAt = Date.now();
     this.startedAt = Date.now();
     this.isLoadedFromPersistence = false;
-  }
 
-  addAsset(sessionAsset: SessionAsset) {
-    this.assets.push(sessionAsset);
-
-    sessionAsset.assetPairs.forEach((assetPair) => {
+    assetPairs.forEach((assetPair) => {
       this.addAssetPair(assetPair);
     });
+  }
 
-    return sessionAsset;
+  getOpenTrades(): ExchangeTrade[] {
+    return this.trades.filter((trade) => {
+      return trade.status === ExchangeTradeStatusEnum.OPEN;
+    });
+  }
+
+  getAssetPairs(): Set<string> {
+    return new Set(this.assetPairs.map((assetPair) => {
+      return assetPair.getKey();
+    }));
   }
 
   addAssetPair(assetPair: AssetPair) {
@@ -75,31 +111,15 @@ export class Session implements SessionInterface {
     return assetPair;
   }
 
-  clearAssets() {
-    this.assets = [];
-    this.exchange.assetPairPrices.clear();
-  }
-
-  getAllAssetPairs(): Set<string> {
-    const assetPairs = new Set<string>();
-
-    this.assets.forEach((sessionAsset) => {
-      sessionAsset.getAssetPairs().forEach((assetPair) => {
-        assetPairs.add(assetPair);
-      });
-    });
-
-    return assetPairs;
-  }
-
   getKey() {
     return JSON.stringify({
       id: this.id,
       exchange: this.exchange.key,
-      createdAt: this.createdAt,
-      assets: this.assets.map((sessionAsset) => {
-        return sessionAsset.getKey();
+      asset: this.asset.getKey(),
+      assetPairs: this.assetPairs.map((assetPair) => {
+        return assetPair.getKey();
       }),
+      createdAt: this.createdAt,
     });
   }
 
@@ -107,15 +127,22 @@ export class Session implements SessionInterface {
   toExport() {
     return {
       id: this.id,
-      assets: this.assets.map((sessionAsset) => {
-        return sessionAsset.toExport();
-      }),
       status: this.status,
       createdAt: this.createdAt,
       startedAt: this.startedAt,
       endedAt: this.endedAt,
       exchange: this.exchange.toExport(),
       config: this.config.toExport(),
+      asset: this.asset.toExport(),
+      assetPairs: this.assetPairs.map((assetPair) => {
+        return assetPair.toExport();
+      }),
+      strategy: this.strategy.toExport(),
+      tradingType: this.tradingType,
+      orderType: this.orderType,
+      trades: this.trades.map((trade) => {
+        return trade.toExport();
+      }),
     };
   }
 
@@ -134,13 +161,21 @@ export class Session implements SessionInterface {
     const session = new Session(
       sessionData.id,
       exchange,
-      config
+      config,
+      Asset.fromImport(data.asset),
+      data.assetPairs.map((assetPairData) => {
+        return AssetPair.fromImport(assetPairData);
+      }),
+      Strategy.fromImport(data.strategy),
+      data.tradingType,
+      data.orderType
     );
 
-    sessionData.assets.forEach((assetData) => {
-      const sessionAsset = SessionAsset.fromImport(assetData);
-      session.addAsset(sessionAsset);
-    });
+    if (data.trades) {
+      session.trades = data.trades.map((tradeData) => {
+        return ExchangeTrade.fromImport(tradeData);
+      });
+    }
 
     session.status = sessionData.status;
     session.createdAt = sessionData.createdAt;

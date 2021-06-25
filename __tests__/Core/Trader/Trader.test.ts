@@ -2,18 +2,19 @@
 
 import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
 import { Manager } from '../../../src/Core/Manager';
-import { Session } from '../../../src/Core/Session/Session';
+import { Session, SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
 import { SessionConfig } from '../../../src/Core/Session/SessionConfig';
 import { Trader } from '../../../src/Core/Trader';
 import {
-  sessionAssets,
   assetPairPricesResponses,
   assetPairsResponse,
   accountAssetsResponse,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { SessionAssetTradingTypeEnum } from '../../../src/Core/Session/SessionAsset';
+import { AssetPair } from '../../../src/Core/Asset/AssetPair';
+import { DefaultStrategy } from '../../../src/Strategies/DefaultStrategy';
+import { ExchangeOrderTypeEnum } from '../../../src/Core/Exchange/ExchangeOrder';
 
 logger.isEnabled = false;
 
@@ -33,12 +34,18 @@ describe('Trader', () => {
       exchange,
       new SessionConfig({
         memoryUsageMonitoringIntervalSeconds: 0,
-      })
+      }),
+      Assets.USDT,
+      [
+        new AssetPair(Assets.ETH, Assets.USDT),
+        new AssetPair(Assets.BTC, Assets.USDT),
+        new AssetPair(Assets.BNB, Assets.USDT),
+        new AssetPair(Assets.BCH, Assets.USDT),
+      ],
+      new DefaultStrategy({}),
+      SessionTradingTypeEnum.SPOT,
+      ExchangeOrderTypeEnum.MARKET
     );
-
-    for (const sessionAsset of sessionAssets) {
-      session.addAsset(sessionAsset);
-    }
 
     trader = await Manager.boot(session, true);
     trader.start();
@@ -55,14 +62,11 @@ describe('Trader', () => {
     // Initial tick
     await trader.tick(1000);
 
-    const sessionAssets = trader.session.assets;
-    expect(sessionAssets).toHaveLength(1);
-
-    const sessionAsset = sessionAssets[0];
-    expect(sessionAsset.asset).toBe(Assets.USDT);
-    expect(sessionAsset.assetPairs).toHaveLength(4);
-    expect(sessionAsset.tradingType).toBe(SessionAssetTradingTypeEnum.SPOT);
-    expect(sessionAsset.trades).toHaveLength(0);
+    const session = trader.session;
+    expect(session.asset).toBe(Assets.USDT);
+    expect(session.assetPairs).toHaveLength(4);
+    expect(session.tradingType).toBe(SessionTradingTypeEnum.SPOT);
+    expect(session.trades).toHaveLength(0);
 
     const assetPairPrice = trader.session.exchange.assetPairPrices.get('ETHUSDT');
     const assetPairPriceEntries = assetPairPrice.getPriceEntries();
@@ -91,7 +95,7 @@ describe('Trader', () => {
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);
     expect(assetPairPriceSecondaryChanges).toHaveLength(assetPairPricesResponses.length);
 
-    const sortedAssetPairs = sessionAsset.strategy.getSortedAssetPairs(sessionAsset);
+    const sortedAssetPairs = session.strategy.getSortedAssetPairs();
 
     expect(sortedAssetPairs[0].assetBase).toBe(Assets.BCH);
     expect(sortedAssetPairs[1].assetBase).toBe(Assets.ETH);

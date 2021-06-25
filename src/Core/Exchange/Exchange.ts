@@ -12,8 +12,7 @@ import { ExchangeResponseAssetPairCandlestickInterface } from './Response/Exchan
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
-import { Session } from '../Session/Session';
-import { SessionAssetTradingTypeEnum } from '../Session/SessionAsset';
+import { Session, SessionTradingTypeEnum } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { ExchangeOrder } from './ExchangeOrder';
 import { asyncForEach } from '../../Utils/Helpers';
@@ -41,7 +40,7 @@ export interface ExchangeInterface {
     limit?: number
   ): Promise<ExchangeResponseAssetPairCandlestickInterface[]>;
   getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
-  getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum;
+  getAccountType(accountType: SessionTradingTypeEnum): ExchangeAccountTypeEnum;
 }
 
 export class Exchange implements ExchangeInterface {
@@ -123,17 +122,17 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** Helpers *****/
-  getAccountType(accountType: SessionAssetTradingTypeEnum): ExchangeAccountTypeEnum {
+  getAccountType(accountType: SessionTradingTypeEnum): ExchangeAccountTypeEnum {
     let exchangeAccountType: ExchangeAccountTypeEnum = null;
 
     switch (accountType) {
-      case SessionAssetTradingTypeEnum.FUTURES:
+      case SessionTradingTypeEnum.FUTURES:
         exchangeAccountType = ExchangeAccountTypeEnum.FUTURES;
         break;
-      case SessionAssetTradingTypeEnum.MARGIN:
+      case SessionTradingTypeEnum.MARGIN:
         exchangeAccountType = ExchangeAccountTypeEnum.MARGIN;
         break;
-      case SessionAssetTradingTypeEnum.SPOT:
+      case SessionTradingTypeEnum.SPOT:
         exchangeAccountType = ExchangeAccountTypeEnum.SPOT;
         break;
       default:
@@ -164,9 +163,9 @@ export class Exchange implements ExchangeInterface {
 
   /***** Helpers *****/
   async _setupAccounts(): Promise<any> {
-    const accountTypes = [...new Set(this.session.assets.map((sessionAsset) => {
-      return sessionAsset.tradingType;
-    }))];
+    const accountTypes = [
+      this.session.tradingType,
+    ];
 
     return await asyncForEach(accountTypes, async (accountType) => {
       const exchangeAccountType = this.getAccountType(accountType);
@@ -197,26 +196,24 @@ export class Exchange implements ExchangeInterface {
 
     logger.debug(`Found ${exchangeOpenTrades.length} open trades on the exchange.`);
 
-    this.session.assets.forEach((sessionAsset) => {
-      const sessionAssetOpenTrades = sessionAsset.getOpenTrades();
-      sessionAssetOpenTrades.forEach((sessionAssetOpenTrade) => {
-        if (exchangeOpenTradesMap.has(sessionAssetOpenTrade.id)) {
-          return;
+    const openTrades = this.session.getOpenTrades();
+    openTrades.forEach((openTrade) => {
+      if (exchangeOpenTradesMap.has(openTrade.id)) {
+        return;
+      }
+
+      for (let i = 0; i < this.session.trades.length; i++) {
+        if (this.session.trades[i].id !== openTrade.id) {
+          continue;
         }
 
-        for (let i = 0; i < sessionAsset.trades.length; i++) {
-          if (sessionAsset.trades[i].id !== sessionAssetOpenTrade.id) {
-            continue;
-          }
+        this.session.trades.splice(i, 1);
+      }
 
-          sessionAsset.trades.splice(i, 1);
-        }
-
-        logger.info(chalk.bold(
-          `Seems like you closed the trade with ID "${sessionAssetOpenTrade.id}" manually on the exchange, ` +
-          `so we are removing this trade from our trades array.`
-        ));
-      });
+      logger.info(chalk.bold(
+        `Seems like you closed the trade with ID "${openTrade.id}" manually on the exchange, ` +
+        `so we are removing this trade from our trades array.`
+      ));
     });
 
     return true;
@@ -226,12 +223,10 @@ export class Exchange implements ExchangeInterface {
     logger.info(chalk.bold(
       'I will be trading with the following assets:'
     ));
-    this.session.assets.forEach((sessionAsset) => {
-      logger.info(chalk.bold(
-        `Strategy name: ${JSON.stringify(sessionAsset.strategy.name)}; ` +
-        `Strategy parameters: ${JSON.stringify(sessionAsset.strategy.parameters)}; ` +
-        `Session asset: ${sessionAsset.getKey()}`
-      ));
-    });
+    logger.info(chalk.bold(
+      `Strategy name: ${JSON.stringify(this.session.strategy.name)}; ` +
+      `Strategy parameters: ${JSON.stringify(this.session.strategy.parameters)}; ` +
+      `Session asset: ${this.session.getKey()}`
+    ));
   }
 }

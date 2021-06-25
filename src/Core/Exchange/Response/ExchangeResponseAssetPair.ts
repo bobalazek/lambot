@@ -1,10 +1,10 @@
 import { AssetPairDataInterface } from '../../Asset/AssetPair';
-import { SessionAssetTradingTypeEnum } from '../../Session/SessionAsset';
+import { SessionTradingTypeEnum } from '../../Session/Session';
 
 export interface ExchangeResponseAssetPairInterface extends AssetPairDataInterface {
   amountMinimum: string;
   amountMaximum: string;
   priceMinimum: string;
   priceMaximum: string;
-  tradingTypes: SessionAssetTradingTypeEnum[];
+  tradingTypes: SessionTradingTypeEnum[];
 }

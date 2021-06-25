@@ -4,7 +4,6 @@ import { AssetPair } from '../Core/Asset/AssetPair';
 import { ExchangeAssetPairInterface } from '../Core/Exchange/ExchangeAssetPair';
 import { ExchangeAssetPairPriceEntryInterface } from '../Core/Exchange/ExchangeAssetPairPrice';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
-import { SessionAsset } from '../Core/Session/SessionAsset';
 import { Strategy } from '../Core/Strategy/Strategy';
 import { calculatePercentage, colorTextPercentageByValue } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
@@ -49,14 +48,14 @@ export class DefaultStrategy extends Strategy {
     );
   }
 
-  async checkForBuySignal(assetPair: AssetPair, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
+  async checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade> {
     const {
       trades,
-    } = sessionAsset;
+    } = this.session;
 
     const now = Date.now();
 
-    const openTrades = sessionAsset.getOpenTrades();
+    const openTrades = this.session.getOpenTrades();
     if (
       this.parameters.maximumOpenTrades !== -1 &&
       openTrades.length >= this.parameters.maximumOpenTrades
@@ -64,7 +63,7 @@ export class DefaultStrategy extends Strategy {
       return null;
     }
 
-    const sessionAssetAssetPairTrades = trades.filter((exchangeTrade) => {
+    const assetPairTrades = trades.filter((exchangeTrade) => {
       return (
         exchangeTrade.assetPair.getKey() === assetPair.getKey() &&
         (
@@ -76,7 +75,7 @@ export class DefaultStrategy extends Strategy {
 
     if (
       this.parameters.maximumOpenTradesPerAssetPair !== -1 &&
-      sessionAssetAssetPairTrades.length >= this.parameters.maximumOpenTradesPerAssetPair
+      assetPairTrades.length >= this.parameters.maximumOpenTradesPerAssetPair
     ) {
       return null;
     }
@@ -103,13 +102,12 @@ export class DefaultStrategy extends Strategy {
 
     return await this._executeBuy(
       assetPair,
-      sessionAsset,
       assetPairPriceEntryNewest,
       profitPercentageSinceTrough
     );
   }
 
-  async checkForSellSignal(exchangeTrade: ExchangeTrade, sessionAsset: SessionAsset): Promise<ExchangeTrade> {
+  async checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade> {
     const now = Date.now();
     const assetPairPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
@@ -148,7 +146,6 @@ export class DefaultStrategy extends Strategy {
       if (!this.parameters.trailingTakeProfitEnabled) {
         return this._executeSell(
           exchangeTrade,
-          sessionAsset,
           assetPairPriceEntryNewest
         );
       }
@@ -172,7 +169,6 @@ export class DefaultStrategy extends Strategy {
       ) {
         return this._executeSell(
           exchangeTrade,
-          sessionAsset,
           assetPairPriceEntryNewest
         );
       }
@@ -185,7 +181,6 @@ export class DefaultStrategy extends Strategy {
     if (currentProfitPercentage < exchangeTrade.triggerStopLossPercentage) {
       return this._executeSell(
         exchangeTrade,
-        sessionAsset,
         assetPairPriceEntryNewest
       );
     }
@@ -197,7 +192,6 @@ export class DefaultStrategy extends Strategy {
       if (this.parameters.stopLossTimeoutSeconds === 0) {
         return this._executeSell(
           exchangeTrade,
-          sessionAsset,
           assetPairPriceEntryNewest
         );
       }
@@ -210,7 +204,6 @@ export class DefaultStrategy extends Strategy {
       if (now - exchangeTrade.triggerStopLossSellAt > stopLossTimeoutTime) {
         return this._executeSell(
           exchangeTrade,
-          sessionAsset,
           assetPairPriceEntryNewest
         );
       }
@@ -226,10 +219,10 @@ export class DefaultStrategy extends Strategy {
     return null;
   }
 
-  getSortedAssetPairs(sessionAsset: SessionAsset): AssetPair[] {
+  getSortedAssetPairs(): AssetPair[] {
     const {
       assetPairs,
-    } = sessionAsset;
+    } = this.session;
 
     const uptrendMaximumAgeTime = this.parameters.buyTroughUptrendMaximumAgeSeconds * 1000;
 
@@ -287,13 +280,11 @@ export class DefaultStrategy extends Strategy {
 
   async _executeBuy(
     assetPair: AssetPair,
-    sessionAsset: SessionAsset,
     assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface,
     profitPercentageSinceTrough: number
   ): Promise<ExchangeTrade> {
     const exchangeTrade = await this.executeBuy(
       assetPair,
-      sessionAsset,
       assetPairPriceEntryNewest.price,
       ExchangeTradeTypeEnum.LONG
     );
@@ -308,12 +299,10 @@ export class DefaultStrategy extends Strategy {
 
   async _executeSell(
     exchangeTrade: ExchangeTrade,
-    sessionAsset: SessionAsset,
     assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface
   ): Promise<ExchangeTrade> {
     await this.executeSell(
       exchangeTrade,
-      sessionAsset,
       assetPairPriceEntryNewest.price
     );
 
