@@ -9,6 +9,7 @@ import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseO
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from './Response/ExchangeResponseAssetPairCandlestick';
+import { ExchangeTradeTypeEnum } from './ExchangeTrade';
 import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
@@ -40,7 +41,12 @@ export interface ExchangeInterface {
     endTime?: number,
     limit?: number
   ): Promise<ExchangeResponseAssetPairCandlestickInterface[]>;
-  getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface>;
+  getAssetFees(
+    symbol: string,
+    amount: string,
+    orderFeesType: ExchangeOrderFeesTypeEnum,
+    tradeType: ExchangeTradeTypeEnum
+  ): Promise<ExchangeResponseOrderFeesInterface>;
   getAccountType(accountType: SessionTradingTypeEnum): ExchangeAccountTypeEnum;
 }
 
@@ -118,7 +124,12 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPairCandlesticks() not implemented yet.');
   }
 
-  async getAssetFees(symbol: string, amount: string, orderFeesType: ExchangeOrderFeesTypeEnum): Promise<ExchangeResponseOrderFeesInterface> {
+  async getAssetFees(
+    symbol: string,
+    amount: string,
+    orderFeesType: ExchangeOrderFeesTypeEnum,
+    tradeType: ExchangeTradeTypeEnum
+  ): Promise<ExchangeResponseOrderFeesInterface> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 

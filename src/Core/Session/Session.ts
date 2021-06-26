@@ -27,6 +27,7 @@ export interface SessionInterface {
   endedAt: number;
   isLoadedFromPersistence: boolean;
   getOpenTrades(): ExchangeTrade[];
+  getClosedTrades(): ExchangeTrade[];
   getAssetPairs(): Set<string>;
   addAssetPair(assetPair: AssetPair): AssetPair;
   getKey(): string;
@@ -93,6 +94,12 @@ export class Session implements SessionInterface {
   getOpenTrades(): ExchangeTrade[] {
     return this.trades.filter((trade) => {
       return trade.status === ExchangeTradeStatusEnum.OPEN;
+    });
+  }
+
+  getClosedTrades(): ExchangeTrade[] {
+    return this.trades.filter((trade) => {
+      return trade.status === ExchangeTradeStatusEnum.CLOSED;
     });
   }
 

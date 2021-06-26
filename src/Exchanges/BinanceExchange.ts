@@ -9,6 +9,7 @@ import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
+import { ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
@@ -357,12 +358,19 @@ export class BinanceExchange extends Exchange {
   async getAssetFees(
     symbol: string,
     amount: string,
-    orderFeesType: ExchangeOrderFeesTypeEnum
+    orderFeesType: ExchangeOrderFeesTypeEnum,
+    tradeType: ExchangeTradeTypeEnum
   ): Promise<ExchangeResponseOrderFeesInterface> {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
+
+    if (tradeType === ExchangeTradeTypeEnum.SHORT) {
+      return {
+        amountPercentage: 0.09,
+      };
+    }
 
     return {
       amountPercentage: 0.075,

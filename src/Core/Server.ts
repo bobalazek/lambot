@@ -5,8 +5,9 @@ import express, {
   Response,
 } from 'express';
 
+import { Manager } from './Manager';
+import { SessionManager } from './Session/SessionManager';
 import { SERVER_PORT } from '../Constants';
-import { Manager } from '../Core/Manager';
 import logger from '../Utils/Logger';
 
 export class Server {
@@ -45,6 +46,10 @@ export class Server {
       response.status(200).json(Manager.session.trades.map((exchangeTrade) => {
         return exchangeTrade.toExport();
       }));
+    });
+
+    this.app.get('/session/trades/summary', (request: Request, response: Response) => {
+      response.status(200).json(SessionManager.getTradesSummary(Manager.session));
     });
   }
 }

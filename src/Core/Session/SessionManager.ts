@@ -154,6 +154,23 @@ export class SessionManager {
     );
   }
 
+  static async getTradesSummary(session: Session) {
+    const allTrades = session.trades;
+    const openTrades = session.getOpenTrades();
+    const closedTrades = session.getClosedTrades();
+
+    const totalCount = allTrades.length;
+    const openCount = openTrades.length;
+    const closedCount = closedTrades.length;
+
+    return {
+      totalCount,
+      openCount,
+      closedCount,
+    }
+  }
+
+  /***** Helpers *****/
   static getPathById(id: string): string {
     const suffix = Manager.isTestMode
       ? '.testing'

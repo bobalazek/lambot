@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { Session } from './Session/Session';
-import { Server } from '../Server/Server';
+import { Server } from './Server';
 import { Trader } from './Trader';
 import logger from '../Utils/Logger';
 
