@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
-import { Exchange } from './Exchange';
 import { AssetPairConverter } from '../Asset/AssetPair';
+import { Exchange } from './Exchange';
 import logger from '../../Utils/Logger';
 
 export class ExchangeValidator {

@@ -1,20 +1,20 @@
 import chalk from 'chalk';
 
-import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
+import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
-import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeAssetPairPricesMap } from './ExchangeAssetPairPrice';
+import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from './Response/ExchangeResponseAssetPairCandlestick';
+import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
 import { Session, SessionTradingTypeEnum } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
-import { ExchangeOrder } from './ExchangeOrder';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 

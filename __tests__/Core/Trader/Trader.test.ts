@@ -1,5 +1,9 @@
 /// <reference types="jest" />
 
+import { Assets } from '../../../src/Core/Asset/Assets';
+import { AssetPair } from '../../../src/Core/Asset/AssetPair';
+import { DefaultStrategy } from '../../../src/Strategies/DefaultStrategy';
+import { ExchangeOrderTypeEnum } from '../../../src/Core/Exchange/ExchangeOrder';
 import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
 import { Manager } from '../../../src/Core/Manager';
 import { Session, SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
@@ -11,10 +15,6 @@ import {
   accountAssetsResponse,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
-import { Assets } from '../../../src/Core/Asset/Assets';
-import { AssetPair } from '../../../src/Core/Asset/AssetPair';
-import { DefaultStrategy } from '../../../src/Strategies/DefaultStrategy';
-import { ExchangeOrderTypeEnum } from '../../../src/Core/Exchange/ExchangeOrder';
 
 logger.isEnabled = false;
 

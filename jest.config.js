@@ -4,4 +4,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/__tests__/__fixtures__',
   ],
+  modulePathIgnorePatterns: [
+    '<rootDir>/data',
+  ],
 };

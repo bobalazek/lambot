@@ -11,7 +11,7 @@ import logger from '../Utils/Logger';
 export class DefaultStrategy extends Strategy {
   constructor({
     tradeAmount = '15',
-    maximumOpenTrades = 5,
+    maximumOpenTrades = 10,
     maximumOpenTradesPerAssetPair = 1,
     priceIntervalSeconds = 2,
     candlesticksIntervalSeconds = 60,
@@ -22,7 +22,7 @@ export class DefaultStrategy extends Strategy {
     stopLossPercentage = 2,
     stopLossTimeoutSeconds = 0,
     trailingStopLossEnabled = true,
-    trailingStopLossPercentage = 10,
+    trailingStopLossPercentage = 2,
     buyTroughUptrendPercentage = 0.1,
     buyTroughUptrendMaximumAgeSeconds = 90,
   }) {

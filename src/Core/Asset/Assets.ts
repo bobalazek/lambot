@@ -5,6 +5,7 @@ export class Assets {
   static readonly USD = new Asset('USD', 'United States Dollar');
   static readonly BTC = new Asset('BTC', 'Bitcoin');
   static readonly ETH = new Asset('ETH', 'Ethereum');
+  static readonly BUSD = new Asset('BUSD', 'Binance USD');
   static readonly USDT = new Asset('USDT', 'Tether');
   static readonly BNB = new Asset('BNB', 'Binance Coin');
   static readonly ADA = new Asset('ADA', 'Cardano');
@@ -19,7 +20,6 @@ export class Assets {
   static readonly LTC = new Asset('LTC', 'Litecoin');
   static readonly MATIC = new Asset('MATIC', 'Polygon');
   static readonly SOL = new Asset('SOL', 'Solana');
-  static readonly BUSD = new Asset('BUSD', 'Binance USD');
   static readonly VET = new Asset('VET', 'VeChain');
   static readonly THETA = new Asset('THETA', 'THETA');
   static readonly ETC = new Asset('ETC', 'Ethereum Classic');

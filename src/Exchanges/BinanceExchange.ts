@@ -3,12 +3,12 @@ import qs from 'qs';
 import crypto from 'crypto';
 import chalk from 'chalk';
 
-import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { AssetPair } from '../Core/Asset/AssetPair';
 import { AssetPairStringConverterInterface } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
+import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';

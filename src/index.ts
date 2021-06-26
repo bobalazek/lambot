@@ -30,29 +30,23 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
+  const baseAsset = Assets.USDT;
+  const assets = [
+    Assets.ETH, Assets.ETC, Assets.BTC, Assets.BNB, Assets.BCH,
+    Assets.LTC, Assets.DOGE, Assets.ADA, Assets.DOT, Assets.UNI,
+    Assets.SOL, Assets.LINK, Assets.DAI, Assets.MATIC, Assets.ALGO,
+    Assets.XRP, Assets.ICP, Assets.THETA, Assets.XLM, Assets.VET,
+    Assets.TRX, Assets.FIL, Assets.XMR, Assets.EOS, Assets.SHIB,
+    Assets.SUSHI, Assets.AAVE, Assets.KSM, Assets.LUNA, Assets.BTT,
+  ];
   const session = await SessionManager.newOrLoad(
     sessionId,
     new SessionConfig({}),
     ExchangesEnum.BINANCE,
-    Assets.USDT,
-    [
-      new AssetPair(Assets.ETH, Assets.USDT),
-      new AssetPair(Assets.ETC, Assets.USDT),
-      new AssetPair(Assets.BTC, Assets.USDT),
-      new AssetPair(Assets.BNB, Assets.USDT),
-      new AssetPair(Assets.BCH, Assets.USDT),
-      new AssetPair(Assets.ETC, Assets.USDT),
-      new AssetPair(Assets.LTC, Assets.USDT),
-      new AssetPair(Assets.DOGE, Assets.USDT),
-      new AssetPair(Assets.ADA, Assets.USDT),
-      new AssetPair(Assets.DOT, Assets.USDT),
-      new AssetPair(Assets.UNI, Assets.USDT),
-      new AssetPair(Assets.SOL, Assets.USDT),
-      new AssetPair(Assets.LINK, Assets.USDT),
-      new AssetPair(Assets.DAI, Assets.USDT),
-      new AssetPair(Assets.MATIC, Assets.USDT),
-      new AssetPair(Assets.ALGO, Assets.USDT),
-    ],
+    baseAsset,
+    assets.map((asset) => {
+      return new AssetPair(asset, baseAsset);
+    }),
     new DefaultStrategy({}),
     SessionTradingTypeEnum.SPOT,
     ExchangeOrderTypeEnum.MARKET

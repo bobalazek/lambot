@@ -1,8 +1,8 @@
 import { AssetPair } from '../Asset/AssetPair';
-import { Manager } from '../Manager';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
+import { Manager } from '../Manager';
 import { Session } from '../Session/Session';
 import { StrategyParametersInterface } from './StrategyParameters';
 import { SessionManager } from '../Session/SessionManager';
