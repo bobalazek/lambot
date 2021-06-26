@@ -52,8 +52,9 @@ describe('Trader', () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    // Sometimes it only works with that, sometimes only without ...
+    //jest.runOnlyPendingTimers();
+    //jest.useRealTimers();
   });
 
   it('should have set all the correct data', async () => {
