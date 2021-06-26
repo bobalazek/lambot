@@ -69,7 +69,8 @@ export class Strategy implements StrategyInterface {
       this.parameters.tradeAmount,
       this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
-        : ExchangeOrderFeesTypeEnum.TAKER
+        : ExchangeOrderFeesTypeEnum.TAKER,
+      tradeType
     );
 
     const buyOrder: ExchangeOrder = !Manager.isTestMode
@@ -113,7 +114,8 @@ export class Strategy implements StrategyInterface {
       this.parameters.tradeAmount,
       this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
-        : ExchangeOrderFeesTypeEnum.TAKER
+        : ExchangeOrderFeesTypeEnum.TAKER,
+      exchangeTrade.type
     );
 
     const sellOrder: ExchangeOrder = !Manager.isTestMode

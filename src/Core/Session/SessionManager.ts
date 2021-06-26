@@ -154,19 +154,54 @@ export class SessionManager {
     );
   }
 
-  static async getTradesSummary(session: Session) {
+  static getTradesSummary(session: Session) {
     const allTrades = session.trades;
-    const openTrades = session.getOpenTrades();
     const closedTrades = session.getClosedTrades();
+    const openTrades = session.getOpenTrades();
 
     const totalCount = allTrades.length;
-    const openCount = openTrades.length;
     const closedCount = closedTrades.length;
+    const openCount = openTrades.length;
+
+    const closedProfitPercentage = closedTrades.map((exchangeTrade) => {
+      return exchangeTrade.getProfitPercentage();
+    }).reduce((total, current) => {
+      return total + current;
+    }, 0);
+    const closedProfitIncludingFeesPercentage = closedTrades.map((exchangeTrade) => {
+      return exchangeTrade.getProfitPercentage(true);
+    }).reduce((total, current) => {
+      return total + current;
+    }, 0);
+    const openProfitPercentage = openTrades.map((exchangeTrade) => {
+      const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
+        exchangeTrade.assetPair.getKey()
+      );
+      const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+      const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+      return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
+    }).reduce((total, current) => {
+      return total + current;
+    }, 0);
+    const openProfitIncludingFeesPercentage = openTrades.map((exchangeTrade) => {
+        const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
+          exchangeTrade.assetPair.getKey()
+        );
+        const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+        const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+        return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);
+      }).reduce((total, current) => {
+        return total + current;
+      }, 0);
 
     return {
       totalCount,
-      openCount,
       closedCount,
+      openCount,
+      closedProfitPercentage,
+      closedProfitIncludingFeesPercentage,
+      openProfitPercentage,
+      openProfitIncludingFeesPercentage,
     }
   }
 

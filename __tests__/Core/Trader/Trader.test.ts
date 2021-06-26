@@ -29,25 +29,26 @@ describe('Trader', () => {
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
+    const baseAsset = Assets.USDT;
     const session = new Session(
       'TEST_SESSION',
       exchange,
       new SessionConfig({
         memoryUsageMonitoringIntervalSeconds: 0,
       }),
-      Assets.USDT,
+      baseAsset,
       [
-        new AssetPair(Assets.ETH, Assets.USDT),
-        new AssetPair(Assets.BTC, Assets.USDT),
-        new AssetPair(Assets.BNB, Assets.USDT),
-        new AssetPair(Assets.BCH, Assets.USDT),
+        new AssetPair(Assets.ETH, baseAsset),
+        new AssetPair(Assets.BTC, baseAsset),
+        new AssetPair(Assets.BNB, baseAsset),
+        new AssetPair(Assets.BCH, baseAsset),
       ],
       new DefaultStrategy({}),
       SessionTradingTypeEnum.SPOT,
       ExchangeOrderTypeEnum.MARKET
     );
 
-    trader = await Manager.boot(session, true);
+    trader = await Manager.boot(session);
   });
 
   afterEach(() => {
