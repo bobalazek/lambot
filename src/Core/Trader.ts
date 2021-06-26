@@ -7,9 +7,10 @@ import logger from '../Utils/Logger';
 export interface TraderInterface {
   session: Session;
   status: TraderStatusEnum;
+  interval: ReturnType<typeof setInterval>;
   startTime: number;
-  start(): void;
-  stop(): void;
+  start(): Promise<boolean>;
+  stop(): Promise<boolean>;
   tick(updateIntervalTime: number): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
@@ -35,27 +36,23 @@ export class Trader implements TraderInterface {
     this.status = TraderStatusEnum.RUNNING;
     this.startTime = Date.now();
 
-    const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
-    if (updateIntervalTime) {
-      this.interval = setInterval(
-        this.tick.bind(this, updateIntervalTime),
-        updateIntervalTime
-      );
-    }
-
     await this.session.strategy.boot(this.session);
+    await this._startTickInterval();
 
     return true;
   }
 
-  stop() {
+  async stop(): Promise<boolean> {
     this.status = TraderStatusEnum.STOPPED;
 
     clearInterval(this.interval);
+
+    return true;
   }
 
-  async tick(updateIntervalTime: number) {
+  async tick() {
     const now = Date.now();
+    const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
 
     await this._updateAssetPairPrices(now);
 
@@ -70,7 +67,7 @@ export class Trader implements TraderInterface {
     this._cleanupAssetPairPrices(
       now,
       processingStartTime,
-      updateIntervalTime
+      updateIntervalTime / 2
     );
   }
 
@@ -91,6 +88,18 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
+  async _startTickInterval() {
+    const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
+    if (!updateIntervalTime) {
+      return;
+    }
+
+    this.interval = setInterval(
+      this.tick.bind(this),
+      updateIntervalTime
+    );
+  }
+
   async _updateAssetPairPrices(now: number) {
     const {
       session,
@@ -183,13 +192,13 @@ export class Trader implements TraderInterface {
   _cleanupAssetPairPrices(
     tickStartTime: number,
     processingStartTime: number,
-    updateIntervalTime: number
+    processingTimeLimit: number
   ) {
     // Cleanup entries if processing time takes too long
     const processingTime = Date.now() - processingStartTime;
     logger.debug(`Processing a tick took ${processingTime}ms.`);
 
-    if (processingTime > updateIntervalTime / 2) {
+    if (processingTime > processingTimeLimit) {
       this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
         exchangeAssetPairPrice.cleanupPriceEntries(0.5);
       });

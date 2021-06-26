@@ -308,7 +308,7 @@ export class DefaultStrategy extends Strategy {
 
     logger.notice(chalk.green.bold(
       `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
-      `I made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
+      `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
     ));
 
     return exchangeTrade;

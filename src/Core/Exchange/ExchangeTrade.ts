@@ -87,11 +87,11 @@ export class ExchangeTrade {
     return calculatePercentage(
       currentPrice,
       buyPrice
-    );
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
   /**
-   * Gets the final profit of this trade - must be called after the sellPrice is set.
+   * Gets the final profit of this trade - must be called after the sellPrice is set to make sense.
    */
   getProfitPercentage(includingFees: boolean = false): number {
     const sellPrice = includingFees
@@ -104,7 +104,7 @@ export class ExchangeTrade {
     return calculatePercentage(
       sellPrice,
       buyPrice
-    );
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
   /***** Export/Import *****/
