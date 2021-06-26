@@ -101,21 +101,18 @@ export class Trader implements TraderInterface {
   }
 
   async _updateAssetPairPrices(now: number) {
-    const {
-      session,
-    } = this;
-    const assetPairs = session.getAssetPairs();
+    const assetPairs = this.session.getAssetPairs();
 
     logger.debug(`Updating asset prices ...`);
 
-    const assetPairPrices = await session.exchange.getAssetPairPrices();
+    const assetPairPrices = await this.session.exchange.getAssetPairPrices();
     for (let i = 0; i < assetPairPrices.length; i++) {
       const priceData = assetPairPrices[i];
       if (!assetPairs.has(priceData.symbol)) {
         continue;
       }
 
-      const assetPairPrice = session.exchange.assetPairPrices.get(priceData.symbol);
+      const assetPairPrice = this.session.exchange.assetPairPrices.get(priceData.symbol);
       if (!assetPairPrice) {
         logger.info(chalk.red.bold(
           `Asset price for symbol "${priceData.symbol}" not found.`
@@ -181,7 +178,6 @@ export class Trader implements TraderInterface {
     const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
     if (warmupPeriodCountdownSeconds < 0) {
-      // Actually start checking if we can do any trades
       await this.processCurrentTrades();
       await this.processPotentialTrades();
     } else {
@@ -194,14 +190,16 @@ export class Trader implements TraderInterface {
     processingStartTime: number,
     processingTimeLimit: number
   ) {
-    // Cleanup entries if processing time takes too long
     const processingTime = Date.now() - processingStartTime;
+
     logger.debug(`Processing a tick took ${processingTime}ms.`);
 
-    if (processingTime > processingTimeLimit) {
-      this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
-        exchangeAssetPairPrice.cleanupPriceEntries(0.5);
-      });
+    if (processingTime < processingTimeLimit) {
+      return;
     }
+
+    this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
+      exchangeAssetPairPrice.cleanupPriceEntries(0.5);
+    });
   }
 }
