@@ -11,7 +11,7 @@ export interface TraderInterface {
   startTime: number;
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
-  tick(updateIntervalTime: number): void;
+  tick(): void;
   processCurrentTrades(): Promise<void>;
   processPotentialTrades(): Promise<void>;
 }
