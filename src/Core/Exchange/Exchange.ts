@@ -13,6 +13,7 @@ import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
+import { Manager } from '../Manager';
 import { Session, SessionTradingTypeEnum } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { asyncForEach } from '../../Utils/Helpers';
@@ -180,7 +181,10 @@ export class Exchange implements ExchangeInterface {
   }
 
   async _checkPersistenceData(): Promise<boolean> {
-    if (!this.session.isLoadedFromPersistence) {
+    if (
+      Manager.isTestMode ||
+      !this.session.isLoadedFromPersistence
+    ) {
       return false;
     }
 

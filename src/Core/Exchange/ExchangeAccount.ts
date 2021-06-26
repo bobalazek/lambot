@@ -4,7 +4,6 @@ import { ExchangeTrade } from './ExchangeTrade';
 export interface ExchangeAccountInterface {
   type: ExchangeAccountTypeEnum;
   assets: ExchangeAccountAssetsMap;
-  trades: ExchangeTrade[];
 }
 
 export enum ExchangeAccountTypeEnum {
@@ -21,12 +20,10 @@ export type ExchangeAccountsMap = Map<string, ExchangeAccountInterface>;
 export class ExchangeAccount implements ExchangeAccountInterface {
   type: ExchangeAccountTypeEnum;
   assets: ExchangeAccountAssetsMap;
-  trades: ExchangeTrade[];
 
   constructor(type: ExchangeAccountTypeEnum) {
     this.type = type;
     this.assets = new Map();
-    this.trades = [];
   }
 
   /***** Export/Import *****/
@@ -34,9 +31,6 @@ export class ExchangeAccount implements ExchangeAccountInterface {
     return {
       type: this.type,
       assets: this.assets.entries(),
-      trades: this.trades.map((trade) => {
-        return trade.toExport();
-      }),
     };
   }
 
@@ -44,10 +38,6 @@ export class ExchangeAccount implements ExchangeAccountInterface {
     const exchangeAccount = new ExchangeAccount(data.type);
 
     exchangeAccount.assets = new Map(data.assets);
-
-    data.forEach((tradeData) => {
-      exchangeAccount.trades.push(ExchangeTrade.fromImport(tradeData));
-    });
 
     return exchangeAccount;
   }

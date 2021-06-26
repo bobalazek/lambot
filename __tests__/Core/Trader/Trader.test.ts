@@ -48,7 +48,6 @@ describe('Trader', () => {
     );
 
     trader = await Manager.boot(session, true);
-    trader.start();
   });
 
   afterEach(() => {

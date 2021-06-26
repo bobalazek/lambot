@@ -158,21 +158,22 @@ export class Session implements SessionInterface {
 
     const exchange = Exchange.fromImport(sessionData.exchange);
     const config = SessionConfig.fromImport(sessionData.config);
+
     const session = new Session(
       sessionData.id,
       exchange,
       config,
-      Asset.fromImport(data.asset),
-      data.assetPairs.map((assetPairData) => {
+      Asset.fromImport(sessionData.asset),
+      sessionData.assetPairs.map((assetPairData) => {
         return AssetPair.fromImport(assetPairData);
       }),
-      Strategy.fromImport(data.strategy),
-      data.tradingType,
-      data.orderType
+      Strategy.fromImport(sessionData.strategy),
+      sessionData.tradingType,
+      sessionData.orderType
     );
 
-    if (data.trades) {
-      session.trades = data.trades.map((tradeData) => {
+    if (typeof sessionData.trades !== 'undefined') {
+      session.trades = sessionData.trades.map((tradeData) => {
         return ExchangeTrade.fromImport(tradeData);
       });
     }

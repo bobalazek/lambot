@@ -64,7 +64,7 @@ export class SessionManager {
     tradingType: SessionTradingTypeEnum,
     orderType: ExchangeOrderTypeEnum
   ): Promise<Session> {
-    logger.info(chalk.cyan(`Creating a new session with ID "${id}" ...`));
+    logger.info(chalk.cyan(`Creating a new session with ID ${id} ...`));
 
     const exchange = ExchangesFactory.get(exchangeKey);
     const session = new Session(

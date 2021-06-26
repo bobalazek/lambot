@@ -39,6 +39,11 @@ const sessionId = programOptions.session;
     Assets.TRX, Assets.FIL, Assets.XMR, Assets.EOS, Assets.SHIB,
     Assets.SUSHI, Assets.AAVE, Assets.KSM, Assets.LUNA, Assets.BTT,
   ];
+
+  // Important! Must be set BEFORE session loading, because inside the session manager,
+  // we use that variable to determine the file name.
+  Manager.isTestMode = isTestMode;
+
   const session = await SessionManager.newOrLoad(
     sessionId,
     new SessionConfig({}),
@@ -52,6 +57,5 @@ const sessionId = programOptions.session;
     ExchangeOrderTypeEnum.MARKET
   );
 
-  const trader = await Manager.boot(session, isTestMode);
-  await trader.start();
+  await Manager.boot(session);
 })();
