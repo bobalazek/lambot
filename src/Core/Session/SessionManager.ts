@@ -167,32 +167,34 @@ export class SessionManager {
       return exchangeTrade.getProfitPercentage();
     }).reduce((total, current) => {
       return total + current;
-    }, 0);
+    }, 0) / closedTrades.length;
     const closedProfitIncludingFeesPercentage = closedTrades.map((exchangeTrade) => {
       return exchangeTrade.getProfitPercentage(true);
     }).reduce((total, current) => {
       return total + current;
-    }, 0);
+    }, 0) / closedTrades.length;
     const openProfitPercentage = openTrades.map((exchangeTrade) => {
       const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
         exchangeTrade.assetPair.getKey()
       );
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+
       return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
     }).reduce((total, current) => {
       return total + current;
-    }, 0);
+    }, 0) / openTrades.length;
     const openProfitIncludingFeesPercentage = openTrades.map((exchangeTrade) => {
-        const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
-          exchangeTrade.assetPair.getKey()
-        );
-        const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
-        const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
-        return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);
-      }).reduce((total, current) => {
-        return total + current;
-      }, 0);
+      const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
+        exchangeTrade.assetPair.getKey()
+      );
+      const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+      const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+
+      return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);
+    }).reduce((total, current) => {
+      return total + current;
+    }, 0) / openTrades.length;
 
     return {
       totalCount,
