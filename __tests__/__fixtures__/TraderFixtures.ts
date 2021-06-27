@@ -1,8 +1,14 @@
+import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
+import { DefaultStrategy } from '../../src/Strategies/DefaultStrategy';
+import { Exchange } from '../../src/Core/Exchange/Exchange';
+import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
-import { SessionTradingTypeEnum } from '../../src/Core/Session/Session';
+import { Manager } from '../../src/Core/Manager';
+import { Session, SessionTradingTypeEnum } from '../../src/Core/Session/Session';
+import { SessionConfig } from '../../src/Core/Session/SessionConfig';
 
 export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterface[][] = [
   [
@@ -169,3 +175,27 @@ export const accountAssetsResponse: ExchangeResponseAccountAssetInterface[] = [
     amountLocked: '0.0',
   },
 ];
+
+export const createMockTrader = async (exchange: Exchange) => {
+  const baseAsset = Assets.USDT;
+  const session = new Session(
+    'TEST_SESSION',
+    exchange,
+    new SessionConfig({
+      memoryUsageMonitoringIntervalSeconds: 0,
+      webServerApiEnabled: false,
+    }),
+    baseAsset,
+    [
+      new AssetPair(Assets.ETH, baseAsset),
+      new AssetPair(Assets.BTC, baseAsset),
+      new AssetPair(Assets.BNB, baseAsset),
+      new AssetPair(Assets.BCH, baseAsset),
+    ],
+    new DefaultStrategy({}),
+    SessionTradingTypeEnum.SPOT,
+    ExchangeOrderTypeEnum.MARKET
+  );
+
+  return await Manager.boot(session);
+}

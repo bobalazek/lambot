@@ -31,7 +31,11 @@ export class Manager {
     this.trader = new Trader(this.session);
     await this.trader.start();
 
-    this.server = new Server();
+    if (this.session.config.webServerApiEnabled) {
+      this.server = new Server(
+        this.session.config.webServerApiPort
+      );
+    }
 
     this._startMemoryUsageMonitoring();
 

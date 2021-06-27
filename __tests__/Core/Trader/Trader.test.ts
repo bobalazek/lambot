@@ -1,18 +1,14 @@
 /// <reference types="jest" />
 
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { AssetPair } from '../../../src/Core/Asset/AssetPair';
-import { DefaultStrategy } from '../../../src/Strategies/DefaultStrategy';
-import { ExchangeOrderTypeEnum } from '../../../src/Core/Exchange/ExchangeOrder';
 import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
-import { Manager } from '../../../src/Core/Manager';
-import { Session, SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
-import { SessionConfig } from '../../../src/Core/Session/SessionConfig';
+import { SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
 import { Trader } from '../../../src/Core/Trader';
 import {
   assetPairPricesResponses,
   assetPairsResponse,
   accountAssetsResponse,
+  createMockTrader,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
 
@@ -29,26 +25,7 @@ describe('Trader', () => {
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
-    const baseAsset = Assets.USDT;
-    const session = new Session(
-      'TEST_SESSION',
-      exchange,
-      new SessionConfig({
-        memoryUsageMonitoringIntervalSeconds: 0,
-      }),
-      baseAsset,
-      [
-        new AssetPair(Assets.ETH, baseAsset),
-        new AssetPair(Assets.BTC, baseAsset),
-        new AssetPair(Assets.BNB, baseAsset),
-        new AssetPair(Assets.BCH, baseAsset),
-      ],
-      new DefaultStrategy({}),
-      SessionTradingTypeEnum.SPOT,
-      ExchangeOrderTypeEnum.MARKET
-    );
-
-    trader = await Manager.boot(session);
+    trader = await createMockTrader(exchange);
   });
 
   afterEach(() => {

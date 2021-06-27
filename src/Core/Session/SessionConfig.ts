@@ -1,3 +1,5 @@
+import { SERVER_PORT } from '../../Constants';
+
 export interface SessionConfigInterface {
   // How long do we wait until we actually start trading?
   warmupPeriodSeconds: number;
@@ -10,6 +12,12 @@ export interface SessionConfigInterface {
 
   // At which interval we want to display the memory usage? Set to 0 if disabled
   memoryUsageMonitoringIntervalSeconds: number;
+
+  // Should we enable the web server api?
+  webServerApiEnabled: boolean;
+
+  // What is the port of the server?
+  webServerApiPort: number;
 }
 
 export class SessionConfig implements SessionConfigInterface {
@@ -17,17 +25,23 @@ export class SessionConfig implements SessionConfigInterface {
   showAssetPairPriceUpdates: boolean;
   showOpenTradeUpdates: boolean;
   memoryUsageMonitoringIntervalSeconds: number;
+  webServerApiEnabled: boolean;
+  webServerApiPort: number;
 
   constructor({
     warmupPeriodSeconds = 60,
     showAssetPairPriceUpdates = false,
     showOpenTradeUpdates = true,
     memoryUsageMonitoringIntervalSeconds = 30,
+    webServerApiEnabled = true,
+    webServerApiPort = SERVER_PORT,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
     this.showAssetPairPriceUpdates = showAssetPairPriceUpdates;
     this.showOpenTradeUpdates = showOpenTradeUpdates;
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
+    this.webServerApiEnabled = webServerApiEnabled;
+    this.webServerApiPort = webServerApiPort;
   }
 
   /***** Export/Import *****/

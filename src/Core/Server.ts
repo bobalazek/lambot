@@ -7,13 +7,12 @@ import express, {
 
 import { Manager } from './Manager';
 import { SessionManager } from './Session/SessionManager';
-import { SERVER_PORT } from '../Constants';
 import logger from '../Utils/Logger';
 
 export class Server {
   app: Application;
 
-  constructor() {
+  constructor(port: number) {
     this.app = express();
 
     logger.info(chalk.cyan(
@@ -22,9 +21,9 @@ export class Server {
 
     this._configureRoutes();
 
-    this.app.listen(SERVER_PORT, () => {
+    this.app.listen(port, () => {
       logger.info(chalk.cyan(
-        `Server started at port ${SERVER_PORT}`
+        `Server started at port ${port}`
       ));
     });
   }

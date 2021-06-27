@@ -7,8 +7,8 @@
     "watch": "webpack --config webpack.dev.js --progress --watch",
     "watch:server": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js --progress",
-    "test": "cross-env FORCE_COLOR=0 jest",
-    "test:watch": "cross-env FORCE_COLOR=0 jest --watchAll",
+    "test": "cross-env FORCE_COLOR=0 jest --detectOpenHandles",
+    "test:watch": "cross-env FORCE_COLOR=0 jest --watchAll --detectOpenHandles",
     "eslint": "eslint . --ext .js,.jsx,.ts,.tsx --quiet"
   },
   "dependencies": {

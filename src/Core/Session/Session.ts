@@ -2,7 +2,6 @@ import chalk from 'chalk';
 
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
-import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
 import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';

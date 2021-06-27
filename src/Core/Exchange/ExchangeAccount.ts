@@ -1,5 +1,4 @@
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
-import { ExchangeTrade } from './ExchangeTrade';
 
 export interface ExchangeAccountInterface {
   type: ExchangeAccountTypeEnum;

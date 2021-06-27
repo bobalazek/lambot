@@ -2,16 +2,16 @@ import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
 
-import { Manager } from '../Manager';
-import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
-import { Session, SessionTradingTypeEnum } from './Session';
-import { SessionConfig } from './SessionConfig';
-import { DATA_SESSIONS_DIR } from '../../Constants';
-import logger from '../../Utils/Logger';
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
-import { Strategy } from '../Strategy/Strategy';
+import { Manager } from '../Manager';
+import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
+import { Session, SessionTradingTypeEnum } from './Session';
+import { SessionConfig } from './SessionConfig';
+import { Strategy } from '../Strategy/Strategy';
+import { DATA_SESSIONS_DIR } from '../../Constants';
+import logger from '../../Utils/Logger';
 
 export class SessionManager {
   static async save(session: Session): Promise<string> {
@@ -210,6 +210,7 @@ export class SessionManager {
     const suffix = Manager.isTestMode
       ? '.testing'
       : '.production';
+
     return path.resolve(DATA_SESSIONS_DIR, id + suffix + '.json');
   }
 }
