@@ -7,16 +7,19 @@ import {
   ExchangeAssetPairPriceTrendStatusEnum,
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
+import { ExchangeAssetPairIndicatorInterface } from './ExchangeAssetPairIndicator';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
-  // Candlesticks
+  indicators: Map<string, ExchangeAssetPairIndicatorInterface>;
+  shouldBuy: boolean;
+  shouldSell: boolean;
+  metadata: any;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
   addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
-  // Price entries
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[];
   getPriceEntriesPeakIndexes(): number[];
   getPriceEntriesTroughIndexes(): number[];
@@ -26,10 +29,8 @@ export interface ExchangeAssetPairInterface {
   getLargestPeakPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
   getLargestTroughPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface;
   addPriceEntry(priceEntry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
-  // Price changes
   getPriceChanges(): ExchangeAssetPairPriceChangeInterface[];
   getNewestPriceChange(): ExchangeAssetPairPriceChangeInterface;
-  // Helpers
   processPriceEntries(): void;
   cleanupPriceEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(): string;
@@ -38,6 +39,10 @@ export interface ExchangeAssetPairInterface {
 
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
+  indicators: Map<string, ExchangeAssetPairIndicatorInterface>;
+  shouldBuy: boolean;
+  shouldSell: boolean;
+  metadata: any;
 
   private _candlesticks: ExchangeAssetPairCandlestickInterface[];
   private _priceEntries: ExchangeAssetPairPriceEntryInterface[];
@@ -47,6 +52,9 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
 
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
+    this.indicators = new Map();
+    this.shouldBuy = false;
+    this.shouldSell = false;
 
     this._candlesticks = [];
     this._priceChanges = [];
@@ -55,7 +63,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this._priceEntriesTroughIndexes = [];
   }
 
-  /***** Candlesticks *****/
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[] {
     return this._candlesticks;
   }
@@ -171,7 +178,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return priceEntry;
   }
 
-  /***** Price changes *****/
   getPriceChanges(): ExchangeAssetPairPriceChangeInterface[] {
     return this._priceChanges;
   }
@@ -184,7 +190,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceChanges[this._priceChanges.length - 1];
   }
 
-  /***** Helpers *****/
   processPriceEntries(): void {
     const entriesCount = this._priceEntries.length;
     if (entriesCount < 2) {
