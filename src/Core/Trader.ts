@@ -35,7 +35,8 @@ export class Trader implements TraderInterface {
     this.startTime = Date.now();
 
     await this.session.strategy.boot(this.session);
-    await this._startTickInterval();
+
+    this._startTickInterval();
 
     return true;
   }
@@ -70,7 +71,7 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
-  async _startTickInterval() {
+  _startTickInterval() {
     const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
     if (!updateIntervalTime) {
       return;
