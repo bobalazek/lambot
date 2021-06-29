@@ -53,8 +53,6 @@ export class DefaultStrategy extends Strategy {
       trades,
     } = this.session;
 
-    const now = Date.now();
-
     const openTrades = this.session.getOpenTrades();
     if (
       this.parameters.maximumOpenTrades !== -1 &&

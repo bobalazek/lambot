@@ -7,13 +7,12 @@ import {
   ExchangeAssetPairPriceTrendStatusEnum,
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
-import { ExchangeAssetPairIndicatorInterface } from './ExchangeAssetPairIndicator';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
-  indicators: Map<string, ExchangeAssetPairIndicatorInterface>;
+  indicators: Map<string, number>;
   shouldBuy: boolean;
   shouldSell: boolean;
   metadata: any;
@@ -39,7 +38,7 @@ export interface ExchangeAssetPairInterface {
 
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
-  indicators: Map<string, ExchangeAssetPairIndicatorInterface>;
+  indicators: Map<string, number>;
   shouldBuy: boolean;
   shouldSell: boolean;
   metadata: any;
@@ -52,7 +51,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
 
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
-    this.indicators = new Map();
+    this.indicators = new Map<string, number>();
     this.shouldBuy = false;
     this.shouldSell = false;
 

@@ -12,8 +12,6 @@ export interface TraderInterface {
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
   tick(): void;
-  processCurrentTrades(): Promise<void>;
-  processPotentialTrades(): Promise<void>;
 }
 
 export enum TraderStatusEnum {
@@ -69,22 +67,6 @@ export class Trader implements TraderInterface {
       processingStartTime,
       updateIntervalTime / 2
     );
-  }
-
-  async processCurrentTrades(): Promise<void> {
-    logger.debug('Starting to process trades ...');
-
-    for (const exchangeTrade of this.session.getOpenTrades()) {
-      await this.session.strategy.checkForSellSignal(exchangeTrade);
-    }
-  }
-
-  async processPotentialTrades(): Promise<void> {
-    logger.debug('Starting to process new potential trades ...');
-
-    for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
-      await this.session.strategy.checkForBuySignal(assetPair);
-    }
   }
 
   /***** Helpers *****/
@@ -148,9 +130,10 @@ export class Trader implements TraderInterface {
       return;
     }
 
-    let hasAnyOpenTrades = false;
+    const openTrades = this.session.getOpenTrades();
+
     logger.info(chalk.bold('Open trade updates:'));
-    this.session.getOpenTrades().forEach((exchangeTrade) => {
+    openTrades.forEach((exchangeTrade) => {
       const assetPairPrice = this.session.exchange.assetPairPrices.get(
         exchangeTrade.assetPair.getKey()
       );
@@ -158,8 +141,6 @@ export class Trader implements TraderInterface {
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
       const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
       const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
-
-      hasAnyOpenTrades = true;
 
       logger.info(
         chalk.bold(exchangeTrade.assetPair.getKey()) +
@@ -169,7 +150,7 @@ export class Trader implements TraderInterface {
       );
     });
 
-    if (!hasAnyOpenTrades) {
+    if (openTrades.length === 0) {
       logger.debug('No open trades found yet.');
     }
   }
@@ -177,12 +158,26 @@ export class Trader implements TraderInterface {
   async _processTrades(now: number) {
     const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
-    if (warmupPeriodCountdownSeconds < 0) {
-      await this.processCurrentTrades();
-      await this.processPotentialTrades();
-    } else {
+
+    logger.debug(`Processing trades ...`);
+
+    if (warmupPeriodCountdownSeconds > 0) {
       logger.debug(`I am still warming up. ${warmupPeriodCountdownSeconds} seconds to go!`);
+
+      return false;
     }
+
+    logger.debug(`Checking for sell signals ...`);
+    for (const exchangeTrade of this.session.getOpenTrades()) {
+      await this.session.strategy.checkForSellSignal(exchangeTrade);
+    }
+
+    logger.debug(`Checking for buy signals ...`);
+    for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
+      await this.session.strategy.checkForBuySignal(assetPair);
+    }
+
+    return true;
   }
 
   _cleanupAssetPairPrices(
