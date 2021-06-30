@@ -29,4 +29,4 @@ export const ExchangeAssetPairTrendIconMap = new Map<ExchangeAssetPairPriceTrend
   [ExchangeAssetPairPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],
 ]);
 
-export type ExchangeAssetPairPricesMap = Map<string, ExchangeAssetPairInterface>;
+export type ExchangeAssetPairsMap = Map<string, ExchangeAssetPairInterface>;

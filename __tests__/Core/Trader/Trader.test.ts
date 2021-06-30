@@ -38,7 +38,7 @@ describe('Trader', () => {
     jest.spyOn(Date, 'now').mockImplementation(() => 0);
 
     // Initial tick
-    await trader.tick();
+    await trader.priceTick();
 
     const session = trader.session;
     expect(session.asset).toBe(Assets.USDT);
@@ -46,7 +46,7 @@ describe('Trader', () => {
     expect(session.tradingType).toBe(SessionTradingTypeEnum.SPOT);
     expect(session.trades).toHaveLength(0);
 
-    const assetPairPrice = trader.session.exchange.assetPairPrices.get('ETHUSDT');
+    const assetPairPrice = trader.session.exchange.assetPairs.get('ETHUSDT');
     const assetPairPriceEntries = assetPairPrice.getPriceEntries();
     const assetPairPriceChanges = assetPairPrice.getPriceChanges();
 
@@ -56,17 +56,17 @@ describe('Trader', () => {
     // Next ticks
     jest.spyOn(Date, 'now').mockImplementation(() => 1000);
     trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[1]);
-    await trader.tick();
+    await trader.priceTick();
 
     jest.spyOn(Date, 'now').mockImplementation(() => 2000);
     trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[2]);
-    await trader.tick();
+    await trader.priceTick();
 
     jest.spyOn(Date, 'now').mockImplementation(() => 3000);
     trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[3]);
-    await trader.tick();
+    await trader.priceTick();
 
-    const assetPairPriceSecondary = trader.session.exchange.assetPairPrices.get('ETHUSDT');
+    const assetPairPriceSecondary = trader.session.exchange.assetPairs.get('ETHUSDT');
     const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getPriceEntries();
     const assetPairPriceSecondaryChanges = assetPairPriceSecondary.getPriceChanges();
 

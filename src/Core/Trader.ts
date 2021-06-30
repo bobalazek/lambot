@@ -7,11 +7,11 @@ import logger from '../Utils/Logger';
 export interface TraderInterface {
   session: Session;
   status: TraderStatusEnum;
-  interval: ReturnType<typeof setInterval>;
   startTime: number;
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
-  tick(): void;
+  priceTick(): void;
+  candlestickTick(): void;
 }
 
 export enum TraderStatusEnum {
@@ -22,8 +22,10 @@ export enum TraderStatusEnum {
 export class Trader implements TraderInterface {
   session: Session;
   status: TraderStatusEnum;
-  interval: ReturnType<typeof setInterval>;
   startTime: number;
+
+  _priceTickInterval: ReturnType<typeof setInterval>;
+  _candlestickTickInterval: ReturnType<typeof setInterval>;
 
   constructor(session: Session) {
     this.session = session;
@@ -36,7 +38,21 @@ export class Trader implements TraderInterface {
 
     await this.session.strategy.boot(this.session);
 
-    this._startTickInterval();
+    const priceIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
+    if (priceIntervalTime) {
+      this._priceTickInterval = setInterval(
+        this.priceTick.bind(this),
+        priceIntervalTime
+      );
+    }
+
+    const candlestickIntervalTime = this.session.strategy.parameters.candlestickIntervalSeconds * 1000;
+    if (candlestickIntervalTime) {
+      this._candlestickTickInterval = setInterval(
+        this.candlestickTick.bind(this),
+        candlestickIntervalTime
+      );
+    }
 
     return true;
   }
@@ -44,14 +60,15 @@ export class Trader implements TraderInterface {
   async stop(): Promise<boolean> {
     this.status = TraderStatusEnum.STOPPED;
 
-    clearInterval(this.interval);
+    clearInterval(this._priceTickInterval);
+    clearInterval(this._candlestickTickInterval);
 
     return true;
   }
 
-  async tick() {
+  async priceTick() {
     const now = Date.now();
-    const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
+    const priceIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
 
     await this._updateAssetPairPrices(now);
 
@@ -66,23 +83,19 @@ export class Trader implements TraderInterface {
     this._cleanupAssetPairPrices(
       now,
       processingStartTime,
-      updateIntervalTime / 2
+      priceIntervalTime / 2
     );
+  }
+
+  async candlestickTick() {
+    const now = Date.now();
+
+    await this._updateAssetPairCandlesticks(now);
+
+    // TODO
   }
 
   /***** Helpers *****/
-  _startTickInterval() {
-    const updateIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
-    if (!updateIntervalTime) {
-      return;
-    }
-
-    this.interval = setInterval(
-      this.tick.bind(this),
-      updateIntervalTime
-    );
-  }
-
   async _updateAssetPairPrices(now: number) {
     const assetPairs = this.session.getAssetPairs();
 
@@ -95,7 +108,7 @@ export class Trader implements TraderInterface {
         continue;
       }
 
-      const assetPairPrice = this.session.exchange.assetPairPrices.get(priceData.symbol);
+      const assetPairPrice = this.session.exchange.assetPairs.get(priceData.symbol);
       if (!assetPairPrice) {
         logger.info(chalk.red.bold(
           `Asset price for symbol "${priceData.symbol}" not found.`
@@ -113,13 +126,30 @@ export class Trader implements TraderInterface {
     }
   }
 
+  async _updateAssetPairCandlesticks(now: number) {
+    logger.debug(`Updating asset candlesticks ...`);
+
+    for (const assetPair of this.session.assetPairs) {
+      const assetPairCandlesticksData = await this.session.exchange.getAssetPairCandlesticks(
+        assetPair,
+        this.session.strategy.parameters.candlestickIntervalSeconds
+      );
+
+      const exchangeAssetPair = this.session.exchange.assetPairs.get(
+        assetPair.getKey()
+      );
+
+      exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
+    }
+  }
+
   _printAssetPairPriceUpdates(now: number) {
     if (!this.session.config.showAssetPairPriceUpdates) {
       return;
     }
 
     logger.info(chalk.bold('Asset pair price updates:'));
-    this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice, key) => {
+    this.session.exchange.assetPairs.forEach((exchangeAssetPairPrice, key) => {
       const priceText = exchangeAssetPairPrice.getPriceText();
 
       logger.info(chalk.bold(key) + ' - ' + priceText);
@@ -160,7 +190,7 @@ export class Trader implements TraderInterface {
 
     logger.info(chalk.bold('Open trade updates:'));
     openTrades.forEach((exchangeTrade) => {
-      const assetPairPrice = this.session.exchange.assetPairPrices.get(
+      const assetPairPrice = this.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
@@ -194,8 +224,8 @@ export class Trader implements TraderInterface {
       return;
     }
 
-    this.session.exchange.assetPairPrices.forEach((exchangeAssetPairPrice) => {
-      exchangeAssetPairPrice.cleanupPriceEntries(0.5);
+    this.session.exchange.assetPairs.forEach((exchangeAssetPair) => {
+      exchangeAssetPair.cleanupPriceEntries(0.5);
     });
   }
 }

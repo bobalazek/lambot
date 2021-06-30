@@ -29,7 +29,7 @@ describe('SessionManager', () => {
 
     trader = await createMockTrader(exchange);
 
-    await trader.tick();
+    await trader.priceTick();
 
     trader.session.trades = exchangeTrades;
   });

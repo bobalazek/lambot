@@ -174,7 +174,7 @@ export class SessionManager {
       return total + current;
     }, 0) / closedTrades.length;
     const openProfitPercentage = openTrades.map((exchangeTrade) => {
-      const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
+      const assetPairPrice = Manager.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
@@ -185,7 +185,7 @@ export class SessionManager {
       return total + current;
     }, 0) / openTrades.length;
     const openProfitIncludingFeesPercentage = openTrades.map((exchangeTrade) => {
-      const assetPairPrice = Manager.session.exchange.assetPairPrices.get(
+      const assetPairPrice = Manager.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();

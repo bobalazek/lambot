@@ -109,7 +109,7 @@ export class Session implements SessionInterface {
   }
 
   addAssetPair(assetPair: AssetPair) {
-    this.exchange.assetPairPrices.set(
+    this.exchange.assetPairs.set(
       assetPair.getKey(),
       new ExchangeAssetPair(assetPair)
     );

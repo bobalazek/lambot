@@ -7,6 +7,12 @@ Yes, you read that right. This Bot could possibly catapult you to the moon, so y
 * First you need to build the bot: `yarn build`
 * Now you can run it: `node dist/main.js`
 
+## Exchanges
+
+### Binance
+
+Right now, Binance is the only supported exchange for this trading bot.
+
 ## Concepts
 
 ### Manager

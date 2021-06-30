@@ -34,6 +34,32 @@ export class ExchangeValidator {
       strategy,
     } = exchange.session;
 
+    const tradeAmount = parseFloat(strategy.parameters.tradeAmount);
+
+    // Check if trailing take profit is enabled and we have no slippage set
+    if (
+      strategy.parameters.trailingTakeProfitEnabled &&
+      !(strategy.parameters.trailingTakeProfitSlipPercentage > 0)
+    ) {
+      logger.critical(chalk.red.bold(
+        `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
+      ));
+
+      process.exit(1);
+    }
+
+    // Check if trailing take profit is enabled and we have no slippage set
+    if (
+      strategy.parameters.trailingStopLossEnabled &&
+      !(strategy.parameters.trailingStopLossPercentage > 0)
+    ) {
+      logger.critical(chalk.red.bold(
+        `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
+      ));
+
+      process.exit(1);
+    }
+
     exchange.session.getAssetPairs().forEach((assetPairSymbol) => {
       // Check if that pair exists on the exchange
       if (!exhangeAssetPairsMap.has(assetPairSymbol)) {
@@ -55,33 +81,8 @@ export class ExchangeValidator {
         process.exit(1);
       }
 
-      // Check if trailing take profit is enabled and we have no slippage set
-      if (
-        strategy.parameters.trailingTakeProfitEnabled &&
-        !(strategy.parameters.trailingTakeProfitSlipPercentage > 0)
-      ) {
-        logger.critical(chalk.red.bold(
-          `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
-        ));
-
-        process.exit(1);
-      }
-
-      // Check if trailing take profit is enabled and we have no slippage set
-      if (
-        strategy.parameters.trailingStopLossEnabled &&
-        !(strategy.parameters.trailingStopLossPercentage > 0)
-      ) {
-        logger.critical(chalk.red.bold(
-          `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
-        ));
-
-        process.exit(1);
-      }
-
       // Check if our order amount is too small or big
       const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
-      const tradeAmount = parseFloat(strategy.parameters.tradeAmount);
       if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
         logger.critical(chalk.red.bold(
           `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +

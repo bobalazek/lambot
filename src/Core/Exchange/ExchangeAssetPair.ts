@@ -19,6 +19,7 @@ export interface ExchangeAssetPairInterface {
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
   addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
+  setCandlesticks(candlesticks: ExchangeAssetPairCandlestickInterface[]): ExchangeAssetPairCandlestickInterface[];
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[];
   getPriceEntriesPeakIndexes(): number[];
   getPriceEntriesTroughIndexes(): number[];
@@ -78,6 +79,10 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this._candlesticks.push(candlestick);
 
     return candlestick;
+  }
+
+  setCandlesticks(candlesticks: ExchangeAssetPairCandlestickInterface[]): ExchangeAssetPairCandlestickInterface[] {
+    return this._candlesticks = candlesticks;
   }
 
   /***** Price entries *****/

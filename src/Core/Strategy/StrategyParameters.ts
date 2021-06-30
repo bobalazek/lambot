@@ -12,7 +12,7 @@ export interface StrategyParametersInterface {
   priceIntervalSeconds: number;
 
   // What's the interval for candlesticks?
-  candlesticksIntervalSeconds: number;
+  candlestickIntervalSeconds: number;
 
   /********* Take Profit **********/
   // How much do we want to get profit, until we trigger a sell?

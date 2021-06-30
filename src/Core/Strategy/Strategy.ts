@@ -65,7 +65,7 @@ export class Strategy implements StrategyInterface {
       price
     );
     const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
+      assetPair,
       this.parameters.tradeAmount,
       this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
@@ -100,8 +100,6 @@ export class Strategy implements StrategyInterface {
   }
 
   async executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade> {
-    const assetPairSymbol = exchangeTrade.assetPair.getKey();
-
     const order = this._createNewOrder(
       exchangeTrade.id,
       exchangeTrade.assetPair,
@@ -110,7 +108,7 @@ export class Strategy implements StrategyInterface {
       price
     );
     const orderFees = await this.session.exchange.getAssetFees(
-      assetPairSymbol,
+      exchangeTrade.assetPair,
       this.parameters.tradeAmount,
       this.session.orderType === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
@@ -141,7 +139,7 @@ export class Strategy implements StrategyInterface {
       maximumOpenTrades: this.parameters.maximumOpenTrades,
       maximumOpenTradesPerAssetPair: this.parameters.maximumOpenTradesPerAssetPair,
       priceIntervalSeconds: this.parameters.priceIntervalSeconds,
-      candlesticksIntervalSeconds: this.parameters.candlesticksIntervalSeconds,
+      candlestickIntervalSeconds: this.parameters.candlestickIntervalSeconds,
       takeProfitPercentage: this.parameters.takeProfitPercentage,
       trailingTakeProfitEnabled: this.parameters.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: this.parameters.trailingTakeProfitSlipPercentage,
@@ -165,7 +163,7 @@ export class Strategy implements StrategyInterface {
       maximumOpenTrades: data.parameters.maximumOpenTrades,
       maximumOpenTradesPerAssetPair: data.parameters.maximumOpenTradesPerAssetPair,
       priceIntervalSeconds: data.parameters.priceIntervalSeconds,
-      candlesticksIntervalSeconds: data.parameters.candlesticksIntervalSeconds,
+      candlestickIntervalSeconds: data.parameters.candlestickIntervalSeconds,
       takeProfitPercentage: data.parameters.takeProfitPercentage,
       trailingTakeProfitEnabled: data.parameters.trailingTakeProfitEnabled,
       trailingTakeProfitSlipPercentage: data.parameters.trailingTakeProfitSlipPercentage,

@@ -76,7 +76,7 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol: string = null): Promise<ExchangeOrder[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, assetPair: AssetPair = null): Promise<ExchangeOrder[]> {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
@@ -85,6 +85,7 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
+    const symbol = assetPair.getExchangeSymbolString(this.assetPairConverter);
     const dataOrParams = symbol
       ? {
         symbol,
@@ -294,7 +295,7 @@ export class BinanceExchange extends Exchange {
   }
 
   async getAssetPairCandlesticks(
-    symbol: string,
+    assetPair: AssetPair,
     timeframeSeconds: number,
     startTime?: number,
     endTime?: number,
@@ -312,6 +313,7 @@ export class BinanceExchange extends Exchange {
 
     const interval = BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds);
 
+    const symbol = assetPair.getExchangeSymbolString(this.assetPairConverter);
     const dataOrParams = {
       symbol,
       interval,
@@ -356,7 +358,7 @@ export class BinanceExchange extends Exchange {
   }
 
   async getAssetFees(
-    symbol: string,
+    assetPair: AssetPair,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum

@@ -14,7 +14,7 @@ export class DefaultStrategy extends Strategy {
     maximumOpenTrades = 10,
     maximumOpenTradesPerAssetPair = 1,
     priceIntervalSeconds = 2,
-    candlesticksIntervalSeconds = 60,
+    candlestickIntervalSeconds = 60,
     takeProfitPercentage = 2,
     trailingTakeProfitEnabled = true,
     trailingTakeProfitSlipPercentage = 0.1,
@@ -33,7 +33,7 @@ export class DefaultStrategy extends Strategy {
         maximumOpenTrades,
         maximumOpenTradesPerAssetPair,
         priceIntervalSeconds,
-        candlesticksIntervalSeconds,
+        candlestickIntervalSeconds,
         takeProfitPercentage,
         trailingTakeProfitEnabled,
         trailingTakeProfitSlipPercentage,
@@ -271,7 +271,7 @@ export class DefaultStrategy extends Strategy {
   }
 
   _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPairInterface {
-    return this.session.exchange.assetPairPrices.get(
+    return this.session.exchange.assetPairs.get(
       assetPair.getKey()
     );
   }

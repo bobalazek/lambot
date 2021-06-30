@@ -1,9 +1,10 @@
 import chalk from 'chalk';
 
+import { AssetPair } from '../Asset/AssetPair';
 import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
-import { ExchangeAssetPairPricesMap } from './ExchangeAssetPairPrice';
+import { ExchangeAssetPairsMap } from './ExchangeAssetPairPrice';
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
@@ -26,23 +27,23 @@ export interface ExchangeInterface {
   apiCredentials: ExchangeApiCredentialsInterface;
   assetPairConverter: AssetPairStringConverterInterface;
   accounts: ExchangeAccountsMap;
-  assetPairPrices: ExchangeAssetPairPricesMap;
+  assetPairs: ExchangeAssetPairsMap;
   session: Session;
   boot(session: Session): Promise<boolean>;
-  getAccountOrders(type: ExchangeAccountTypeEnum, symbol?: string): Promise<ExchangeOrder[]>;
+  getAccountOrders(type: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]>;
   addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]>;
   getAssetPairCandlesticks(
-    symbol: string,
+    assetPair: AssetPair,
     timeframeSeconds: number,
     startTime?: number,
     endTime?: number,
     limit?: number
   ): Promise<ExchangeResponseAssetPairCandlestickInterface[]>;
   getAssetFees(
-    symbol: string,
+    assetPair: AssetPair,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum
@@ -55,7 +56,7 @@ export class Exchange implements ExchangeInterface {
   name: string;
   apiCredentials: ExchangeApiCredentialsInterface;
   assetPairConverter: AssetPairStringConverterInterface;
-  assetPairPrices: ExchangeAssetPairPricesMap;
+  assetPairs: ExchangeAssetPairsMap;
   accounts: ExchangeAccountsMap;
   session: Session;
 
@@ -69,7 +70,7 @@ export class Exchange implements ExchangeInterface {
     this.name = name;
     this.apiCredentials = apiCredentials;
     this.assetPairConverter = assetPairConverter;
-    this.assetPairPrices = new Map();
+    this.assetPairs = new Map();
     this.accounts = new Map();
   }
 
@@ -94,7 +95,7 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, symbol?: string): Promise<ExchangeOrder[]> {
+  async getAccountOrders(type: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 
@@ -115,7 +116,7 @@ export class Exchange implements ExchangeInterface {
   }
 
   async getAssetPairCandlesticks(
-    symbol: string,
+    assetPair: AssetPair,
     timeframeSeconds: number,
     startTime?: number,
     endTime?: number,
@@ -125,7 +126,7 @@ export class Exchange implements ExchangeInterface {
   }
 
   async getAssetFees(
-    symbol: string,
+    assetPair: AssetPair,
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum
