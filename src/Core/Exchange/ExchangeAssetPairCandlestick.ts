@@ -1,10 +1,10 @@
 export interface ExchangeAssetPairCandlestickInterface {
   openTime: number;
   closeTime: number;
-  openPrice: string;
-  highPrice: string;
-  lowPrice: string;
-  closePrice: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
   volume: string;
   tradesCount: number;
 }
