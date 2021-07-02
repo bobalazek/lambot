@@ -43,7 +43,7 @@ describe('Trader', () => {
     const session = trader.session;
     expect(session.asset).toBe(Assets.USDT);
     expect(session.assetPairs).toHaveLength(4);
-    expect(session.tradingTypes).toBe([
+    expect(session.tradingTypes).toStrictEqual([
       SessionTradingTypeEnum.SPOT,
     ]);
     expect(session.trades).toHaveLength(0);
