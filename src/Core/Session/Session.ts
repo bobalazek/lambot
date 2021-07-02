@@ -158,7 +158,6 @@ export class Session implements SessionInterface {
       logger.critical(chalk.red.bold(
         'The session you are trying to import has already ended. Please create a new one instead.'
       ));
-
       process.exit(1);
     }
 

@@ -152,7 +152,6 @@ export class Exchange implements ExchangeInterface {
         logger.critical(chalk.red.bold(
           `Invalid account type.`
         ));
-
         process.exit(1);
     }
 

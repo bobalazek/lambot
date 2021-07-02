@@ -44,7 +44,6 @@ export class ExchangeValidator {
       logger.critical(chalk.red.bold(
         `If trailing take profit is enabled, you need to set the slip percentage to more than 0.`
       ));
-
       process.exit(1);
     }
 
@@ -56,7 +55,6 @@ export class ExchangeValidator {
       logger.critical(chalk.red.bold(
         `If trailing stop loss is enabled, you need to set the percentage to more than 0.`
       ));
-
       process.exit(1);
     }
 
@@ -66,7 +64,6 @@ export class ExchangeValidator {
         logger.critical(chalk.red.bold(
           `Oh dear. We did not seem to have found the "${assetPairSymbol}" asset pair on the exchange.`
         ));
-
         process.exit(1);
       }
 
@@ -79,7 +76,6 @@ export class ExchangeValidator {
         logger.critical(chalk.red.bold(
           `Trading type "${tradingTypes}" is not available for "${assetPairSymbol}".`
         ));
-
         process.exit(1);
       }
 
@@ -91,7 +87,6 @@ export class ExchangeValidator {
           `You specified: "${strategy.parameters.tradeAmount}". ` +
           `Maximum: "${exhangeAssetPair.amountMaximum}"`
         ));
-
         process.exit(1);
       } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
         logger.critical(chalk.red.bold(
@@ -99,7 +94,6 @@ export class ExchangeValidator {
           `You specified: "${strategy.parameters.tradeAmount}". ` +
           `Minimum: "${exhangeAssetPair.amountMinimum}"`
         ));
-
         process.exit(1);
       }
     });

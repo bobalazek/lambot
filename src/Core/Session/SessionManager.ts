@@ -4,12 +4,12 @@ import chalk from 'chalk';
 
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
-import { Manager } from '../Manager';
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
 import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { Session, SessionTradingTypeEnum } from './Session';
 import { SessionConfig } from './SessionConfig';
 import { Strategy } from '../Strategy/Strategy';
+import { Manager } from '../Manager';
 import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
 
@@ -103,7 +103,6 @@ export class SessionManager {
           `The base asset does not match between the loaded session and your current config. ` +
           `Either change your base asset back to ${session.asset.getKey()}, or start a new session!`
         ));
-
         process.exit(1);
       }
 
@@ -116,7 +115,6 @@ export class SessionManager {
               `You can only add new asset pairs, if you append them at the end of the array. ` +
               `You can NOT remove or reorder any existing asset pairs in the array!`
             ));
-
             process.exit(1);
           }
         });

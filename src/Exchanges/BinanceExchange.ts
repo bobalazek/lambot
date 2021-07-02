@@ -59,7 +59,6 @@ export class BinanceExchange extends Exchange {
       logger.critical(chalk.red.bold(
         'Please set BINANCE_API_KEY and BINANCE_API_SECRET in your .env file!'
       ));
-
       process.exit(1);
     }
 
@@ -80,8 +79,9 @@ export class BinanceExchange extends Exchange {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
-
+      logger.critical(chalk.red.bold(
+        'Currently only the SPOT account is implemented.'
+      ));
       process.exit(1);
     }
 
@@ -108,7 +108,6 @@ export class BinanceExchange extends Exchange {
           'Could not find the symbol in the asset pairs array. ' +
           'Make sure getAssetPairs() was called before.'
         ));
-
         process.exit(1);
       }
 
@@ -140,8 +139,9 @@ export class BinanceExchange extends Exchange {
     ));
 
     if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
-
+      logger.critical(chalk.red.bold(
+        'Currently only the SPOT account is implemented.'
+      ));
       process.exit(1);
     }
 
@@ -178,28 +178,61 @@ export class BinanceExchange extends Exchange {
   async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
     logger.debug(chalk.italic('Fetching account assets ...'));
 
-    if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold('Currently only the SPOT account is implemented.'));
-
-      process.exit(1);
-    }
-
-    const response = await this._doRequest(
-      RequestMethodEnum.GET,
-      'https://api.binance.com/api/v3/account',
-      {},
-      true
-    );
-
     const accountAssets: ExchangeResponseAccountAssetInterface[] = [];
-    for (let i = 0; i < response.data.balances.length; i++) {
-      const balanceData = response.data.balances[i];
 
-      accountAssets.push({
-        asset: Assets.getBySymbol(balanceData.asset),
-        amountFree: balanceData.free,
-        amountLocked: balanceData.locked,
-      });
+    if (type === ExchangeAccountTypeEnum.SPOT) {
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/api/v3/account',
+        {},
+        true
+      );
+
+      for (let i = 0; i < response.data.balances.length; i++) {
+        const balanceData = response.data.balances[i];
+
+        accountAssets.push({
+          asset: Assets.getBySymbol(balanceData.asset),
+          amountFree: balanceData.free,
+          amountLocked: balanceData.locked,
+        });
+      }
+    } else if (type === ExchangeAccountTypeEnum.MARGIN) {
+      const response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/sapi/v1/margin/account',
+        {},
+        true
+      );
+
+      if (response.data.borrowEnabled) {
+        logger.critical(chalk.red.bold(
+          `Seems that borrowing is not enabled for your margin account.`
+        ));
+        process.exit(1);
+      }
+
+      if (response.data.tradeEnabled) {
+        logger.critical(chalk.red.bold(
+          `Seems that trading is not enabled for your margin account.`
+        ));
+        process.exit(1);
+      }
+
+      for (let i = 0; i < response.data.userAssets.length; i++) {
+        const balanceData = response.data.userAssets[i];
+
+        accountAssets.push({
+          asset: Assets.getBySymbol(balanceData.asset),
+          amountFree: balanceData.free,
+          amountLocked: balanceData.locked,
+        });
+      }
+    } else {
+      logger.critical(chalk.red.bold(
+        `Type "${type}" is not supported.`
+      ));
+      process.exit(1);
     }
 
     return accountAssets;
@@ -306,8 +339,9 @@ export class BinanceExchange extends Exchange {
     ));
 
     if (!BinanceExchangeCandlestickTimeframesMap.has(timeframeSeconds)) {
-      logger.critical(chalk.red.bold('Invalid timeframeSeconds provided.'));
-
+      logger.critical(chalk.red.bold(
+        'Invalid timeframeSeconds provided.'
+      ));
       process.exit(1);
     }
 
