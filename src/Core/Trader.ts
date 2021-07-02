@@ -51,7 +51,7 @@ export class Trader implements TraderInterface {
     await this.session.strategy.boot(this.session);
 
     // Intervals
-    const priceIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
+    const priceIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (priceIntervalTime) {
       this._priceTickInterval = setInterval(
         this.priceTick.bind(this),
@@ -59,7 +59,7 @@ export class Trader implements TraderInterface {
       );
     }
 
-    const candlestickIntervalTime = this.session.strategy.parameters.candlestickIntervalSeconds * 1000;
+    const candlestickIntervalTime = this.session.config.assetPairCandlestickUpdateIntervalSeconds * 1000;
     if (candlestickIntervalTime) {
       this._candlestickTickInterval = setInterval(
         this.candlestickTick.bind(this),
@@ -108,7 +108,7 @@ export class Trader implements TraderInterface {
 
     this._cleanupAssetPairPrices(
       processingStartTime,
-      (this.session.strategy.parameters.priceIntervalSeconds * 1000) / 2
+      (this.session.config.assetPairPriceUpdateIntervalSeconds * 1000) / 2
     );
   }
 
@@ -251,7 +251,7 @@ export class Trader implements TraderInterface {
     for (const assetPair of this.session.assetPairs) {
       const assetPairCandlesticksData = await this.session.exchange.getAssetPairCandlesticks(
         assetPair,
-        this.session.strategy.parameters.candlestickIntervalSeconds
+        this.session.config.assetPairCandlestickUpdateIntervalSeconds
       );
 
       const exchangeAssetPair = this.session.exchange.assetPairs.get(

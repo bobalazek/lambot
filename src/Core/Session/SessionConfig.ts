@@ -10,6 +10,9 @@ export interface SessionConfigInterface {
   // Should we show the current price & status for all the assets?
   assetPairPriceUpdateIntervalSeconds: number;
 
+  // After how many seconds we refetch the candlestick data?
+  assetPairCandlestickUpdateIntervalSeconds: number;
+
   // At which interval we want to display the memory usage? Set to 0 if disabled
   memoryUsageMonitoringIntervalSeconds: number;
 
@@ -24,6 +27,7 @@ export class SessionConfig implements SessionConfigInterface {
   warmupPeriodSeconds: number;
   openTradeUpdateIntervalSeconds: number;
   assetPairPriceUpdateIntervalSeconds: number;
+  assetPairCandlestickUpdateIntervalSeconds: number;
   memoryUsageMonitoringIntervalSeconds: number;
   webServerApiEnabled: boolean;
   webServerApiPort: number;
@@ -31,7 +35,8 @@ export class SessionConfig implements SessionConfigInterface {
   constructor({
     warmupPeriodSeconds = 60,
     openTradeUpdateIntervalSeconds = 5,
-    assetPairPriceUpdateIntervalSeconds = 0,
+    assetPairPriceUpdateIntervalSeconds = 1,
+    assetPairCandlestickUpdateIntervalSeconds = 0,
     memoryUsageMonitoringIntervalSeconds = 30,
     webServerApiEnabled = true,
     webServerApiPort = SERVER_PORT,
@@ -39,6 +44,7 @@ export class SessionConfig implements SessionConfigInterface {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
     this.openTradeUpdateIntervalSeconds = openTradeUpdateIntervalSeconds;
     this.assetPairPriceUpdateIntervalSeconds = assetPairPriceUpdateIntervalSeconds;
+    this.assetPairCandlestickUpdateIntervalSeconds = assetPairCandlestickUpdateIntervalSeconds;
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
     this.webServerApiEnabled = webServerApiEnabled;
     this.webServerApiPort = webServerApiPort;
@@ -50,6 +56,7 @@ export class SessionConfig implements SessionConfigInterface {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
       openTradeUpdateIntervalSeconds: this.openTradeUpdateIntervalSeconds,
       assetPairPriceUpdateIntervalSeconds: this.assetPairPriceUpdateIntervalSeconds,
+      assetPairCandlestickUpdateIntervalSeconds: this.assetPairCandlestickUpdateIntervalSeconds,
       memoryUsageMonitoringIntervalSeconds: this.memoryUsageMonitoringIntervalSeconds,
       webServerApiEnabled: this.webServerApiEnabled,
       webServerApiPort: this.webServerApiPort,
@@ -61,6 +68,7 @@ export class SessionConfig implements SessionConfigInterface {
       warmupPeriodSeconds: data.warmupPeriodSeconds,
       openTradeUpdateIntervalSeconds: data.openTradeUpdateIntervalSeconds,
       assetPairPriceUpdateIntervalSeconds: data.assetPairPriceUpdateIntervalSeconds,
+      assetPairCandlestickUpdateIntervalSeconds: data.assetPairCandlestickUpdateIntervalSeconds,
       memoryUsageMonitoringIntervalSeconds: data.memoryUsageMonitoringIntervalSeconds,
       webServerApiEnabled: data.webServerApiEnabled,
       webServerApiPort: data.webServerApiPort,
