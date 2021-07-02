@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
@@ -7,6 +9,8 @@ import { Session } from '../Session/Session';
 import { StrategyParametersInterface } from './StrategyParameters';
 import { SessionManager } from '../Session/SessionManager';
 import { ID_PREFIX } from '../../Constants';
+import { colorTextPercentageByValue } from '../../Utils/Helpers';
+import logger from '../../Utils/Logger';
 
 export interface StrategyInterface {
   name: string;
@@ -14,6 +18,7 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(): AssetPair[];
+  checkForBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair>;
   checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade>;
   checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade>;
   executeBuy(assetPair: AssetPair, price: string, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
@@ -38,6 +43,10 @@ export class Strategy implements StrategyInterface {
 
   getSortedAssetPairs(): AssetPair[] {
     throw new Error('getSortedAssetPairs() not implemented yet.');
+  }
+
+  async checkForBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
+    throw new Error('checkForBuyAndSellSignals() not implemented yet.');
   }
 
   async checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade> {
@@ -96,6 +105,10 @@ export class Strategy implements StrategyInterface {
 
     SessionManager.save(this.session);
 
+    logger.notice(chalk.green.bold(
+      `I am bought "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}!`
+    ));
+
     return exchangeTrade;
   }
 
@@ -128,6 +141,11 @@ export class Strategy implements StrategyInterface {
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
     SessionManager.save(this.session);
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
+      `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
+    ));
 
     return exchangeTrade;
   }

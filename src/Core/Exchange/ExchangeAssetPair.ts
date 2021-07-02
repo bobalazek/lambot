@@ -13,8 +13,10 @@ import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Hel
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  shouldBuy: boolean;
-  shouldSell: boolean;
+  shouldBuyLong: boolean;
+  shouldBuyShort: boolean;
+  shouldSellLong: boolean;
+  shouldSellShort: boolean;
   metadata: any;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
@@ -40,8 +42,10 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  shouldBuy: boolean;
-  shouldSell: boolean;
+  shouldBuyLong: boolean;
+  shouldBuyShort: boolean;
+  shouldSellLong: boolean;
+  shouldSellShort: boolean;
   metadata: any;
 
   private _candlesticks: ExchangeAssetPairCandlestickInterface[];
@@ -53,8 +57,10 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
     this.indicators = new Map<string, number>();
-    this.shouldBuy = false;
-    this.shouldSell = false;
+    this.shouldBuyLong = false;
+    this.shouldBuyShort = false;
+    this.shouldSellLong = false;
+    this.shouldSellShort = false;
 
     this._candlesticks = [];
     this._priceChanges = [];

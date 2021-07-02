@@ -98,10 +98,10 @@ export class DefaultStrategy extends Strategy {
 
     // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
 
-    return await this._executeBuy(
+    return await this.executeBuy(
       assetPair,
-      assetPairPriceEntryNewest,
-      profitPercentageSinceTrough
+      assetPairPriceEntryNewest.price,
+      ExchangeTradeTypeEnum.LONG
     );
   }
 
@@ -142,9 +142,9 @@ export class DefaultStrategy extends Strategy {
 
     if (currentProfitPercentage > this.parameters.takeProfitPercentage) {
       if (!this.parameters.trailingTakeProfitEnabled) {
-        return this._executeSell(
+        return this.executeSell(
           exchangeTrade,
-          assetPairPriceEntryNewest
+          assetPairPriceEntryNewest.price
         );
       }
 
@@ -165,9 +165,9 @@ export class DefaultStrategy extends Strategy {
         this.parameters.trailingTakeProfitEnabled &&
         this.parameters.trailingTakeProfitSlipPercentage < slipSincePeakProfitPercentage
       ) {
-        return this._executeSell(
+        return this.executeSell(
           exchangeTrade,
-          assetPairPriceEntryNewest
+          assetPairPriceEntryNewest.price
         );
       }
     }
@@ -177,9 +177,9 @@ export class DefaultStrategy extends Strategy {
     // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
     // so it doesn't every again fall below this value.
     if (currentProfitPercentage < exchangeTrade.triggerStopLossPercentage) {
-      return this._executeSell(
+      return this.executeSell(
         exchangeTrade,
-        assetPairPriceEntryNewest
+        assetPairPriceEntryNewest.price
       );
     }
 
@@ -188,9 +188,9 @@ export class DefaultStrategy extends Strategy {
       currentProfitPercentage < exchangeTrade.triggerStopLossPercentage
     ) {
       if (this.parameters.stopLossTimeoutSeconds === 0) {
-        return this._executeSell(
+        return this.executeSell(
           exchangeTrade,
-          assetPairPriceEntryNewest
+          assetPairPriceEntryNewest.price
         );
       }
 
@@ -200,9 +200,9 @@ export class DefaultStrategy extends Strategy {
 
       const stopLossTimeoutTime = this.parameters.stopLossTimeoutSeconds * 1000;
       if (now - exchangeTrade.triggerStopLossSellAt > stopLossTimeoutTime) {
-        return this._executeSell(
+        return this.executeSell(
           exchangeTrade,
-          assetPairPriceEntryNewest
+          assetPairPriceEntryNewest.price
         );
       }
     } else if (
@@ -274,41 +274,5 @@ export class DefaultStrategy extends Strategy {
     return this.session.exchange.assetPairs.get(
       assetPair.getKey()
     );
-  }
-
-  async _executeBuy(
-    assetPair: AssetPair,
-    assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface,
-    profitPercentageSinceTrough: number
-  ): Promise<ExchangeTrade> {
-    const exchangeTrade = await this.executeBuy(
-      assetPair,
-      assetPairPriceEntryNewest.price,
-      ExchangeTradeTypeEnum.LONG
-    );
-
-    logger.notice(chalk.green.bold(
-      `I am buying "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}, ` +
-      `because there was a ${profitPercentageSinceTrough.toPrecision(3)}% profit since the trough!`
-    ));
-
-    return exchangeTrade;
-  }
-
-  async _executeSell(
-    exchangeTrade: ExchangeTrade,
-    assetPairPriceEntryNewest: ExchangeAssetPairPriceEntryInterface
-  ): Promise<ExchangeTrade> {
-    await this.executeSell(
-      exchangeTrade,
-      assetPairPriceEntryNewest.price
-    );
-
-    logger.notice(chalk.green.bold(
-      `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
-      `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
-    ));
-
-    return exchangeTrade;
   }
 }
