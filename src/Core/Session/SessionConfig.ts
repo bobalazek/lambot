@@ -4,11 +4,11 @@ export interface SessionConfigInterface {
   // How long do we wait until we actually start trading?
   warmupPeriodSeconds: number;
 
-  // Should we show the current price & status for all the assets?
-  showAssetPairPriceUpdates: boolean;
-
   // Should we show the status of all the current open trades?
-  showOpenTradeUpdates: boolean;
+  openTradeUpdateIntervalSeconds: number;
+
+  // Should we show the current price & status for all the assets?
+  assetPairPriceUpdateIntervalSeconds: number;
 
   // At which interval we want to display the memory usage? Set to 0 if disabled
   memoryUsageMonitoringIntervalSeconds: number;
@@ -22,23 +22,23 @@ export interface SessionConfigInterface {
 
 export class SessionConfig implements SessionConfigInterface {
   warmupPeriodSeconds: number;
-  showAssetPairPriceUpdates: boolean;
-  showOpenTradeUpdates: boolean;
+  openTradeUpdateIntervalSeconds: number;
+  assetPairPriceUpdateIntervalSeconds: number;
   memoryUsageMonitoringIntervalSeconds: number;
   webServerApiEnabled: boolean;
   webServerApiPort: number;
 
   constructor({
     warmupPeriodSeconds = 60,
-    showAssetPairPriceUpdates = false,
-    showOpenTradeUpdates = true,
+    openTradeUpdateIntervalSeconds = 5,
+    assetPairPriceUpdateIntervalSeconds = 0,
     memoryUsageMonitoringIntervalSeconds = 30,
     webServerApiEnabled = true,
     webServerApiPort = SERVER_PORT,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
-    this.showAssetPairPriceUpdates = showAssetPairPriceUpdates;
-    this.showOpenTradeUpdates = showOpenTradeUpdates;
+    this.openTradeUpdateIntervalSeconds = openTradeUpdateIntervalSeconds;
+    this.assetPairPriceUpdateIntervalSeconds = assetPairPriceUpdateIntervalSeconds;
     this.memoryUsageMonitoringIntervalSeconds = memoryUsageMonitoringIntervalSeconds;
     this.webServerApiEnabled = webServerApiEnabled;
     this.webServerApiPort = webServerApiPort;
@@ -48,18 +48,22 @@ export class SessionConfig implements SessionConfigInterface {
   toExport() {
     return {
       warmupPeriodSeconds: this.warmupPeriodSeconds,
-      showAssetPairPriceUpdates: this.showAssetPairPriceUpdates,
-      showOpenTradeUpdates: this.showOpenTradeUpdates,
+      openTradeUpdateIntervalSeconds: this.openTradeUpdateIntervalSeconds,
+      assetPairPriceUpdateIntervalSeconds: this.assetPairPriceUpdateIntervalSeconds,
       memoryUsageMonitoringIntervalSeconds: this.memoryUsageMonitoringIntervalSeconds,
+      webServerApiEnabled: this.webServerApiEnabled,
+      webServerApiPort: this.webServerApiPort,
     };
   }
 
   static fromImport(data: any): SessionConfig {
     return new SessionConfig({
       warmupPeriodSeconds: data.warmupPeriodSeconds,
-      showAssetPairPriceUpdates: data.showAssetPairPriceUpdates,
-      showOpenTradeUpdates: data.showOpenTradeUpdates,
+      openTradeUpdateIntervalSeconds: data.openTradeUpdateIntervalSeconds,
+      assetPairPriceUpdateIntervalSeconds: data.assetPairPriceUpdateIntervalSeconds,
       memoryUsageMonitoringIntervalSeconds: data.memoryUsageMonitoringIntervalSeconds,
+      webServerApiEnabled: data.webServerApiEnabled,
+      webServerApiPort: data.webServerApiPort,
     });
   }
 }

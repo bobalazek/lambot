@@ -26,6 +26,8 @@ export class Trader implements TraderInterface {
 
   _priceTickInterval: ReturnType<typeof setInterval>;
   _candlestickTickInterval: ReturnType<typeof setInterval>;
+  _openTradesInterval: ReturnType<typeof setInterval>;
+  _assetPairPriceInterval: ReturnType<typeof setInterval>;
 
   constructor(session: Session) {
     this.session = session;
@@ -38,6 +40,7 @@ export class Trader implements TraderInterface {
 
     await this.session.strategy.boot(this.session);
 
+    // Intervals
     const priceIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
     if (priceIntervalTime) {
       this._priceTickInterval = setInterval(
@@ -54,6 +57,22 @@ export class Trader implements TraderInterface {
       );
     }
 
+    const openTradesIntervalTime = this.session.config.openTradeUpdateIntervalSeconds * 1000;
+    if (openTradesIntervalTime) {
+      this._openTradesInterval = setInterval(
+        this._printOpenTradeUpdates.bind(this),
+        openTradesIntervalTime
+      );
+    }
+
+    const assetPairPriceIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
+    if (assetPairPriceIntervalTime) {
+      this._assetPairPriceInterval = setInterval(
+        this._printAssetPairPriceUpdates.bind(this),
+        openTradesIntervalTime
+      );
+    }
+
     return true;
   }
 
@@ -62,41 +81,35 @@ export class Trader implements TraderInterface {
 
     clearInterval(this._priceTickInterval);
     clearInterval(this._candlestickTickInterval);
+    clearInterval(this._openTradesInterval);
+    clearInterval(this._assetPairPriceInterval);
 
     return true;
   }
 
   async priceTick() {
-    const now = Date.now();
-    const priceIntervalTime = this.session.strategy.parameters.priceIntervalSeconds * 1000;
+    logger.debug(`Price tick ...`);
 
-    await this._updateAssetPairPrices(now);
-
-    this._printAssetPairPriceUpdates(now);
+    await this._updateAssetPairPrices();
 
     const processingStartTime = Date.now();
 
-    await this._processTrades(now);
-
-    this._printOpenTradeUpdates(now);
+    await this._processTrades();
 
     this._cleanupAssetPairPrices(
-      now,
       processingStartTime,
-      priceIntervalTime / 2
+      (this.session.strategy.parameters.priceIntervalSeconds * 1000) / 2
     );
   }
 
   async candlestickTick() {
-    const now = Date.now();
+    logger.debug(`Candlestick tick ...`);
 
-    await this._updateAssetPairCandlesticks(now);
-
-    // TODO
+    await this._updateAssetPairCandlesticks();
   }
 
   /***** Helpers *****/
-  async _updateAssetPairPrices(now: number) {
+  async _updateAssetPairPrices() {
     const assetPairs = this.session.getAssetPairs();
 
     logger.debug(`Updating asset prices ...`);
@@ -126,7 +139,7 @@ export class Trader implements TraderInterface {
     }
   }
 
-  async _updateAssetPairCandlesticks(now: number) {
+  async _updateAssetPairCandlesticks() {
     logger.debug(`Updating asset candlesticks ...`);
 
     for (const assetPair of this.session.assetPairs) {
@@ -140,23 +153,24 @@ export class Trader implements TraderInterface {
       );
 
       exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
+
+      // TODO: process that asset pair
     }
   }
 
   _printAssetPairPriceUpdates(now: number) {
-    if (!this.session.config.showAssetPairPriceUpdates) {
-      return;
-    }
-
     logger.info(chalk.bold('Asset pair price updates:'));
     this.session.exchange.assetPairs.forEach((exchangeAssetPairPrice, key) => {
-      const priceText = exchangeAssetPairPrice.getPriceText();
-
-      logger.info(chalk.bold(key) + ' - ' + priceText);
+      logger.info(
+        chalk.bold(key) +
+        ' - ' +
+        exchangeAssetPairPrice.getPriceText()
+      );
     });
   }
 
-  async _processTrades(now: number) {
+  async _processTrades() {
+    const now = Date.now();
     const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
 
@@ -181,11 +195,8 @@ export class Trader implements TraderInterface {
     return true;
   }
 
-  _printOpenTradeUpdates(now: number) {
-    if (!this.session.config.showOpenTradeUpdates) {
-      return;
-    }
-
+  _printOpenTradeUpdates() {
+    const now = Date.now();
     const openTrades = this.session.getOpenTrades();
 
     logger.info(chalk.bold('Open trade updates:'));
@@ -212,15 +223,14 @@ export class Trader implements TraderInterface {
   }
 
   _cleanupAssetPairPrices(
-    tickStartTime: number,
     processingStartTime: number,
-    processingTimeLimit: number
+    processingLimitTime: number
   ) {
     const processingTime = Date.now() - processingStartTime;
 
     logger.debug(`Processing a tick took ${processingTime}ms.`);
 
-    if (processingTime < processingTimeLimit) {
+    if (processingTime < processingLimitTime) {
       return;
     }
 
