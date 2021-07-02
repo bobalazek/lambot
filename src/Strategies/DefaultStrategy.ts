@@ -1,12 +1,8 @@
-import chalk from 'chalk';
-
 import { AssetPair } from '../Core/Asset/AssetPair';
 import { ExchangeAssetPairInterface } from '../Core/Exchange/ExchangeAssetPair';
-import { ExchangeAssetPairPriceEntryInterface } from '../Core/Exchange/ExchangeAssetPairPrice';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
 import { Strategy } from '../Core/Strategy/Strategy';
-import { calculatePercentage, colorTextPercentageByValue } from '../Utils/Helpers';
-import logger from '../Utils/Logger';
+import { calculatePercentage } from '../Utils/Helpers';
 
 export class DefaultStrategy extends Strategy {
   constructor({
@@ -46,6 +42,10 @@ export class DefaultStrategy extends Strategy {
         buyTroughUptrendMaximumAgeSeconds,
       }
     );
+  }
+
+  async checkForBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
+    throw new Error('checkForBuyAndSellSignals() not implemented yet.');
   }
 
   async checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade> {

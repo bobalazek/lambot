@@ -17,7 +17,7 @@ export interface SessionInterface {
   asset: Asset; // What is the default asset you want to trade in?
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
-  tradingType: SessionTradingTypeEnum;
+  tradingTypes: SessionTradingTypeEnum[];
   orderType: ExchangeOrderTypeEnum;
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
@@ -51,7 +51,7 @@ export class Session implements SessionInterface {
   asset: Asset;
   assetPairs: AssetPair[];
   strategy: Strategy;
-  tradingType: SessionTradingTypeEnum;
+  tradingTypes: SessionTradingTypeEnum[];
   orderType: ExchangeOrderTypeEnum;
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
@@ -67,7 +67,7 @@ export class Session implements SessionInterface {
     asset: Asset,
     assetPairs: AssetPair[],
     strategy: Strategy,
-    tradingType: SessionTradingTypeEnum,
+    tradingTypes: SessionTradingTypeEnum[],
     orderType: ExchangeOrderTypeEnum
   ) {
     this.id = id;
@@ -76,7 +76,7 @@ export class Session implements SessionInterface {
     this.asset = asset;
     this.assetPairs = assetPairs;
     this.strategy = strategy;
-    this.tradingType = tradingType;
+    this.tradingTypes = tradingTypes;
     this.orderType = orderType;
 
     this.trades = [];
@@ -144,7 +144,7 @@ export class Session implements SessionInterface {
         return assetPair.toExport();
       }),
       strategy: this.strategy.toExport(),
-      tradingType: this.tradingType,
+      tradingTypes: this.tradingTypes,
       orderType: this.orderType,
       trades: this.trades.map((trade) => {
         return trade.toExport();
@@ -174,7 +174,7 @@ export class Session implements SessionInterface {
         return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(sessionData.strategy),
-      sessionData.tradingType,
+      sessionData.tradingTypes,
       sessionData.orderType
     );
 

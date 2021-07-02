@@ -193,7 +193,9 @@ export const createMockTrader = async (exchange: Exchange) => {
       new AssetPair(Assets.BCH, baseAsset),
     ],
     new DefaultStrategy({}),
-    SessionTradingTypeEnum.SPOT,
+    [
+      SessionTradingTypeEnum.SPOT,
+    ],
     ExchangeOrderTypeEnum.MARKET
   );
 

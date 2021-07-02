@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
+import { ExchangeAccountTypeEnum } from '../Exchange/ExchangeAccount';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { ExchangeOrderFeesTypeEnum } from '../Exchange/ExchangeOrderFees';
@@ -64,14 +65,18 @@ export class Strategy implements StrategyInterface {
   ): Promise<ExchangeTrade> {
     const now = Date.now();
     const assetPairSymbol = assetPair.getKey();
-
+    const accountType = tradeType === ExchangeTradeTypeEnum.SHORT
+      ? ExchangeAccountTypeEnum.MARGIN
+      : ExchangeAccountTypeEnum.SPOT;
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
-    const order = this._createNewOrder(
-      id,
+    const order = new ExchangeOrder(
+      id + '_' + ExchangeOrderSideEnum.BUY,
       assetPair,
       ExchangeOrderSideEnum.BUY,
       this.parameters.tradeAmount,
-      price
+      price,
+      ExchangeOrderTypeEnum.MARKET,
+      accountType
     );
     const orderFees = await this.session.exchange.getAssetFees(
       assetPair,
@@ -83,10 +88,7 @@ export class Strategy implements StrategyInterface {
     );
 
     const buyOrder: ExchangeOrder = !Manager.isTestMode
-      ? await this.session.exchange.addAccountOrder(
-        this.session.exchange.getAccountType(this.session.tradingType),
-        order
-      )
+      ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
     const exchangeTrade = new ExchangeTrade(
       id,
@@ -113,12 +115,17 @@ export class Strategy implements StrategyInterface {
   }
 
   async executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade> {
-    const order = this._createNewOrder(
-      exchangeTrade.id,
+    const accountType = exchangeTrade.type === ExchangeTradeTypeEnum.SHORT
+      ? ExchangeAccountTypeEnum.MARGIN
+      : ExchangeAccountTypeEnum.SPOT;
+    const order = new ExchangeOrder(
+      exchangeTrade.id + '_' + ExchangeOrderSideEnum.SELL,
       exchangeTrade.assetPair,
       ExchangeOrderSideEnum.SELL,
       exchangeTrade.amount,
-      price
+      price,
+      ExchangeOrderTypeEnum.MARKET,
+      accountType
     );
     const orderFees = await this.session.exchange.getAssetFees(
       exchangeTrade.assetPair,
@@ -130,10 +137,7 @@ export class Strategy implements StrategyInterface {
     );
 
     const sellOrder: ExchangeOrder = !Manager.isTestMode
-      ? await this.session.exchange.addAccountOrder(
-        this.session.exchange.getAccountType(this.session.tradingType),
-        order
-      )
+      ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
     exchangeTrade.sellFeesPercentage = orderFees.amountPercentage;
     exchangeTrade.sellOrder = sellOrder;
@@ -195,24 +199,5 @@ export class Strategy implements StrategyInterface {
     };
 
     return new Strategy(this.name, parameters);
-  }
-
-  /***** Helpers *****/
-  _createNewOrder(
-    idPrefix: string,
-    assetPair: AssetPair,
-    orderSide: ExchangeOrderSideEnum,
-    amount: string,
-    price: string
-  ) {
-    return new ExchangeOrder(
-      idPrefix + '_' + orderSide,
-      assetPair,
-      orderSide,
-      amount,
-      price,
-      ExchangeOrderTypeEnum.MARKET,
-      this.session.exchange.getAccountType(this.session.tradingType)
-    );
   }
 }

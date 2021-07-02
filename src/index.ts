@@ -53,7 +53,9 @@ const sessionId = programOptions.session;
       return new AssetPair(asset, baseAsset);
     }),
     new DefaultStrategy({}),
-    SessionTradingTypeEnum.SPOT,
+    [
+      SessionTradingTypeEnum.SPOT,
+    ],
     ExchangeOrderTypeEnum.MARKET
   );
 

@@ -30,7 +30,7 @@ export class ExchangeValidator {
 
     // Do session asset validations
     const {
-      tradingType,
+      tradingTypes,
       strategy,
     } = exchange.session;
 
@@ -73,9 +73,11 @@ export class ExchangeValidator {
       const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
 
       // Check if we can to the trading type we specified
-      if (!exchangeAssetPair.tradingTypes.includes(tradingType)) {
+      if (!tradingTypes.every((item) => {
+        return exchangeAssetPair.tradingTypes.includes(item);
+      })) {
         logger.critical(chalk.red.bold(
-          `Trading type "${tradingType}" is not available for "${assetPairSymbol}".`
+          `Trading type "${tradingTypes}" is not available for "${assetPairSymbol}".`
         ));
 
         process.exit(1);

@@ -176,11 +176,7 @@ export class Exchange implements ExchangeInterface {
 
   /***** Helpers *****/
   async _setupAccounts(): Promise<any> {
-    const accountTypes = [
-      this.session.tradingType,
-    ];
-
-    return await asyncForEach(accountTypes, async (accountType) => {
+    return await asyncForEach(this.session.tradingTypes, async (accountType) => {
       const exchangeAccountType = this.getAccountType(accountType);
       const exchangeAccount = new ExchangeAccount(exchangeAccountType);
       const exchangeAccountAssets = await this.getAccountAssets(exchangeAccountType);

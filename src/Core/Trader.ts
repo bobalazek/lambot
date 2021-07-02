@@ -182,11 +182,13 @@ export class Trader implements TraderInterface {
       return false;
     }
 
+    /*
+    // TODO: implement
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
       await this.session.strategy.checkForBuyAndSellSignals(assetPair);
     }
+    */
 
-    /*
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {
       await this.session.strategy.checkForSellSignal(exchangeTrade);
@@ -196,8 +198,6 @@ export class Trader implements TraderInterface {
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
       await this.session.strategy.checkForBuySignal(assetPair);
     }
-
-    */
 
     return true;
   }
