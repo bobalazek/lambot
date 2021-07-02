@@ -1,6 +1,14 @@
 import chalk from 'chalk';
 
+import { AssetPair } from './Asset/AssetPair';
+import { ExchangeAccountTypeEnum } from './Exchange/ExchangeAccount';
+import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from './Exchange/ExchangeOrder';
+import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './Exchange/ExchangeTrade';
+import { ExchangeOrderFeesTypeEnum } from './Exchange/ExchangeOrderFees';
 import { Session } from './Session/Session';
+import { SessionManager } from './Session/SessionManager';
+import { Manager } from './Manager';
+import { ID_PREFIX } from '../Constants';
 import { colorTextPercentageByValue } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
 
@@ -12,6 +20,8 @@ export interface TraderInterface {
   stop(): Promise<boolean>;
   priceTick(): void;
   candlestickTick(): void;
+  executeBuy(assetPair: AssetPair, price: string, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
+  executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade>;
 }
 
 export enum TraderStatusEnum {
@@ -106,6 +116,102 @@ export class Trader implements TraderInterface {
     logger.debug(`Candlestick tick ...`);
 
     await this._updateAssetPairCandlesticks();
+  }
+
+  async executeBuy(
+    assetPair: AssetPair,
+    price: string,
+    tradeType: ExchangeTradeTypeEnum
+  ): Promise<ExchangeTrade> {
+    const now = Date.now();
+    const assetPairSymbol = assetPair.getKey();
+    const accountType = tradeType === ExchangeTradeTypeEnum.SHORT
+      ? ExchangeAccountTypeEnum.MARGIN
+      : ExchangeAccountTypeEnum.SPOT;
+    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
+    const order = new ExchangeOrder(
+      id + '_' + ExchangeOrderSideEnum.BUY,
+      assetPair,
+      ExchangeOrderSideEnum.BUY,
+      this.session.strategy.parameters.tradeAmount,
+      price,
+      ExchangeOrderTypeEnum.MARKET,
+      accountType
+    );
+    const orderFees = await this.session.exchange.getAssetFees(
+      assetPair,
+      this.session.strategy.parameters.tradeAmount,
+      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
+        ? ExchangeOrderFeesTypeEnum.MAKER
+        : ExchangeOrderFeesTypeEnum.TAKER,
+      tradeType
+    );
+
+    const buyOrder: ExchangeOrder = !Manager.isTestMode
+      ? await this.session.exchange.addAccountOrder(accountType, order)
+      : order;
+    const exchangeTrade = new ExchangeTrade(
+      id,
+      assetPair.assetBase,
+      assetPair,
+      tradeType,
+      ExchangeTradeStatusEnum.OPEN,
+      now
+    );
+    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
+    exchangeTrade.buyOrder = buyOrder;
+    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
+    exchangeTrade.amount = buyOrder.amount;
+
+    this.session.trades.push(exchangeTrade);
+
+    SessionManager.save(this.session);
+
+    logger.notice(chalk.green.bold(
+      `I am bought "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}!`
+    ));
+
+    return exchangeTrade;
+  }
+
+  async executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade> {
+    const accountType = exchangeTrade.type === ExchangeTradeTypeEnum.SHORT
+      ? ExchangeAccountTypeEnum.MARGIN
+      : ExchangeAccountTypeEnum.SPOT;
+    const order = new ExchangeOrder(
+      exchangeTrade.id + '_' + ExchangeOrderSideEnum.SELL,
+      exchangeTrade.assetPair,
+      ExchangeOrderSideEnum.SELL,
+      exchangeTrade.amount,
+      price,
+      ExchangeOrderTypeEnum.MARKET,
+      accountType
+    );
+    const orderFees = await this.session.exchange.getAssetFees(
+      exchangeTrade.assetPair,
+      this.session.strategy.parameters.tradeAmount,
+      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
+        ? ExchangeOrderFeesTypeEnum.MAKER
+        : ExchangeOrderFeesTypeEnum.TAKER,
+      exchangeTrade.type
+    );
+
+    const sellOrder: ExchangeOrder = !Manager.isTestMode
+      ? await this.session.exchange.addAccountOrder(accountType, order)
+      : order;
+    exchangeTrade.sellFeesPercentage = orderFees.amountPercentage;
+    exchangeTrade.sellOrder = sellOrder;
+    exchangeTrade.sellPrice = parseFloat(sellOrder.price);
+    exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
+
+    SessionManager.save(this.session);
+
+    logger.notice(chalk.green.bold(
+      `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
+      `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
+    ));
+
+    return exchangeTrade;
   }
 
   /***** Helpers *****/
