@@ -30,9 +30,9 @@ export interface ExchangeInterface {
   assetPairs: ExchangeAssetPairsMap;
   session: Session;
   boot(session: Session): Promise<boolean>;
-  getAccountOrders(type: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]>;
-  addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
-  getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
+  getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]>;
+  addAccountOrder(accountType: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
+  getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]>;
   getAssetPairCandlesticks(
@@ -95,15 +95,15 @@ export class Exchange implements ExchangeInterface {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]> {
+  async getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]> {
     throw new Error('getAccountOrders() not implemented yet.');
   }
 
-  async addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
+  async addAccountOrder(accountType: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
     throw new Error('addAccountOrder() not implemented yet.');
   }
 
-  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
+  async getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
     throw new Error('getAccountAssets() not implemented yet.');
   }
 

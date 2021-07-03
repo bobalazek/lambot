@@ -24,8 +24,7 @@ export class ExchangeValidator {
 
     const exhangeAssetPairs = await exchange.getAssetPairs();
     const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
-      const key = AssetPairConverter.convert(assetPair);
-      return [key, assetPair];
+      return [AssetPairConverter.convert(assetPair), assetPair];
     }));
 
     // Do session asset validations

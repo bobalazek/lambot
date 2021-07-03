@@ -56,7 +56,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
 
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
-    this.indicators = new Map<string, number>();
+    this.indicators = new Map();
     this.shouldBuyLong = false;
     this.shouldBuyShort = false;
     this.shouldSellLong = false;

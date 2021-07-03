@@ -23,7 +23,7 @@ export enum ExchangeAssetPairPriceTrendStatusEnum {
   SIDEWAYS_TREND  = 'SIDEWAYS_TREND',
 }
 
-export const ExchangeAssetPairTrendIconMap = new Map<ExchangeAssetPairPriceTrendStatusEnum, string>([
+export const ExchangeAssetPairTrendIconMap = new Map([
   [ExchangeAssetPairPriceTrendStatusEnum.UPTREND, '🟢'],
   [ExchangeAssetPairPriceTrendStatusEnum.DOWNTREND, '🔴'],
   [ExchangeAssetPairPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],

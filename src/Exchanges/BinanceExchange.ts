@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import chalk from 'chalk';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { AssetPairStringConverterInterface } from '../Core/Asset/AssetPairStringConverter';
+import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
@@ -52,7 +52,7 @@ export class BinanceExchange extends Exchange {
       'binance',
       'Binance',
       apiCredentials,
-      new AssetPairStringConverterBinance()
+      new AssetPairStringConverterDefault()
     );
 
     if (!apiCredentials.key || !apiCredentials.secret) {
@@ -75,31 +75,39 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(type: ExchangeAccountTypeEnum, assetPair: AssetPair = null): Promise<ExchangeOrder[]> {
+  async getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair: AssetPair = null): Promise<ExchangeOrder[]> {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
-    if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold(
-        'Currently only the SPOT account is implemented.'
-      ));
-      process.exit(1);
-    }
-
-    const symbol = assetPair.getExchangeSymbolString(this.assetPairConverter);
+    const orders: ExchangeOrder[] = [];
+    const symbol = assetPair?.getExchangeSymbolString(this.assetPairConverter);
     const dataOrParams = symbol
       ? {
         symbol,
       }
       : {};
 
-    const response = await this._doRequest(
-      RequestMethodEnum.GET,
-      'https://api.binance.com/api/v3/openOrders',
-      dataOrParams,
-      true
-    );
+    let response: any = {};
+    if (accountType === ExchangeAccountTypeEnum.SPOT) {
+      response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/api/v3/openOrders',
+        dataOrParams,
+        true
+      );
+    } else if (accountType === ExchangeAccountTypeEnum.MARGIN) {
+      response = await this._doRequest(
+        RequestMethodEnum.GET,
+        'https://api.binance.com/sapi/v1/margin/openOrders',
+        dataOrParams,
+        true
+      );
+    } else {
+      logger.critical(chalk.red.bold(
+        `Account type "${accountType}" is not supported.`
+      ));
+      process.exit(1);
+    }
 
-    const orders: ExchangeOrder[] = [];
     for (let i = 0; i < response.data.length; i++) {
       const orderData = response.data[i];
 
@@ -124,7 +132,7 @@ export class BinanceExchange extends Exchange {
           orderData.origQty,
           orderData.price,
           orderData.type,
-          type,
+          accountType,
           orderData
         )
       );
@@ -133,17 +141,10 @@ export class BinanceExchange extends Exchange {
     return orders;
   }
 
-  async addAccountOrder(type: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
+  async addAccountOrder(accountType: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder> {
     logger.debug(chalk.italic(
       'Adding account order ...'
     ));
-
-    if (type !== ExchangeAccountTypeEnum.SPOT) {
-      logger.critical(chalk.red.bold(
-        'Currently only the SPOT account is implemented.'
-      ));
-      process.exit(1);
-    }
 
     const orderSymbol = order.assetPair.getExchangeSymbolString(this.assetPairConverter);
     const orderType = order.type;
@@ -163,11 +164,25 @@ export class BinanceExchange extends Exchange {
       data.quantity = order.amount;
     }
 
-    const response = await this._doRequest(
-      RequestMethodEnum.POST,
-      'https://api.binance.com/api/v3/order',
-      data
-    );
+    let response: any = {};
+    if (accountType === ExchangeAccountTypeEnum.SPOT) {
+      response = await this._doRequest(
+        RequestMethodEnum.POST,
+        'https://api.binance.com/api/v3/order',
+        data
+      );
+    } else if (accountType === ExchangeAccountTypeEnum.MARGIN) {
+      response = await this._doRequest(
+        RequestMethodEnum.POST,
+        'https://api.binance.com/sapi/v1/margin/order',
+        data
+      );
+    } else {
+      logger.critical(chalk.red.bold(
+        `Account type "${accountType}" is not supported.`
+      ));
+      process.exit(1);
+    }
 
     order.price = response.data.price;
     order.exchangeResponse = response.data;
@@ -175,12 +190,12 @@ export class BinanceExchange extends Exchange {
     return order;
   }
 
-  async getAccountAssets(type: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
+  async getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]> {
     logger.debug(chalk.italic('Fetching account assets ...'));
 
     const accountAssets: ExchangeResponseAccountAssetInterface[] = [];
 
-    if (type === ExchangeAccountTypeEnum.SPOT) {
+    if (accountType === ExchangeAccountTypeEnum.SPOT) {
       const response = await this._doRequest(
         RequestMethodEnum.GET,
         'https://api.binance.com/api/v3/account',
@@ -197,7 +212,7 @@ export class BinanceExchange extends Exchange {
           amountLocked: balanceData.locked,
         });
       }
-    } else if (type === ExchangeAccountTypeEnum.MARGIN) {
+    } else if (accountType === ExchangeAccountTypeEnum.MARGIN) {
       const response = await this._doRequest(
         RequestMethodEnum.GET,
         'https://api.binance.com/sapi/v1/margin/account',
@@ -230,7 +245,7 @@ export class BinanceExchange extends Exchange {
       }
     } else {
       logger.critical(chalk.red.bold(
-        `Type "${type}" is not supported.`
+        `Type "${accountType}" is not supported.`
       ));
       process.exit(1);
     }
@@ -494,14 +509,5 @@ export class BinanceExchange extends Exchange {
     ));
 
     return response;
-  }
-}
-
-export class AssetPairStringConverterBinance implements AssetPairStringConverterInterface {
-  convert(assetPair: AssetPair): string {
-    return (
-      assetPair.assetBase.symbol +
-      assetPair.assetQuote.symbol
-    );
   }
 }
