@@ -1,9 +1,9 @@
-import { AssetPair } from '../Core/Asset/AssetPair';
-import { ExchangeAssetPairInterface } from '../Core/Exchange/ExchangeAssetPair';
-import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
-import { Manager } from '../Core/Manager';
-import { Strategy } from '../Core/Strategy/Strategy';
-import { calculatePercentage } from '../Utils/Helpers';
+import { AssetPair } from '../src/Core/Asset/AssetPair';
+import { ExchangeAssetPairInterface } from '../src/Core/Exchange/ExchangeAssetPair';
+import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../src/Core/Exchange/ExchangeTrade';
+import { Manager } from '../src/Core/Manager';
+import { Strategy } from '../src/Core/Strategy/Strategy';
+import { calculatePercentage } from '../src/Utils/Helpers';
 
 export class DefaultStrategy extends Strategy {
   constructor({

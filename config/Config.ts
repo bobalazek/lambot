@@ -5,7 +5,7 @@ import { ExchangeOrderTypeEnum } from '../src/Core/Exchange/ExchangeOrder';
 import { ExchangesEnum } from '../src/Core/Exchange/ExchangesFactory';
 import { SessionTradingTypeEnum } from '../src/Core/Session/Session';
 import { SessionConfig } from '../src/Core/Session/SessionConfig';
-import { DefaultStrategy } from '../src/Strategies/DefaultStrategy';
+import { DefaultStrategy } from './DefaultStrategy';
 
 // Config
 const assets = [

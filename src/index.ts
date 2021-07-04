@@ -3,14 +3,13 @@ import { Command } from 'commander';
 
 import { Manager } from './Core/Manager';
 import { SessionManager } from './Core/Session/SessionManager';
-import config from '../config/default';
+import config from '../config/Config';
 
 dotenv.config();
 
 // Prepare CLI
 const program = new Command();
 program
-  .version('0.1')
   .option('-p, --production', 'Does actual trading with your account.', false)
   .requiredOption('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
   .parse(process.argv)

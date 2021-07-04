@@ -1,6 +1,6 @@
 import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
-import { DefaultStrategy } from '../../src/Strategies/DefaultStrategy';
+import { DefaultStrategy } from '../../config/DefaultStrategy';
 import { Exchange } from '../../src/Core/Exchange/Exchange';
 import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
