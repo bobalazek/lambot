@@ -318,6 +318,10 @@ export class Trader implements TraderInterface {
         exchangeTrade.assetPair.getKey()
       );
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+      if (!assetPairPriceEntryNewest) {
+        return;
+      }
+
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
       const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
       const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);

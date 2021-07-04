@@ -38,7 +38,7 @@ export class SessionConfig implements SessionConfigInterface {
     assetPairPriceUpdateIntervalSeconds = 1,
     assetPairCandlestickUpdateIntervalSeconds = 0,
     memoryUsageMonitoringIntervalSeconds = 30,
-    webServerApiEnabled = true,
+    webServerApiEnabled = false,
     webServerApiPort = SERVER_PORT,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;

@@ -445,7 +445,7 @@ export class BinanceExchange extends Exchange {
     signed: boolean = false
   ): Promise<AxiosResponse<any>> {
     logger.log(chalk.italic(
-      `Making a ${method} request to ${url}`
+      `Making a ${method} request to ${url}, with parameters: ${JSON.stringify(dataOrParams)}`
     ));
 
     let params: any = {};

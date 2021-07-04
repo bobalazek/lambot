@@ -16,7 +16,11 @@ const assets = [
   Assets.TRX, Assets.FIL, Assets.XMR, Assets.EOS, Assets.SHIB,
   Assets.SUSHI, Assets.AAVE, Assets.KSM, Assets.LUNA, Assets.BTT,
 ];
-const sessionConfig = new SessionConfig({});
+const sessionConfig = new SessionConfig({
+  assetPairPriceUpdateIntervalSeconds: 5,
+  assetPairCandlestickUpdateIntervalSeconds: 60,
+  memoryUsageMonitoringIntervalSeconds: 120,
+});
 const sessionExchange = ExchangesEnum.BINANCE;
 const sessionAsset = Assets.USDT;
 const sessionAssetPairs = assets.map((asset) => {
