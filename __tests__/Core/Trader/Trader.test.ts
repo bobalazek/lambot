@@ -50,10 +50,8 @@ describe('Trader', () => {
 
     const assetPairPrice = trader.session.exchange.assetPairs.get('ETHUSDT');
     const assetPairPriceEntries = assetPairPrice.getPriceEntries();
-    const assetPairPriceChanges = assetPairPrice.getPriceChanges();
 
     expect(assetPairPriceEntries).toHaveLength(1);
-    expect(assetPairPriceChanges).toHaveLength(0);
 
     // Next ticks
     jest.spyOn(Date, 'now').mockImplementation(() => 1000);
@@ -70,10 +68,8 @@ describe('Trader', () => {
 
     const assetPairPriceSecondary = trader.session.exchange.assetPairs.get('ETHUSDT');
     const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getPriceEntries();
-    const assetPairPriceSecondaryChanges = assetPairPriceSecondary.getPriceChanges();
 
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);
-    expect(assetPairPriceSecondaryChanges).toHaveLength(assetPairPricesResponses.length);
 
     const sortedAssetPairs = session.strategy.getSortedAssetPairs();
 

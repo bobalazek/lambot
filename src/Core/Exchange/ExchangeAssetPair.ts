@@ -2,7 +2,6 @@ import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
 import {
-  ExchangeAssetPairPriceChangeInterface,
   ExchangeAssetPairPriceEntryInterface,
   ExchangeAssetPairPriceTrendStatusEnum,
   ExchangeAssetPairTrendIconMap,
@@ -31,8 +30,6 @@ export interface ExchangeAssetPairInterface {
   getLargestPeakPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
   getLargestTroughPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface;
   addPriceEntry(priceEntry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
-  getPriceChanges(): ExchangeAssetPairPriceChangeInterface[];
-  getNewestPriceChange(): ExchangeAssetPairPriceChangeInterface;
   processPriceEntries(): void;
   cleanupPriceEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
   getPriceText(): string;
@@ -52,7 +49,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   private _priceEntries: ExchangeAssetPairPriceEntryInterface[];
   private _priceEntriesPeakIndexes: Array<number>;
   private _priceEntriesTroughIndexes: Array<number>;
-  private _priceChanges: ExchangeAssetPairPriceChangeInterface[];
 
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
@@ -63,7 +59,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this.shouldSellShort = false;
 
     this._candlesticks = [];
-    this._priceChanges = [];
     this._priceEntries = [];
     this._priceEntriesPeakIndexes = [];
     this._priceEntriesTroughIndexes = [];
@@ -188,18 +183,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return priceEntry;
   }
 
-  getPriceChanges(): ExchangeAssetPairPriceChangeInterface[] {
-    return this._priceChanges;
-  }
-
-  getNewestPriceChange(): ExchangeAssetPairPriceChangeInterface {
-    if (this._priceChanges.length === 0) {
-      return null;
-    }
-
-    return this._priceChanges[this._priceChanges.length - 1];
-  }
-
   processPriceEntries(): void {
     const entriesCount = this._priceEntries.length;
     if (entriesCount < 2) {
@@ -212,7 +195,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this._priceEntriesPeakIndexes = [];
     this._priceEntriesTroughIndexes = [];
 
-    const changes: ExchangeAssetPairPriceChangeInterface[] = [];
+    const changes: number[] = [];
     for (let i = 0; i < entriesCount; i++) {
       const entry = this._priceEntries[i];
       const prevEntry = i > 0
@@ -234,18 +217,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         ? calculatePercentage(price, prevPrice)
         : 0;
 
-      changes.push({
-        relativePricePercentage,
-        price,
-        prevPrice,
-        timestamp: entry.timestamp,
-      });
+      changes.push(relativePricePercentage);
 
       if (prevEntry) {
         // TODO: figure out a better way to do this
         // I'm aware that the performance is rather terrible,
         // but will need a good idea on how to fix it
-        const prevRelativePricePercentage = changes[i - 1].relativePricePercentage;
+        const prevRelativePricePercentage = changes[i - 1];
         if (
           price < prevPrice &&
           prevRelativePricePercentage >= 0
@@ -329,8 +307,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         }
       }
     }
-
-    this._priceChanges = changes;
   }
 
   cleanupPriceEntries(ratio: number = 0.5): void {
@@ -350,7 +326,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     const entryNewestTimeAgo = now - entryNewest.timestamp;
     const entryLastPeak = this.getLastPeakPriceEntry();
     const entryLastTrough = this.getLastTroughPriceEntry();
-    const changesNewest = this.getNewestPriceChange();
 
     let string = chalk.bold(entryNewestPrice);
 
@@ -358,8 +333,12 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
       string += ` (${Math.round(entryNewestTimeAgo / 1000)}s ago)`;
     }
 
-    if (changesNewest) {
-      const percentage = changesNewest.relativePricePercentage;
+    const entrySecondNewest = this._priceEntries[this._priceEntries.length - 2] ?? null;
+    if (entrySecondNewest) {
+      const percentage = calculatePercentage(
+        parseFloat(entryNewestPrice),
+        parseFloat(entrySecondNewest.price)
+      );
       const status = percentage > 0
         ? ExchangeAssetPairPriceTrendStatusEnum.UPTREND
         : (percentage < 0

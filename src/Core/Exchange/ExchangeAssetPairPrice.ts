@@ -1,12 +1,5 @@
 import { ExchangeAssetPairInterface } from './ExchangeAssetPair';
 
-export interface ExchangeAssetPairPriceChangeInterface {
-  relativePricePercentage: number; // relative to the previous entry - ((price - prevPrice) / prevPrice) * 100
-  price: number;
-  prevPrice: number;
-  timestamp: number;
-}
-
 export interface ExchangeAssetPairPriceEntryInterface {
   timestamp: number;
   price: string;

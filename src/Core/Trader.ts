@@ -168,7 +168,7 @@ export class Trader implements TraderInterface {
     SessionManager.save(this.session);
 
     logger.notice(chalk.green.bold(
-      `I am bought "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}!`
+      `I bought "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}!`
     ));
 
     return exchangeTrade;
@@ -207,7 +207,7 @@ export class Trader implements TraderInterface {
     SessionManager.save(this.session);
 
     logger.notice(chalk.green.bold(
-      `I am selling "${exchangeTrade.assetPair.getKey()}". ` +
+      `I sold "${exchangeTrade.assetPair.getKey()}". ` +
       `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
     ));
 
