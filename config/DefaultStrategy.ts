@@ -1,7 +1,6 @@
 import { AssetPair } from '../src/Core/Asset/AssetPair';
 import { ExchangeAssetPairInterface } from '../src/Core/Exchange/ExchangeAssetPair';
-import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../src/Core/Exchange/ExchangeTrade';
-import { Manager } from '../src/Core/Manager';
+import { ExchangeTrade, ExchangeTradeStatusEnum } from '../src/Core/Exchange/ExchangeTrade';
 import { Strategy } from '../src/Core/Strategy/Strategy';
 import { calculatePercentage } from '../src/Utils/Helpers';
 
