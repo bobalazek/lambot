@@ -20,8 +20,8 @@ export interface TraderInterface {
   stop(): Promise<boolean>;
   priceTick(): void;
   candlestickTick(): void;
-  executeBuy(assetPair: AssetPair, price: string, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
-  executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade>;
+  executeBuy(assetPair: AssetPair, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
+  executeSell(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade>;
 }
 
 export enum TraderStatusEnum {
@@ -120,7 +120,6 @@ export class Trader implements TraderInterface {
 
   async executeBuy(
     assetPair: AssetPair,
-    price: string,
     tradeType: ExchangeTradeTypeEnum
   ): Promise<ExchangeTrade> {
     const now = Date.now();
@@ -128,13 +127,23 @@ export class Trader implements TraderInterface {
     const accountType = tradeType === ExchangeTradeTypeEnum.SHORT
       ? ExchangeAccountTypeEnum.MARGIN
       : ExchangeAccountTypeEnum.SPOT;
+    const assetPairPrice = this.session.exchange.assetPairs.get(assetPairSymbol);
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+    if (!assetPairPriceEntryNewest) {
+      logger.notice(chalk.green.bold(
+        `Could not buy "${assetPairSymbol}" because no price was set.`
+      ));
+
+      return null;
+    }
+
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
     const order = new ExchangeOrder(
       id + '_' + ExchangeOrderSideEnum.BUY,
       assetPair,
       ExchangeOrderSideEnum.BUY,
       this.session.strategy.parameters.tradeAmount,
-      price,
+      assetPairPriceEntryNewest.price,
       ExchangeOrderTypeEnum.MARKET,
       accountType
     );
@@ -174,7 +183,11 @@ export class Trader implements TraderInterface {
     return exchangeTrade;
   }
 
-  async executeSell(exchangeTrade: ExchangeTrade, price: string): Promise<ExchangeTrade> {
+  async executeSell(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade> {
+    const assetPairPrice = this.session.exchange.assetPairs.get(
+      exchangeTrade.assetPair.getKey()
+    );
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
     const accountType = exchangeTrade.type === ExchangeTradeTypeEnum.SHORT
       ? ExchangeAccountTypeEnum.MARGIN
       : ExchangeAccountTypeEnum.SPOT;
@@ -183,7 +196,7 @@ export class Trader implements TraderInterface {
       exchangeTrade.assetPair,
       ExchangeOrderSideEnum.SELL,
       exchangeTrade.amount,
-      price,
+      assetPairPriceEntryNewest.price,
       ExchangeOrderTypeEnum.MARKET,
       accountType
     );
@@ -275,7 +288,7 @@ export class Trader implements TraderInterface {
     });
   }
 
-  async _processTrades() {
+  async _processTrades(): Promise<boolean> {
     const now = Date.now();
     const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
@@ -293,16 +306,30 @@ export class Trader implements TraderInterface {
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
       await this.session.strategy.checkForBuyAndSellSignals(assetPair);
     }
+
+    // TODO: go through existing trades first and see if we can sell any
+    // then go through assets and see if we can buy any.
     */
 
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {
-      await this.session.strategy.checkForSellSignal(exchangeTrade);
+      if (!this.session.strategy.checkForSellSignal(exchangeTrade)) {
+        continue;
+      }
+
+      await this.executeSell(exchangeTrade);
     }
 
     logger.debug(`Checking for buy signals ...`);
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
-      await this.session.strategy.checkForBuySignal(assetPair);
+      if (!this.session.strategy.checkForBuySignal(assetPair)) {
+        continue;
+      }
+
+      await this.executeBuy(
+        assetPair,
+        ExchangeTradeTypeEnum.LONG
+      );
     }
 
     return true;

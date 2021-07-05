@@ -42,10 +42,12 @@ export class DefaultStrategy extends Strategy {
   }
 
   async checkForBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
-    throw new Error('checkForBuyAndSellSignals() not implemented yet.');
+    // TODO
+
+    return assetPair;
   }
 
-  async checkForBuySignal(assetPair: AssetPair): Promise<ExchangeTrade> {
+  async checkForBuySignal(assetPair: AssetPair): Promise<boolean> {
     const {
       trades,
     } = this.session;
@@ -55,7 +57,7 @@ export class DefaultStrategy extends Strategy {
       this.parameters.maximumOpenTrades !== -1 &&
       openTrades.length >= this.parameters.maximumOpenTrades
     ) {
-      return null;
+      return false;
     }
 
     const assetPairTrades = trades.filter((exchangeTrade) => {
@@ -72,11 +74,8 @@ export class DefaultStrategy extends Strategy {
       this.parameters.maximumOpenTradesPerAssetPair !== -1 &&
       assetPairTrades.length >= this.parameters.maximumOpenTradesPerAssetPair
     ) {
-      return null;
+      return false;
     }
-
-    const assetPairPrice = this._getAssetPairPrice(assetPair);
-    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
 
     // TODO: implement minimum hourly/daily volume
 
@@ -90,19 +89,15 @@ export class DefaultStrategy extends Strategy {
       !profitPercentageSinceTrough ||
       profitPercentageSinceTrough < this.parameters.buyTroughUptrendPercentage
     ) {
-      return null;
+      return false;
     }
 
     // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
 
-    return await Manager.trader.executeBuy(
-      assetPair,
-      assetPairPriceEntryNewest.price,
-      ExchangeTradeTypeEnum.LONG
-    );
+    return true;
   }
 
-  async checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade> {
+  async checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<boolean> {
     const now = Date.now();
     const assetPairPrice = this._getAssetPairPrice(exchangeTrade.assetPair);
     const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
@@ -139,10 +134,7 @@ export class DefaultStrategy extends Strategy {
 
     if (currentProfitPercentage > this.parameters.takeProfitPercentage) {
       if (!this.parameters.trailingTakeProfitEnabled) {
-        return Manager.trader.executeSell(
-          exchangeTrade,
-          assetPairPriceEntryNewest.price
-        );
+        return true;
       }
 
       // Once we reach over this takeProfitPercentage threshold, we should set the stop loss percentage
@@ -155,17 +147,14 @@ export class DefaultStrategy extends Strategy {
         this.parameters.trailingTakeProfitEnabled &&
         slipSincePeakProfitPercentage === 0 // We are peaking right now!
       ) {
-        return null;
+        return false;
       }
 
       if (
         this.parameters.trailingTakeProfitEnabled &&
         this.parameters.trailingTakeProfitSlipPercentage < slipSincePeakProfitPercentage
       ) {
-        return Manager.trader.executeSell(
-          exchangeTrade,
-          assetPairPriceEntryNewest.price
-        );
+        return true;
       }
     }
 
@@ -174,10 +163,7 @@ export class DefaultStrategy extends Strategy {
     // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
     // so it doesn't every again fall below this value.
     if (currentProfitPercentage < exchangeTrade.triggerStopLossPercentage) {
-      return Manager.trader.executeSell(
-        exchangeTrade,
-        assetPairPriceEntryNewest.price
-      );
+      return true;
     }
 
     if (
@@ -185,10 +171,7 @@ export class DefaultStrategy extends Strategy {
       currentProfitPercentage < exchangeTrade.triggerStopLossPercentage
     ) {
       if (this.parameters.stopLossTimeoutSeconds === 0) {
-        return Manager.trader.executeSell(
-          exchangeTrade,
-          assetPairPriceEntryNewest.price
-        );
+        return true;
       }
 
       if (!exchangeTrade.triggerStopLossSellAt) {
@@ -197,10 +180,7 @@ export class DefaultStrategy extends Strategy {
 
       const stopLossTimeoutTime = this.parameters.stopLossTimeoutSeconds * 1000;
       if (now - exchangeTrade.triggerStopLossSellAt > stopLossTimeoutTime) {
-        return Manager.trader.executeSell(
-          exchangeTrade,
-          assetPairPriceEntryNewest.price
-        );
+        return true;
       }
     } else if (
       this.parameters.stopLossEnabled &&
@@ -211,7 +191,7 @@ export class DefaultStrategy extends Strategy {
       exchangeTrade.triggerStopLossSellAt = null;
     }
 
-    return null;
+    return false;
   }
 
   getSortedAssetPairs(): AssetPair[] {
