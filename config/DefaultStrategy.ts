@@ -40,7 +40,7 @@ export class DefaultStrategy extends Strategy {
     );
   }
 
-  async checkForBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
+  async processBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
     // TODO
 
     return assetPair;
