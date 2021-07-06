@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { AssetPairConverter } from '../Asset/AssetPair';
+import { AssetPairDataConverter } from '../Asset/AssetPair';
 import { Exchange } from './Exchange';
 import logger from '../../Utils/Logger';
 
@@ -24,7 +24,7 @@ export class ExchangeValidator {
 
     const exhangeAssetPairs = await exchange.getAssetPairs();
     const exhangeAssetPairsMap = new Map(exhangeAssetPairs.map((assetPair) => {
-      return [AssetPairConverter.convert(assetPair), assetPair];
+      return [AssetPairDataConverter.convert(assetPair), assetPair];
     }));
 
     // Do session asset validations

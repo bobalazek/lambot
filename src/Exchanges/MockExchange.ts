@@ -1,4 +1,4 @@
-import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
+import { AssetPair } from '../Core/Asset/AssetPair';
 import { Exchange } from '../Core/Exchange/Exchange';
 
 export class MockExchange extends Exchange {
@@ -9,8 +9,14 @@ export class MockExchange extends Exchange {
       {
         key: '',
         secret: '',
-      },
-      new AssetPairStringConverterDefault()
+      }
+    );
+  }
+
+  convertAssetPairToString(assetPair: AssetPair): string {
+    return (
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
     );
   }
 }

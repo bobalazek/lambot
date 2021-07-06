@@ -1,6 +1,4 @@
 import { Asset } from './Asset';
-import { AssetPairStringConverterInterface } from './AssetPairStringConverter';
-import { Assets } from './Assets';
 
 export interface AssetPairDataInterface {
   assetBase: Asset;
@@ -10,7 +8,6 @@ export interface AssetPairDataInterface {
 export interface AssetPairInterface extends AssetPairDataInterface {
   symbol?: string;
   getKey(): string;
-  getExchangeSymbolString(converter: AssetPairStringConverterInterface): string;
 }
 
 export class AssetPair implements AssetPairInterface {
@@ -29,15 +26,7 @@ export class AssetPair implements AssetPairInterface {
       return this.symbol;
     }
 
-    return AssetPairConverter.convert(this);
-  }
-
-  getExchangeSymbolString(converter: AssetPairStringConverterInterface): string {
-    if (this.symbol) {
-      return this.symbol;
-    }
-
-    return converter.convert(this);
+    return AssetPairDataConverter.convert(this);
   }
 
   toExport() {
@@ -57,7 +46,7 @@ export class AssetPair implements AssetPairInterface {
   }
 }
 
-export class AssetPairConverter {
+export class AssetPairDataConverter {
   static convert(assetPair: AssetPairDataInterface) {
     return (
       assetPair.assetBase.symbol +

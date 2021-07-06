@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 
 import { AssetPair } from '../Asset/AssetPair';
-import { AssetPairStringConverterInterface } from '../Asset/AssetPairStringConverter';
 import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAssetPairsMap } from './ExchangeAssetPairPrice';
@@ -25,11 +24,11 @@ export interface ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ExchangeApiCredentialsInterface;
-  assetPairConverter: AssetPairStringConverterInterface;
   accounts: ExchangeAccountsMap;
   assetPairs: ExchangeAssetPairsMap;
   session: Session;
   boot(session: Session): Promise<boolean>;
+  convertAssetPairToString(assetPair: AssetPair): string;
   getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair?: AssetPair): Promise<ExchangeOrder[]>;
   addAccountOrder(accountType: ExchangeAccountTypeEnum, order: ExchangeOrder): Promise<ExchangeOrder>;
   getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
@@ -55,7 +54,6 @@ export class Exchange implements ExchangeInterface {
   key: string;
   name: string;
   apiCredentials: ExchangeApiCredentialsInterface;
-  assetPairConverter: AssetPairStringConverterInterface;
   assetPairs: ExchangeAssetPairsMap;
   accounts: ExchangeAccountsMap;
   session: Session;
@@ -63,13 +61,11 @@ export class Exchange implements ExchangeInterface {
   constructor(
     key: string,
     name: string,
-    apiCredentials: ExchangeApiCredentialsInterface,
-    assetPairConverter: AssetPairStringConverterInterface
+    apiCredentials: ExchangeApiCredentialsInterface
   ) {
     this.key = key;
     this.name = name;
     this.apiCredentials = apiCredentials;
-    this.assetPairConverter = assetPairConverter;
     this.assetPairs = new Map();
     this.accounts = new Map();
   }
@@ -92,6 +88,10 @@ export class Exchange implements ExchangeInterface {
     await SessionManager.save(this.session);
 
     return true;
+  }
+
+  convertAssetPairToString(assetPair: AssetPair): string {
+    throw new Error('convertAssetPairToString() not implemented yet.');
   }
 
   /***** API Data fetching ******/

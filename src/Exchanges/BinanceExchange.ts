@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import chalk from 'chalk';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
-import { AssetPairStringConverterDefault } from '../Core/Asset/AssetPairStringConverter';
 import { Assets } from '../Core/Asset/Assets';
 import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
@@ -51,8 +50,7 @@ export class BinanceExchange extends Exchange {
     super(
       'binance',
       'Binance',
-      apiCredentials,
-      new AssetPairStringConverterDefault()
+      apiCredentials
     );
 
     if (!apiCredentials.key || !apiCredentials.secret) {
@@ -74,12 +72,23 @@ export class BinanceExchange extends Exchange {
     return true;
   }
 
+  convertAssetPairToString(assetPair: AssetPair): string {
+    if (assetPair.symbol) {
+      return assetPair.symbol;
+    }
+
+    return (
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
+    );
+  }
+
   /***** API Data fetching ******/
   async getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair: AssetPair = null): Promise<ExchangeOrder[]> {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
     const orders: ExchangeOrder[] = [];
-    const symbol = assetPair?.getExchangeSymbolString(this.assetPairConverter);
+    const symbol = this.convertAssetPairToString(assetPair);
     const dataOrParams = symbol
       ? {
         symbol,
@@ -146,7 +155,7 @@ export class BinanceExchange extends Exchange {
       'Adding account order ...'
     ));
 
-    const orderSymbol = order.assetPair.getExchangeSymbolString(this.assetPairConverter);
+    const orderSymbol = this.convertAssetPairToString(order.assetPair);
     const orderType = order.type;
 
     const data: any = {
@@ -362,7 +371,7 @@ export class BinanceExchange extends Exchange {
 
     const interval = BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds);
 
-    const symbol = assetPair.getExchangeSymbolString(this.assetPairConverter);
+    const symbol = this.convertAssetPairToString(assetPair);
     const dataOrParams = {
       symbol,
       interval,
