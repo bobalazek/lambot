@@ -2,6 +2,7 @@ import chalk from 'chalk';
 
 import { AssetPair } from './Asset/AssetPair';
 import { ExchangeAccountTypeEnum } from './Exchange/ExchangeAccount';
+import { ExchangeAssetPair } from './Exchange/ExchangeAssetPair';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from './Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './Exchange/ExchangeTrade';
 import { ExchangeOrderFeesTypeEnum } from './Exchange/ExchangeOrderFees';
@@ -102,14 +103,7 @@ export class Trader implements TraderInterface {
 
     await this._updateAssetPairPrices();
 
-    const processingStartTime = Date.now();
-
     await this._processTrades();
-
-    this._cleanupAssetPairPrices(
-      processingStartTime,
-      (this.session.config.assetPairPriceUpdateIntervalSeconds * 1000) / 2
-    );
   }
 
   async candlestickTick() {
@@ -273,8 +267,7 @@ export class Trader implements TraderInterface {
 
       exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
 
-      // TODO: process if we should buy
-      // TODO: execute buy/sell
+      await this._processTrades(assetPair);
     }
   }
 
@@ -289,12 +282,14 @@ export class Trader implements TraderInterface {
     });
   }
 
-  async _processTrades(): Promise<boolean> {
+  async _processTrades(assetPairOnly?: AssetPair): Promise<boolean> {
     const now = Date.now();
     const warmupPeriodTime = this.session.config.warmupPeriodSeconds * 1000;
     const warmupPeriodCountdownSeconds = Math.round((now - this.startTime - warmupPeriodTime) * -0.001);
 
-    logger.debug(`Processing trades ...`);
+    logger.debug(assetPairOnly
+        ? `Processing trades only for "${assetPairOnly.getKey()}" ...`
+        : `Processing trades ...`);
 
     if (warmupPeriodCountdownSeconds > 0) {
       logger.debug(`I am still warming up. ${warmupPeriodCountdownSeconds} seconds to go!`);
@@ -304,21 +299,40 @@ export class Trader implements TraderInterface {
 
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {
-      const shouldSell = exchangeTrade.shouldSell();
-      if (shouldSell) {
-        await this.executeSell(exchangeTrade);
+      if (
+        assetPairOnly &&
+        assetPairOnly.getKey() !== exchangeTrade.assetPair.getKey()
+      ) {
+        continue;
       }
+
+      const shouldSell = this.session.strategy.shouldSell(exchangeTrade);
+      if (!shouldSell) {
+        continue;
+      }
+
+      await this.executeSell(exchangeTrade);
     }
 
     logger.debug(`Checking for buy signals ...`);
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
+      if (
+        assetPairOnly &&
+        assetPairOnly.getKey() !== assetPair.getKey()
+      ) {
+        continue;
+      }
+
       const exchangeAssetPair = this.session.exchange.assetPairs.get(
         assetPair.getKey()
       );
-      const shouldBuy = exchangeAssetPair.shouldBuy();
-      if (shouldBuy) {
-        await this.executeBuy(assetPair, shouldBuy);
+
+      const shouldBuy = this.session.strategy.shouldBuy(exchangeAssetPair);
+      if (!shouldBuy) {
+        continue;
       }
+
+      await this.executeBuy(assetPair, shouldBuy);
     }
 
     return true;
@@ -353,22 +367,5 @@ export class Trader implements TraderInterface {
     if (openTrades.length === 0) {
       logger.debug('No open trades found yet.');
     }
-  }
-
-  _cleanupAssetPairPrices(
-    processingStartTime: number,
-    processingLimitTime: number
-  ) {
-    const processingTime = Date.now() - processingStartTime;
-
-    logger.debug(`Processing a tick took ${processingTime}ms.`);
-
-    if (processingTime < processingLimitTime) {
-      return;
-    }
-
-    this.session.exchange.assetPairs.forEach((exchangeAssetPair) => {
-      exchangeAssetPair.cleanupPriceEntries(0.5);
-    });
   }
 }

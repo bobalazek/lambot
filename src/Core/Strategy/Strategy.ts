@@ -1,6 +1,6 @@
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
-import { ExchangeTrade } from '../Exchange/ExchangeTrade';
+import { ExchangeTrade, ExchangeTradeTypeEnum } from '../Exchange/ExchangeTrade';
 import { Session } from '../Session/Session';
 import { StrategyParametersInterface } from './StrategyParameters';
 
@@ -10,6 +10,8 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(): AssetPair[];
+  shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false;
+  shouldSell(exchangeTrade: ExchangeTrade): boolean;
 }
 
 export class Strategy implements StrategyInterface {
@@ -30,6 +32,14 @@ export class Strategy implements StrategyInterface {
 
   getSortedAssetPairs(): AssetPair[] {
     throw new Error('getSortedAssetPairs() not implemented yet.');
+  }
+
+  shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {
+    return exchangeAssetPair.shouldBuy();
+  }
+
+  shouldSell(exchangeTrade: ExchangeTrade): boolean {
+    return exchangeTrade.shouldSell();
   }
 
   /***** Export/Import *****/
