@@ -89,20 +89,6 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
 
     // TODO: implement minimum hourly/daily volume
 
-    const uptrendMaximumAgeTime = strategy.parameters.buyTroughUptrendMaximumAgeSeconds * 1000;
-    const profitPercentageSinceTrough = this._getLargestTroughPercentage(
-      uptrendMaximumAgeTime
-    );
-
-    if (
-      !profitPercentageSinceTrough ||
-      profitPercentageSinceTrough < strategy.parameters.buyTroughUptrendPercentage
-    ) {
-      return false;
-    }
-
-    // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
-
     return ExchangeTradeTypeEnum.LONG;
   }
 
@@ -420,24 +406,5 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     }
 
     return string;
-  }
-
-  /***** Helpers *****/
-  _getLargestTroughPercentage(uptrendMaximumAgeTime: number): number {
-    const newestPriceEntry = this.getNewestPriceEntry();
-    const largestTroughPriceEntry = this.getLargestTroughPriceEntry(
-      uptrendMaximumAgeTime
-    );
-    if (
-      !newestPriceEntry ||
-      !largestTroughPriceEntry
-    ) {
-      return null;
-    }
-
-    return calculatePercentage(
-      parseFloat(newestPriceEntry.price),
-      parseFloat(largestTroughPriceEntry.price)
-    );
   }
 }

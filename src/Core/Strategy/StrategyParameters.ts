@@ -40,18 +40,4 @@ export interface StrategyParametersInterface {
   // relative to the CURRENT stopLossPercentage,
   // before we should increase the stop loss again?
   trailingStopLossPercentage: number;
-
-  /********* Buy Trough **********/
-  // How much percentage can the price rise after a trough, until we want to trigger a buy order?
-  // This is mostly used so we follow the trough down, and once it starts getting back up, we buy!
-  buyTroughUptrendPercentage: number;
-
-  // Relates to the setting above. What is the maximum age (in seconds) can the trough be,
-  // so we would still consider a buy?
-  // For example: In {buyTroughUptrendMaximumAgeSeconds} seconds,
-  // we expect the price to jump {buyTroughUptrendPercentage}% of profit gains
-  // so we actually but this asset. However, if session.config.warmupPeriodSeconds
-  // is set to lower than that, it will only go trough that time range,
-  // before trying to find if it can buy an asset.
-  buyTroughUptrendMaximumAgeSeconds: number;
 }

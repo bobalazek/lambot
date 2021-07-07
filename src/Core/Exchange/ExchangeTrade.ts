@@ -1,8 +1,8 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
-import { calculatePercentage } from '../../Utils/Helpers';
 import { Manager } from '../Manager';
+import { calculatePercentage } from '../../Utils/Helpers';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.

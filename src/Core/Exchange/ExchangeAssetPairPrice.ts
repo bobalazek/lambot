@@ -1,4 +1,4 @@
-import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
+import { ExchangeAssetPair } from './ExchangeAssetPair';
 
 export interface ExchangeAssetPairPriceEntryInterface {
   timestamp: number;

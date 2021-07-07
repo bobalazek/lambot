@@ -1,10 +1,13 @@
 import { AssetPair } from '../src/Core/Asset/AssetPair';
-import { ExchangeAssetPairInterface } from '../src/Core/Exchange/ExchangeAssetPair';
-import { ExchangeTrade } from '../src/Core/Exchange/ExchangeTrade';
+import { ExchangeAssetPair, ExchangeAssetPairInterface } from '../src/Core/Exchange/ExchangeAssetPair';
+import { ExchangeTrade, ExchangeTradeTypeEnum } from '../src/Core/Exchange/ExchangeTrade';
 import { Strategy } from '../src/Core/Strategy/Strategy';
 import { calculatePercentage } from '../src/Utils/Helpers';
 
 export class DefaultStrategy extends Strategy {
+  buyTroughUptrendPercentage: number;
+  buyTroughUptrendMaximumAgeSeconds: number;
+
   constructor({
     tradeAmount = '15',
     maximumOpenTrades = 10,
@@ -17,8 +20,6 @@ export class DefaultStrategy extends Strategy {
     stopLossTimeoutSeconds = 0,
     trailingStopLossEnabled = true,
     trailingStopLossPercentage = 2,
-    buyTroughUptrendPercentage = 0.1,
-    buyTroughUptrendMaximumAgeSeconds = 90,
   }) {
     super(
       'Default',
@@ -34,10 +35,11 @@ export class DefaultStrategy extends Strategy {
         stopLossTimeoutSeconds,
         trailingStopLossEnabled,
         trailingStopLossPercentage,
-        buyTroughUptrendPercentage,
-        buyTroughUptrendMaximumAgeSeconds,
       }
     );
+
+    this.buyTroughUptrendPercentage = 0.1;
+    this.buyTroughUptrendMaximumAgeSeconds = 90;
   }
 
   getSortedAssetPairs(): AssetPair[] {
@@ -45,7 +47,7 @@ export class DefaultStrategy extends Strategy {
       assetPairs,
     } = this.session;
 
-    const uptrendMaximumAgeTime = this.parameters.buyTroughUptrendMaximumAgeSeconds * 1000;
+    const uptrendMaximumAgeTime = this.buyTroughUptrendMaximumAgeSeconds * 1000;
 
     // Sort by assets that had the biggest increase since the last largest trough
     return [...assetPairs].sort((assetPairA, assetPairB) => {
@@ -68,6 +70,33 @@ export class DefaultStrategy extends Strategy {
 
       return percentageB - percentageA;
     });
+  }
+
+  shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {
+    const shouldBuy = super.shouldBuy(exchangeAssetPair);
+
+    const uptrendMaximumAgeTime = this.buyTroughUptrendMaximumAgeSeconds * 1000;
+    const profitPercentageSinceTrough = this._getLargestTroughPercentage(
+      exchangeAssetPair.assetPair,
+      uptrendMaximumAgeTime
+    );
+
+    if (
+      !profitPercentageSinceTrough ||
+      profitPercentageSinceTrough < this.buyTroughUptrendPercentage
+    ) {
+      return false;
+    }
+
+    return shouldBuy;
+  }
+
+  shouldSell(exchangeTrade: ExchangeTrade): boolean {
+    const shouldSell = super.shouldSell(exchangeTrade);
+
+    // TODO: your own logic here
+
+    return shouldSell;
   }
 
   /***** Helpers ******/

@@ -56,8 +56,6 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: this.parameters.stopLossTimeoutSeconds,
       trailingStopLossEnabled: this.parameters.trailingStopLossEnabled,
       trailingStopLossPercentage: this.parameters.trailingStopLossPercentage,
-      buyTroughUptrendPercentage: this.parameters.buyTroughUptrendPercentage,
-      buyTroughUptrendMaximumAgeSeconds: this.parameters.buyTroughUptrendMaximumAgeSeconds,
     };
 
     return {
@@ -78,8 +76,6 @@ export class Strategy implements StrategyInterface {
       stopLossTimeoutSeconds: data.parameters.stopLossTimeoutSeconds,
       trailingStopLossEnabled: data.parameters.trailingStopLossEnabled,
       trailingStopLossPercentage: data.parameters.trailingStopLossPercentage,
-      buyTroughUptrendPercentage: data.parameters.buyTroughUptrendPercentage,
-      buyTroughUptrendMaximumAgeSeconds: data.parameters.buyTroughUptrendMaximumAgeSeconds,
     };
 
     return new Strategy(this.name, parameters);
