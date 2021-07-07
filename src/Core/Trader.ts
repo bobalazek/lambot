@@ -304,23 +304,21 @@ export class Trader implements TraderInterface {
 
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {
-      if (!this.session.strategy.checkForSellSignal(exchangeTrade)) {
-        continue;
+      const shouldSell = exchangeTrade.shouldSell();
+      if (shouldSell) {
+        await this.executeSell(exchangeTrade);
       }
-
-      await this.executeSell(exchangeTrade);
     }
 
     logger.debug(`Checking for buy signals ...`);
     for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
-      if (!this.session.strategy.checkForBuySignal(assetPair)) {
-        continue;
-      }
-
-      await this.executeBuy(
-        assetPair,
-        ExchangeTradeTypeEnum.LONG
+      const exchangeAssetPair = this.session.exchange.assetPairs.get(
+        assetPair.getKey()
       );
+      const shouldBuy = exchangeAssetPair.shouldBuy();
+      if (shouldBuy) {
+        await this.executeBuy(assetPair, shouldBuy);
+      }
     }
 
     return true;

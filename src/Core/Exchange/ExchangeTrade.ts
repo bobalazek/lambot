@@ -2,6 +2,7 @@ import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 import { calculatePercentage } from '../../Utils/Helpers';
+import { Manager } from '../Manager';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
@@ -20,6 +21,7 @@ export interface ExchangeTradeInterface {
   triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
   buyOrder?: ExchangeOrderInterface;
   sellOrder?: ExchangeOrderInterface;
+  shouldSell(): boolean;
   getCurrentProfitPercentage(currentPrice: number): number;
   getProfitPercentage(): number;
 }
@@ -105,6 +107,109 @@ export class ExchangeTrade {
       sellPrice,
       buyPrice
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
+  }
+
+  shouldSell(): boolean {
+    const now = Date.now();
+    const session = Manager.session;
+    const {
+      strategy,
+    } = session;
+    const assetPairPrice = session.exchange.assetPairs.get(
+      this.assetPair.getKey()
+    );
+    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+    const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
+    const currentProfitPercentage = this.getCurrentProfitPercentage(currentAssetPairPrice);
+
+    if (
+      this.peakProfitPercentage === null ||
+      this.peakProfitPercentage < currentProfitPercentage
+    ) {
+      this.peakProfitPercentage = currentProfitPercentage;
+    }
+
+    if (
+      this.troughProfitPercentage === null ||
+      this.troughProfitPercentage > currentProfitPercentage
+    ) {
+      this.troughProfitPercentage = currentProfitPercentage;
+    }
+
+    if (this.triggerStopLossPercentage === null) {
+      this.triggerStopLossPercentage = -strategy.parameters.stopLossPercentage;
+    }
+
+    const expectedTriggerStopLossPercentage = this.peakProfitPercentage - strategy.parameters.trailingStopLossPercentage;
+    const diffStopLossPercentage = this.peakProfitPercentage - this.triggerStopLossPercentage;
+    if (
+      strategy.parameters.trailingStopLossEnabled &&
+      strategy.parameters.trailingStopLossPercentage < diffStopLossPercentage &&
+      this.triggerStopLossPercentage < expectedTriggerStopLossPercentage
+    ) {
+      this.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
+    }
+
+    if (currentProfitPercentage > strategy.parameters.takeProfitPercentage) {
+      if (!strategy.parameters.trailingTakeProfitEnabled) {
+        return true;
+      }
+
+      // Once we reach over this takeProfitPercentage threshold, we should set the stop loss percentage
+      // to that value, to prevent dipping down again when the trigger doesn't execute
+      // because of trailing take profit enabled.
+      this.triggerStopLossPercentage = strategy.parameters.takeProfitPercentage;
+
+      const slipSincePeakProfitPercentage = this.peakProfitPercentage - currentProfitPercentage;
+      if (
+        strategy.parameters.trailingTakeProfitEnabled &&
+        slipSincePeakProfitPercentage === 0 // We are peaking right now!
+      ) {
+        return false;
+      }
+
+      if (
+        strategy.parameters.trailingTakeProfitEnabled &&
+        strategy.parameters.trailingTakeProfitSlipPercentage < slipSincePeakProfitPercentage
+      ) {
+        return true;
+      }
+    }
+
+    // Just to make sure that we trigger a sell when the currentProfitPercentage is less than the trigger.
+    // This basically covers the case when we have trailingTakeProfitEnabled,
+    // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
+    // so it doesn't every again fall below this value.
+    if (currentProfitPercentage < this.triggerStopLossPercentage) {
+      return true;
+    }
+
+    if (
+      strategy.parameters.stopLossEnabled &&
+      currentProfitPercentage < this.triggerStopLossPercentage
+    ) {
+      if (strategy.parameters.stopLossTimeoutSeconds === 0) {
+        return true;
+      }
+
+      if (!this.triggerStopLossSellAt) {
+        this.triggerStopLossSellAt = now;
+      }
+
+      const stopLossTimeoutTime = strategy.parameters.stopLossTimeoutSeconds * 1000;
+      if (now - this.triggerStopLossSellAt > stopLossTimeoutTime) {
+        return true;
+      }
+    } else if (
+      strategy.parameters.stopLossEnabled &&
+      currentProfitPercentage > this.triggerStopLossPercentage &&
+      this.triggerStopLossSellAt
+    ) {
+      // We are out of the stop loss percentage loss, so let's reset the timer!
+      this.triggerStopLossSellAt = null;
+    }
+
+    return false;
   }
 
   /***** Export/Import *****/

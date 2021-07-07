@@ -1,4 +1,5 @@
 import { AssetPair } from '../Asset/AssetPair';
+import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
 import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 import { Session } from '../Session/Session';
 import { StrategyParametersInterface } from './StrategyParameters';
@@ -9,8 +10,6 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(): AssetPair[];
-  checkForBuySignal(assetPair: AssetPair): Promise<boolean>;
-  checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<boolean>;
 }
 
 export class Strategy implements StrategyInterface {
@@ -31,14 +30,6 @@ export class Strategy implements StrategyInterface {
 
   getSortedAssetPairs(): AssetPair[] {
     throw new Error('getSortedAssetPairs() not implemented yet.');
-  }
-
-  async checkForBuySignal(assetPair: AssetPair): Promise<boolean> {
-    throw new Error('checkForBuySignal() not implemented yet.');
-  }
-
-  async checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<boolean> {
-    throw new Error('checkForSellSignal() not implemented yet.');
   }
 
   /***** Export/Import *****/

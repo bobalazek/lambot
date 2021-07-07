@@ -7,16 +7,15 @@ import {
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
+import { ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './ExchangeTrade';
+import { Manager } from '../Manager';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  shouldBuyLong: boolean;
-  shouldBuyShort: boolean;
-  shouldSellLong: boolean;
-  shouldSellShort: boolean;
   metadata: any;
+  shouldBuy(): ExchangeTradeTypeEnum | false;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
   addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
@@ -39,10 +38,6 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  shouldBuyLong: boolean;
-  shouldBuyShort: boolean;
-  shouldSellLong: boolean;
-  shouldSellShort: boolean;
   metadata: any;
 
   private _candlesticks: ExchangeAssetPairCandlestickInterface[];
@@ -53,15 +48,62 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
     this.indicators = new Map();
-    this.shouldBuyLong = false;
-    this.shouldBuyShort = false;
-    this.shouldSellLong = false;
-    this.shouldSellShort = false;
 
     this._candlesticks = [];
     this._priceEntries = [];
     this._priceEntriesPeakIndexes = [];
     this._priceEntriesTroughIndexes = [];
+  }
+
+  shouldBuy(): ExchangeTradeTypeEnum | false {
+    const session = Manager.session;
+    const {
+      strategy,
+      trades,
+    } = session;
+
+    const openTrades = Manager.session.getOpenTrades();
+    if (
+      strategy.parameters.maximumOpenTrades !== -1 &&
+      openTrades.length >= strategy.parameters.maximumOpenTrades
+    ) {
+      return false;
+    }
+
+    const assetPairTrades = trades.filter((exchangeTrade) => {
+      return (
+        exchangeTrade.assetPair.getKey() === this.assetPair.getKey() &&
+        (
+          exchangeTrade.status === ExchangeTradeStatusEnum.OPEN ||
+          exchangeTrade.status === ExchangeTradeStatusEnum.BUY_PENDING
+        )
+      );
+    });
+
+    if (
+      strategy.parameters.maximumOpenTradesPerAssetPair !== -1 &&
+      assetPairTrades.length >= strategy.parameters.maximumOpenTradesPerAssetPair
+    ) {
+      return false;
+    }
+
+    // TODO: implement minimum hourly/daily volume
+
+    const uptrendMaximumAgeTime = strategy.parameters.buyTroughUptrendMaximumAgeSeconds * 1000;
+    const profitPercentageSinceTrough = this._getLargestTroughPercentage(
+      uptrendMaximumAgeTime
+    );
+
+    if (
+      !profitPercentageSinceTrough ||
+      profitPercentageSinceTrough < strategy.parameters.buyTroughUptrendPercentage
+    ) {
+      return false;
+    }
+
+    // TODO: DO NOT BUY IF WE ARE CURRENTLY IN A DOWNTREND!
+
+    return ExchangeTradeTypeEnum.LONG;
   }
 
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[] {
@@ -378,5 +420,24 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     }
 
     return string;
+  }
+
+  /***** Helpers *****/
+  _getLargestTroughPercentage(uptrendMaximumAgeTime: number): number {
+    const newestPriceEntry = this.getNewestPriceEntry();
+    const largestTroughPriceEntry = this.getLargestTroughPriceEntry(
+      uptrendMaximumAgeTime
+    );
+    if (
+      !newestPriceEntry ||
+      !largestTroughPriceEntry
+    ) {
+      return null;
+    }
+
+    return calculatePercentage(
+      parseFloat(newestPriceEntry.price),
+      parseFloat(largestTroughPriceEntry.price)
+    );
   }
 }

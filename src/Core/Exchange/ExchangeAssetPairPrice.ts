@@ -1,4 +1,4 @@
-import { ExchangeAssetPairInterface } from './ExchangeAssetPair';
+import { ExchangeAssetPair, ExchangeAssetPairInterface } from './ExchangeAssetPair';
 
 export interface ExchangeAssetPairPriceEntryInterface {
   timestamp: number;
@@ -22,4 +22,4 @@ export const ExchangeAssetPairTrendIconMap = new Map([
   [ExchangeAssetPairPriceTrendStatusEnum.SIDEWAYS_TREND, '🔵'],
 ]);
 
-export type ExchangeAssetPairsMap = Map<string, ExchangeAssetPairInterface>;
+export type ExchangeAssetPairsMap = Map<string, ExchangeAssetPair>;
