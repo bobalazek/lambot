@@ -273,7 +273,7 @@ export class Trader implements TraderInterface {
 
       exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
 
-      this.session.strategy.processBuyAndSellSignals(assetPair);
+      // TODO: process if we should buy
       // TODO: execute buy/sell
     }
   }
@@ -301,16 +301,6 @@ export class Trader implements TraderInterface {
 
       return false;
     }
-
-    /*
-    // TODO: implement
-    for (const assetPair of this.session.strategy.getSortedAssetPairs()) {
-      await this.session.strategy.processBuyAndSellSignals(assetPair);
-    }
-
-    // TODO: go through existing trades first and see if we can sell any
-    // then go through assets and see if we can buy any.
-    */
 
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {

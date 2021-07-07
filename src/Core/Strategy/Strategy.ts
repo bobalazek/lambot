@@ -9,7 +9,6 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(): AssetPair[];
-  processBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair>;
   checkForBuySignal(assetPair: AssetPair): Promise<boolean>;
   checkForSellSignal(exchangeTrade: ExchangeTrade): Promise<boolean>;
 }
@@ -32,10 +31,6 @@ export class Strategy implements StrategyInterface {
 
   getSortedAssetPairs(): AssetPair[] {
     throw new Error('getSortedAssetPairs() not implemented yet.');
-  }
-
-  async processBuyAndSellSignals(assetPair: AssetPair): Promise<AssetPair> {
-    throw new Error('processBuyAndSellSignals() not implemented yet.');
   }
 
   async checkForBuySignal(assetPair: AssetPair): Promise<boolean> {
