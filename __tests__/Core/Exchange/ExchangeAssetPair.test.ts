@@ -3,10 +3,10 @@
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
 import { ExchangeAssetPair } from '../../../src/Core/Exchange/ExchangeAssetPair';
-import {
-  entries,
-  entriesPriceTexts,
-} from '../../__fixtures__/ExchangeAssetPairPriceFixtures';
+import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
+import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../../src/Core/Exchange/ExchangeTrade';
+import { entries, entriesPriceTexts, } from '../../__fixtures__/ExchangeAssetPairPriceFixtures';
+import { createMockSession } from '../../__fixtures__/SessionFixtures';
 
 describe('ExchangeAssetPair', () => {
   let exchangeAssetPair: ExchangeAssetPair;
@@ -130,5 +130,28 @@ describe('ExchangeAssetPair', () => {
     exchangeAssetPair.addPriceEntry({ timestamp: 21000, price: '1.5' });
     exchangeAssetPair.cleanupPriceEntries(0.5);
     expect(exchangeAssetPair.getPriceEntries()).toHaveLength(5);
+  });
+
+  it('should correctly return the trade type or boolean for shouldBuy', () => {
+    const session = createMockSession(
+      ExchangesFactory.get(ExchangesEnum.MOCK)
+    );
+    const mockTrade = new ExchangeTrade(
+      'MOCK_TRADE_ID',
+      Assets.USDT,
+      new AssetPair(Assets.USDT, Assets.BTC),
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.OPEN
+    );
+
+    // Without any trades, it should work!
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(ExchangeTradeTypeEnum.LONG);
+
+    session.trades.push(mockTrade);
+
+    // Now that we got one trade already, we do not allow any more for this pair!
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(false);
+
+    // TODO
   });
 });

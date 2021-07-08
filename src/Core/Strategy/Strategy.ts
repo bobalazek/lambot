@@ -31,15 +31,15 @@ export class Strategy implements StrategyInterface {
   }
 
   getSortedAssetPairs(): AssetPair[] {
-    throw new Error('getSortedAssetPairs() not implemented yet.');
+    return this.session.assetPairs;
   }
 
   shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {
-    return exchangeAssetPair.shouldBuy();
+    return exchangeAssetPair.shouldBuy(this.session);
   }
 
   shouldSell(exchangeTrade: ExchangeTrade): boolean {
-    return exchangeTrade.shouldSell();
+    return exchangeTrade.shouldSell(this.session);
   }
 
   /***** Export/Import *****/

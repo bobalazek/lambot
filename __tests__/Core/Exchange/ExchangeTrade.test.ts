@@ -12,7 +12,7 @@ describe('ExchangeTrade', () => {
   it('should return the correct profit percentage correctly', () => {
     // Long
     const exchangeTrade = new ExchangeTrade(
-      'testTrade123',
+      'MOCK_TRADE',
       Assets.USDT,
       new AssetPair(Assets.BTC, Assets.USDT),
       ExchangeTradeTypeEnum.LONG,

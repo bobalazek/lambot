@@ -73,9 +73,9 @@ describe('Trader', () => {
 
     const sortedAssetPairs = session.strategy.getSortedAssetPairs();
 
-    expect(sortedAssetPairs[0].assetBase).toBe(Assets.BCH);
-    expect(sortedAssetPairs[1].assetBase).toBe(Assets.ETH);
-    expect(sortedAssetPairs[2].assetBase).toBe(Assets.BTC);
-    expect(sortedAssetPairs[3].assetBase).toBe(Assets.BNB);
+    expect(sortedAssetPairs[0].assetBase).toBe(Assets.ETH);
+    expect(sortedAssetPairs[1].assetBase).toBe(Assets.BTC);
+    expect(sortedAssetPairs[2].assetBase).toBe(Assets.BNB);
+    expect(sortedAssetPairs[3].assetBase).toBe(Assets.BCH);
   });
 });

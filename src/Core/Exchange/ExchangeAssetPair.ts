@@ -8,14 +8,14 @@ import {
 } from './ExchangeAssetPairPrice';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
 import { ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './ExchangeTrade';
-import { Manager } from '../Manager';
+import { Session } from '../Session/Session';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
   metadata: any;
-  shouldBuy(): ExchangeTradeTypeEnum | false;
+  shouldBuy(session: Session): ExchangeTradeTypeEnum | false;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
   addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
@@ -55,14 +55,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this._priceEntriesTroughIndexes = [];
   }
 
-  shouldBuy(): ExchangeTradeTypeEnum | false {
-    const session = Manager.session;
+  shouldBuy(session: Session): ExchangeTradeTypeEnum | false {
     const {
       strategy,
       trades,
     } = session;
 
-    const openTrades = Manager.session.getOpenTrades();
+    const openTrades = session.getOpenTrades();
     if (
       strategy.parameters.maximumOpenTrades !== -1 &&
       openTrades.length >= strategy.parameters.maximumOpenTrades
@@ -88,6 +87,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     }
 
     // TODO: implement minimum hourly/daily volume
+    // TODO: implement short
 
     return ExchangeTradeTypeEnum.LONG;
   }

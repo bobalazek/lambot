@@ -1,8 +1,8 @@
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
-import { Manager } from '../Manager';
 import { calculatePercentage } from '../../Utils/Helpers';
+import { Session } from '../Session/Session';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
@@ -109,9 +109,8 @@ export class ExchangeTrade {
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
-  shouldSell(): boolean {
+  shouldSell(session: Session): boolean {
     const now = Date.now();
-    const session = Manager.session;
     const {
       strategy,
     } = session;

@@ -1,6 +1,11 @@
 import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
+import { Exchange } from '../../src/Core/Exchange/Exchange';
+import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../src/Core/Exchange/ExchangeTrade';
+import { Session, SessionTradingTypeEnum } from '../../src/Core/Session/Session';
+import { SessionConfig } from '../../src/Core/Session/SessionConfig';
+import { Strategy } from '../../src/Core/Strategy/Strategy';
 
 const exchangeTrades: ExchangeTrade[] = [];
 [
@@ -62,7 +67,44 @@ const exchangeTrades: ExchangeTrade[] = [];
   }
 
   exchangeTrades.push(exchangeTrade);
-})
+});
+
+export const createMockSession = (exchange: Exchange) => {
+  const baseAsset = Assets.USDT;
+  return new Session(
+    'MOCK_SESSION',
+    exchange,
+    new SessionConfig({
+      memoryUsageMonitoringIntervalSeconds: 0,
+      webServerApiEnabled: false,
+    }),
+    baseAsset,
+    [
+      new AssetPair(Assets.ETH, baseAsset),
+      new AssetPair(Assets.BTC, baseAsset),
+      new AssetPair(Assets.BNB, baseAsset),
+      new AssetPair(Assets.BCH, baseAsset),
+    ],
+    new Strategy('MOCK_STRATEGY', {
+      tradeAmount: '15',
+      maximumOpenTrades: 3,
+      maximumOpenTradesPerAssetPair: 1,
+      takeProfitPercentage: 2,
+      trailingTakeProfitEnabled: true,
+      trailingTakeProfitSlipPercentage: 0.1,
+      stopLossEnabled: true,
+      stopLossPercentage: 2,
+      stopLossTimeoutSeconds: 0,
+      trailingStopLossEnabled: true,
+      trailingStopLossPercentage: 2,
+    }),
+    [
+      SessionTradingTypeEnum.SPOT,
+    ],
+    ExchangeOrderTypeEnum.MARKET
+  );
+}
+
 
 export {
   exchangeTrades,
