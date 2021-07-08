@@ -35,7 +35,14 @@ export class Strategy implements StrategyInterface {
   }
 
   shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {
-    return exchangeAssetPair.shouldBuy(this.session);
+    const shouldBuy = exchangeAssetPair.shouldBuy(this.session);
+    if (shouldBuy) {
+      return ExchangeTradeTypeEnum.LONG;
+    }
+
+    // TODO: also implement short?
+
+    return false;
   }
 
   shouldSell(exchangeTrade: ExchangeTrade): boolean {

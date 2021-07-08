@@ -101,7 +101,10 @@ export const createMockSession = (exchange: Exchange) => {
     [
       SessionTradingTypeEnum.SPOT,
     ],
-    ExchangeOrderTypeEnum.MARKET
+    {
+      buy: ExchangeOrderTypeEnum.MARKET,
+      sell: ExchangeOrderTypeEnum.MARKET,
+    }
   );
 }
 

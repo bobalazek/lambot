@@ -18,7 +18,7 @@ export interface SessionInterface {
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
   tradingTypes: SessionTradingTypeEnum[];
-  orderType: ExchangeOrderTypeEnum;
+  orderTypes: SessionOrderTypes;
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
@@ -44,6 +44,11 @@ export enum SessionStatusEnum {
   ENDED = 'ENDED',
 }
 
+export type SessionOrderTypes = {
+  buy: ExchangeOrderTypeEnum,
+  sell: ExchangeOrderTypeEnum,
+}
+
 export class Session implements SessionInterface {
   id: string;
   exchange: Exchange;
@@ -52,7 +57,7 @@ export class Session implements SessionInterface {
   assetPairs: AssetPair[];
   strategy: Strategy;
   tradingTypes: SessionTradingTypeEnum[];
-  orderType: ExchangeOrderTypeEnum;
+  orderTypes: SessionOrderTypes;
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
@@ -68,7 +73,7 @@ export class Session implements SessionInterface {
     assetPairs: AssetPair[],
     strategy: Strategy,
     tradingTypes: SessionTradingTypeEnum[],
-    orderType: ExchangeOrderTypeEnum
+    orderTypes: SessionOrderTypes
   ) {
     this.id = id;
     this.exchange = exchange;
@@ -77,7 +82,7 @@ export class Session implements SessionInterface {
     this.assetPairs = assetPairs;
     this.strategy = strategy;
     this.tradingTypes = tradingTypes;
-    this.orderType = orderType;
+    this.orderTypes = orderTypes;
 
     this.trades = [];
     this.status = SessionStatusEnum.STARTED;
@@ -145,7 +150,7 @@ export class Session implements SessionInterface {
       }),
       strategy: this.strategy.toExport(),
       tradingTypes: this.tradingTypes,
-      orderType: this.orderType,
+      orderTypes: this.orderTypes,
       trades: this.trades.map((trade) => {
         return trade.toExport();
       }),

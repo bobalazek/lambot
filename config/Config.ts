@@ -30,7 +30,10 @@ const sessionStrategy = new DefaultStrategy({});
 const sessionTradingTypes = [
   SessionTradingTypeEnum.SPOT,
 ];
-const sessionOrderType = ExchangeOrderTypeEnum.MARKET;
+const sessionOrderTypes = {
+  buy: ExchangeOrderTypeEnum.MARKET,
+  sell: ExchangeOrderTypeEnum.MARKET,
+};
 
 const config: ConfigInterface = {
   sessionConfig,
@@ -39,7 +42,7 @@ const config: ConfigInterface = {
   sessionAssetPairs,
   sessionStrategy,
   sessionTradingTypes,
-  sessionOrderType,
+  sessionOrderTypes,
 };
 
 export default config;

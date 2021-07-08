@@ -7,7 +7,7 @@ import {
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
-import { ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './ExchangeTrade';
+import { ExchangeTradeStatusEnum } from './ExchangeTrade';
 import { Session } from '../Session/Session';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
@@ -15,7 +15,7 @@ export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
   metadata: any;
-  shouldBuy(session: Session): ExchangeTradeTypeEnum | false;
+  shouldBuy(session: Session): boolean;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
   getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
   addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
@@ -55,7 +55,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     this._priceEntriesTroughIndexes = [];
   }
 
-  shouldBuy(session: Session): ExchangeTradeTypeEnum | false {
+  shouldBuy(session: Session): boolean {
     const {
       strategy,
       trades,
@@ -87,9 +87,8 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     }
 
     // TODO: implement minimum hourly/daily volume
-    // TODO: implement short
 
-    return ExchangeTradeTypeEnum.LONG;
+    return true
   }
 
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[] {

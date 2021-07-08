@@ -34,7 +34,7 @@ const sessionId = programOptions.session;
     config.sessionAssetPairs,
     config.sessionStrategy,
     config.sessionTradingTypes,
-    config.sessionOrderType
+    config.sessionOrderTypes
   );
 
   await Manager.boot(session);

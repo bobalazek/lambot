@@ -145,7 +145,7 @@ describe('ExchangeAssetPair', () => {
     );
 
     // Without any trades, it should work!
-    expect(exchangeAssetPair.shouldBuy(session)).toBe(ExchangeTradeTypeEnum.LONG);
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
 
     session.trades.push(mockTrade);
 

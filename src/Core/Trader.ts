@@ -2,7 +2,6 @@ import chalk from 'chalk';
 
 import { AssetPair } from './Asset/AssetPair';
 import { ExchangeAccountTypeEnum } from './Exchange/ExchangeAccount';
-import { ExchangeAssetPair } from './Exchange/ExchangeAssetPair';
 import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from './Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './Exchange/ExchangeTrade';
 import { ExchangeOrderFeesTypeEnum } from './Exchange/ExchangeOrderFees';
@@ -144,7 +143,7 @@ export class Trader implements TraderInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       assetPair,
       this.session.strategy.parameters.tradeAmount,
-      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
+      this.session.orderTypes.buy === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
         : ExchangeOrderFeesTypeEnum.TAKER,
       tradeType
@@ -197,7 +196,7 @@ export class Trader implements TraderInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       exchangeTrade.assetPair,
       this.session.strategy.parameters.tradeAmount,
-      this.session.orderType === ExchangeOrderTypeEnum.LIMIT
+      this.session.orderTypes.sell === ExchangeOrderTypeEnum.LIMIT
         ? ExchangeOrderFeesTypeEnum.MAKER
         : ExchangeOrderFeesTypeEnum.TAKER,
       exchangeTrade.type
@@ -271,7 +270,7 @@ export class Trader implements TraderInterface {
     }
   }
 
-  _printAssetPairPriceUpdates(now: number) {
+  _printAssetPairPriceUpdates() {
     logger.info(chalk.bold('Asset pair price updates:'));
     this.session.exchange.assetPairs.forEach((exchangeAssetPairPrice, key) => {
       logger.info(

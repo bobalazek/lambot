@@ -5,8 +5,7 @@ import chalk from 'chalk';
 import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangesEnum, ExchangesFactory } from '../Exchange/ExchangesFactory';
-import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
-import { Session, SessionTradingTypeEnum } from './Session';
+import { Session, SessionOrderTypes, SessionTradingTypeEnum } from './Session';
 import { SessionConfig } from './SessionConfig';
 import { Strategy } from '../Strategy/Strategy';
 import { Manager } from '../Manager';
@@ -62,7 +61,7 @@ export class SessionManager {
     assetPairs: AssetPair[],
     strategy: Strategy,
     tradingTypes: SessionTradingTypeEnum[],
-    orderType: ExchangeOrderTypeEnum
+    orderTypes: SessionOrderTypes
   ): Promise<Session> {
     logger.info(chalk.cyan(`Creating a new session with ID ${id} ...`));
 
@@ -75,7 +74,7 @@ export class SessionManager {
       assetPairs,
       strategy,
       tradingTypes,
-      orderType
+      orderTypes
     );
 
     return session;
@@ -89,7 +88,7 @@ export class SessionManager {
     assetPairs: AssetPair[],
     strategy: Strategy,
     tradingTypes: SessionTradingTypeEnum[],
-    orderType: ExchangeOrderTypeEnum
+    orderTypes: SessionOrderTypes
   ): Promise<Session> {
     const sessionFilePath = this.getPathById(id);
     if (fs.existsSync(sessionFilePath)) {
@@ -148,7 +147,7 @@ export class SessionManager {
       assetPairs,
       strategy,
       tradingTypes,
-      orderType
+      orderTypes
     );
   }
 
