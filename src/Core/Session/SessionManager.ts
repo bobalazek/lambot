@@ -60,8 +60,8 @@ export class SessionManager {
     asset: Asset,
     assetPairs: AssetPair[],
     strategy: Strategy,
-    tradingTypes: SessionTradingTypeEnum[],
-    orderTypes: SessionOrderTypes
+    orderTypes: SessionOrderTypes,
+    tradingTypes: SessionTradingTypeEnum[]
   ): Promise<Session> {
     logger.info(chalk.cyan(`Creating a new session with ID ${id} ...`));
 
@@ -73,8 +73,8 @@ export class SessionManager {
       asset,
       assetPairs,
       strategy,
-      tradingTypes,
-      orderTypes
+      orderTypes,
+      tradingTypes
     );
 
     return session;
@@ -87,8 +87,8 @@ export class SessionManager {
     asset: Asset,
     assetPairs: AssetPair[],
     strategy: Strategy,
-    tradingTypes: SessionTradingTypeEnum[],
-    orderTypes: SessionOrderTypes
+    orderTypes: SessionOrderTypes,
+    tradingTypes: SessionTradingTypeEnum[]
   ): Promise<Session> {
     const sessionFilePath = this.getPathById(id);
     if (fs.existsSync(sessionFilePath)) {
@@ -146,8 +146,8 @@ export class SessionManager {
       asset,
       assetPairs,
       strategy,
-      tradingTypes,
-      orderTypes
+      orderTypes,
+      tradingTypes
     );
   }
 

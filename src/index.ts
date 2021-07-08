@@ -22,7 +22,8 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
-  // Important! Must be set BEFORE session loading, because inside the session manager,
+  // Important!
+  // This MUST be set BEFORE session loading, because inside the session manager,
   // we use that variable to determine the file name.
   Manager.isTestMode = isTestMode;
 
@@ -33,8 +34,8 @@ const sessionId = programOptions.session;
     config.sessionAsset,
     config.sessionAssetPairs,
     config.sessionStrategy,
+    config.sessionOrderTypes,
     config.sessionTradingTypes,
-    config.sessionOrderTypes
   );
 
   await Manager.boot(session);

@@ -137,7 +137,7 @@ export class Trader implements TraderInterface {
       ExchangeOrderSideEnum.BUY,
       this.session.strategy.parameters.tradeAmount,
       assetPairPriceEntryNewest.price,
-      ExchangeOrderTypeEnum.MARKET,
+      this.session.orderTypes.buy,
       accountType
     );
     const orderFees = await this.session.exchange.getAssetFees(
@@ -190,7 +190,7 @@ export class Trader implements TraderInterface {
       ExchangeOrderSideEnum.SELL,
       exchangeTrade.amount,
       assetPairPriceEntryNewest.price,
-      ExchangeOrderTypeEnum.MARKET,
+      this.session.orderTypes.sell,
       accountType
     );
     const orderFees = await this.session.exchange.getAssetFees(

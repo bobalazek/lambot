@@ -98,13 +98,13 @@ export const createMockSession = (exchange: Exchange) => {
       trailingStopLossEnabled: true,
       trailingStopLossPercentage: 2,
     }),
-    [
-      SessionTradingTypeEnum.SPOT,
-    ],
     {
       buy: ExchangeOrderTypeEnum.MARKET,
       sell: ExchangeOrderTypeEnum.MARKET,
-    }
+    },
+    [
+      SessionTradingTypeEnum.SPOT,
+    ]
   );
 }
 

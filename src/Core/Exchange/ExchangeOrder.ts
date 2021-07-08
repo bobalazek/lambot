@@ -44,8 +44,8 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     side: ExchangeOrderSideEnum,
     amount: string,
     price: string = null,
-    type: ExchangeOrderTypeEnum = ExchangeOrderTypeEnum.MARKET,
-    accountType: ExchangeAccountTypeEnum = ExchangeAccountTypeEnum.SPOT,
+    type: ExchangeOrderTypeEnum,
+    accountType: ExchangeAccountTypeEnum,
     exchangeResponse: unknown = null
   ) {
     this.id = id;

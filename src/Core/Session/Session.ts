@@ -17,8 +17,8 @@ export interface SessionInterface {
   asset: Asset; // What is the default asset you want to trade in?
   assetPairs: AssetPair[]; // With which pairs do we want to trade? BTC_USDT, BTC_ETH, ...
   strategy: Strategy;
-  tradingTypes: SessionTradingTypeEnum[];
   orderTypes: SessionOrderTypes;
+  tradingTypes: SessionTradingTypeEnum[];
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
@@ -56,8 +56,8 @@ export class Session implements SessionInterface {
   asset: Asset;
   assetPairs: AssetPair[];
   strategy: Strategy;
-  tradingTypes: SessionTradingTypeEnum[];
   orderTypes: SessionOrderTypes;
+  tradingTypes: SessionTradingTypeEnum[];
   trades: ExchangeTrade[];
   status: SessionStatusEnum;
   createdAt: number;
@@ -72,8 +72,8 @@ export class Session implements SessionInterface {
     asset: Asset,
     assetPairs: AssetPair[],
     strategy: Strategy,
-    tradingTypes: SessionTradingTypeEnum[],
-    orderTypes: SessionOrderTypes
+    orderTypes: SessionOrderTypes,
+    tradingTypes: SessionTradingTypeEnum[]
   ) {
     this.id = id;
     this.exchange = exchange;
@@ -81,8 +81,8 @@ export class Session implements SessionInterface {
     this.asset = asset;
     this.assetPairs = assetPairs;
     this.strategy = strategy;
-    this.tradingTypes = tradingTypes;
     this.orderTypes = orderTypes;
+    this.tradingTypes = tradingTypes;
 
     this.trades = [];
     this.status = SessionStatusEnum.STARTED;
@@ -149,8 +149,8 @@ export class Session implements SessionInterface {
         return assetPair.toExport();
       }),
       strategy: this.strategy.toExport(),
-      tradingTypes: this.tradingTypes,
       orderTypes: this.orderTypes,
+      tradingTypes: this.tradingTypes,
       trades: this.trades.map((trade) => {
         return trade.toExport();
       }),
@@ -178,8 +178,8 @@ export class Session implements SessionInterface {
         return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(sessionData.strategy),
-      sessionData.tradingTypes,
-      sessionData.orderType
+      sessionData.orderType,
+      sessionData.tradingTypes
     );
 
     if (typeof sessionData.trades !== 'undefined') {
