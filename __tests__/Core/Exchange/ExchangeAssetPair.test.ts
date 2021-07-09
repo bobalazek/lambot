@@ -136,22 +136,52 @@ describe('ExchangeAssetPair', () => {
     const session = createMockSession(
       ExchangesFactory.get(ExchangesEnum.MOCK)
     );
-    const mockTrade = new ExchangeTrade(
+
+    // Without any trades, it should work!
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
+
+    session.trades.push(new ExchangeTrade(
       'MOCK_TRADE_ID',
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
       ExchangeTradeStatusEnum.OPEN
-    );
-
-    // Without any trades, it should work!
-    expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
-
-    session.trades.push(mockTrade);
+    ));
 
     // Now that we got one trade already, we do not allow any more for this pair!
     expect(exchangeAssetPair.shouldBuy(session)).toBe(false);
 
-    // TODO
+    // Reset the trades, so we can check if allow 3 unique asset pairs (as specified by the session strategy config)
+    session.trades = [];
+
+    session.trades.push(new ExchangeTrade(
+      'MOCK_TRADE_ID_2',
+      Assets.USDT,
+      new AssetPair(Assets.USDT, Assets.ETH),
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.OPEN
+    ));
+
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
+
+    session.trades.push(new ExchangeTrade(
+      'MOCK_TRADE_ID_3',
+      Assets.USDT,
+      new AssetPair(Assets.USDT, Assets.BCH),
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.OPEN
+    ));
+
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
+
+    session.trades.push(new ExchangeTrade(
+      'MOCK_TRADE_ID_4',
+      Assets.USDT,
+      new AssetPair(Assets.USDT, Assets.ETC),
+      ExchangeTradeTypeEnum.LONG,
+      ExchangeTradeStatusEnum.OPEN
+    ));
+
+    expect(exchangeAssetPair.shouldBuy(session)).toBe(false);
   });
 });
