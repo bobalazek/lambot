@@ -21,7 +21,8 @@ export interface ExchangeTradeInterface {
   triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
   buyOrder?: ExchangeOrderInterface;
   sellOrder?: ExchangeOrderInterface;
-  shouldSell(): boolean;
+  prepareData(): void;
+  shouldSell(session: Session, prepareData: boolean): boolean;
   getCurrentProfitPercentage(currentPrice: number): number;
   getProfitPercentage(): number;
 }
@@ -78,48 +79,26 @@ export class ExchangeTrade {
     this.triggerStopLossSellAt = null;
   }
 
-  /**
-   * Gets the current profit, relating to the current price we provide it.
-   */
-  getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
-    const buyPrice = includingFees
-      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
-      : this.buyPrice;
-
-    return calculatePercentage(
-      currentPrice,
-      buyPrice
-    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
-  }
-
-  /**
-   * Gets the final profit of this trade - must be called after the sellPrice is set to make sense.
-   */
-  getProfitPercentage(includingFees: boolean = false): number {
-    const sellPrice = includingFees
-      ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)
-      : this.sellPrice;
-    const buyPrice = includingFees
-      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
-      : this.buyPrice;
-
-    return calculatePercentage(
-      sellPrice,
-      buyPrice
-    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
-  }
-
-  shouldSell(session: Session): boolean {
+  prepareData(session: Session) {
     const now = Date.now();
     const {
       strategy,
     } = session;
-    const assetPairPrice = session.exchange.assetPairs.get(
+    const exchangeAssetPair = session.exchange.assetPairs.get(
       this.assetPair.getKey()
     );
-    const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
-    const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
-    const currentProfitPercentage = this.getCurrentProfitPercentage(currentAssetPairPrice);
+    if (!exchangeAssetPair) {
+      return;
+    }
+
+    const exchangeAssetPairEntryNewest = exchangeAssetPair.getNewestPriceEntry();
+    if (!exchangeAssetPairEntryNewest) {
+      return;
+    }
+
+    const currentProfitPercentage = this.getCurrentProfitPercentage(
+      parseFloat(exchangeAssetPairEntryNewest.price)
+    );
 
     if (
       this.peakProfitPercentage === null ||
@@ -147,6 +126,46 @@ export class ExchangeTrade {
       this.triggerStopLossPercentage < expectedTriggerStopLossPercentage
     ) {
       this.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
+    }
+
+    if (
+      strategy.parameters.stopLossEnabled &&
+      currentProfitPercentage < this.triggerStopLossPercentage &&
+      !this.triggerStopLossSellAt
+    ) {
+      this.triggerStopLossSellAt = now;
+    } else if (
+      strategy.parameters.stopLossEnabled &&
+      currentProfitPercentage > this.triggerStopLossPercentage &&
+      this.triggerStopLossSellAt
+    ) {
+      this.triggerStopLossSellAt = null;
+    }
+  }
+
+  shouldSell(session: Session, prepareData: boolean = true): boolean {
+    const now = Date.now();
+    const {
+      strategy,
+    } = session;
+    const exchangeAssetPair = session.exchange.assetPairs.get(
+      this.assetPair.getKey()
+    );
+    if (!exchangeAssetPair) {
+      return false;
+    }
+
+    const exchangeAssetPairEntryNewest = exchangeAssetPair.getNewestPriceEntry();
+    if (!exchangeAssetPairEntryNewest) {
+      return false;
+    }
+
+    const currentProfitPercentage = this.getCurrentProfitPercentage(
+      parseFloat(exchangeAssetPairEntryNewest.price)
+    );
+
+    if (prepareData) {
+      this.prepareData(session);
     }
 
     if (currentProfitPercentage > strategy.parameters.takeProfitPercentage) {
@@ -191,24 +210,44 @@ export class ExchangeTrade {
         return true;
       }
 
-      if (!this.triggerStopLossSellAt) {
-        this.triggerStopLossSellAt = now;
-      }
-
       const stopLossTimeoutTime = strategy.parameters.stopLossTimeoutSeconds * 1000;
       if (now - this.triggerStopLossSellAt > stopLossTimeoutTime) {
         return true;
       }
-    } else if (
-      strategy.parameters.stopLossEnabled &&
-      currentProfitPercentage > this.triggerStopLossPercentage &&
-      this.triggerStopLossSellAt
-    ) {
-      // We are out of the stop loss percentage loss, so let's reset the timer!
-      this.triggerStopLossSellAt = null;
     }
 
     return false;
+  }
+
+  /**
+   * Gets the current profit, relating to the current price we provide it.
+   */
+  getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
+    const buyPrice = includingFees
+      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
+      : this.buyPrice;
+
+    return calculatePercentage(
+      currentPrice,
+      buyPrice
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
+  }
+
+  /**
+   * Gets the final profit of this trade - must be called after the sellPrice is set to make sense.
+   */
+  getProfitPercentage(includingFees: boolean = false): number {
+    const sellPrice = includingFees
+      ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)
+      : this.sellPrice;
+    const buyPrice = includingFees
+      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
+      : this.buyPrice;
+
+    return calculatePercentage(
+      sellPrice,
+      buyPrice
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
   /***** Export/Import *****/

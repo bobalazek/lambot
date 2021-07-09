@@ -132,7 +132,7 @@ describe('ExchangeAssetPair', () => {
     expect(exchangeAssetPair.getPriceEntries()).toHaveLength(5);
   });
 
-  it('should correctly return the trade type or boolean for shouldBuy', () => {
+  it('should correctly return shouldBuy', () => {
     const session = createMockSession(
       ExchangesFactory.get(ExchangesEnum.MOCK)
     );

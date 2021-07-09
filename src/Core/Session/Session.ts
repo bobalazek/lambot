@@ -28,7 +28,7 @@ export interface SessionInterface {
   getOpenTrades(): ExchangeTrade[];
   getClosedTrades(): ExchangeTrade[];
   getAssetPairs(): Set<string>;
-  addAssetPair(assetPair: AssetPair): AssetPair;
+  addAssetPair(assetPair: AssetPair): ExchangeAssetPair;
   getKey(): string;
 }
 
@@ -114,12 +114,13 @@ export class Session implements SessionInterface {
   }
 
   addAssetPair(assetPair: AssetPair) {
+    const exchangeAssetPair = new ExchangeAssetPair(assetPair);
     this.exchange.assetPairs.set(
       assetPair.getKey(),
-      new ExchangeAssetPair(assetPair)
+      exchangeAssetPair
     );
 
-    return assetPair;
+    return exchangeAssetPair;
   }
 
   getKey() {
