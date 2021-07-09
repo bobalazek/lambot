@@ -20,6 +20,7 @@ const sessionConfig = new SessionConfig({
   assetPairPriceUpdateIntervalSeconds: 5,
   assetPairCandlestickUpdateIntervalSeconds: 60,
   memoryUsageMonitoringIntervalSeconds: 120,
+  webServerApiEnabled: true,
 });
 const sessionExchange = ExchangesEnum.BINANCE;
 const sessionAsset = Assets.USDT;
