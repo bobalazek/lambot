@@ -14,12 +14,17 @@ describe('ExchangeTrade', () => {
   let exchangeTrade: ExchangeTrade;
 
   beforeEach(() => {
+    jest.useFakeTimers();
+
+    jest.spyOn(Date, 'now').mockImplementation(() => 0);
+
     exchangeTrade = new ExchangeTrade(
       'MOCK_TRADE',
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN
+      ExchangeTradeStatusEnum.OPEN,
+      '1'
     );
     exchangeTrade.buyPrice = 1.0;
     exchangeTrade.buyFeesPercentage = 0.01;

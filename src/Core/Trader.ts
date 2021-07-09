@@ -158,12 +158,12 @@ export class Trader implements TraderInterface {
       assetPair,
       tradeType,
       ExchangeTradeStatusEnum.OPEN,
+      buyOrder.amount,
       now
     );
     exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
     exchangeTrade.buyOrder = buyOrder;
     exchangeTrade.buyPrice = parseFloat(buyOrder.price);
-    exchangeTrade.amount = buyOrder.amount;
 
     this.session.trades.push(exchangeTrade);
 

@@ -10,6 +10,7 @@ export interface ExchangeTradeInterface {
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
+  amount: string;
   timestamp: number;
   buyPrice?: number;
   sellPrice?: number;
@@ -46,8 +47,8 @@ export class ExchangeTrade {
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
   status: ExchangeTradeStatusEnum;
+  amount: string;
   timestamp: number;
-  amount?: string;
   buyPrice?: number;
   sellPrice?: number;
   buyFeesPercentage?: number;
@@ -65,6 +66,7 @@ export class ExchangeTrade {
     assetPair: AssetPair,
     type: ExchangeTradeTypeEnum,
     status: ExchangeTradeStatusEnum,
+    amount: string,
     timestamp: number = Date.now()
   ) {
     this.id = id;
@@ -72,6 +74,7 @@ export class ExchangeTrade {
     this.assetPair = assetPair;
     this.type = type;
     this.status = status;
+    this.amount = amount;
     this.timestamp = timestamp;
     this.peakProfitPercentage = null;
     this.troughProfitPercentage = null;
@@ -280,12 +283,9 @@ export class ExchangeTrade {
       AssetPair.fromImport(data.assetPair),
       data.type,
       data.status,
+      data.amount,
       data.timestamp
     );
-
-    if (typeof data.amount !== 'undefined') {
-      exchangeTrade.amount = data.amount;
-    }
 
     if (typeof data.buyPrice !== 'undefined') {
       exchangeTrade.buyPrice = data.buyPrice;

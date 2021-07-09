@@ -145,7 +145,8 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN
+      ExchangeTradeStatusEnum.OPEN,
+      '1'
     ));
 
     // Now that we got one trade already, we do not allow any more for this pair!
@@ -159,7 +160,8 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETH),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN
+      ExchangeTradeStatusEnum.OPEN,
+      '1'
     ));
 
     expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
@@ -169,7 +171,8 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BCH),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN
+      ExchangeTradeStatusEnum.OPEN,
+      '1'
     ));
 
     expect(exchangeAssetPair.shouldBuy(session)).toBe(true);
@@ -179,7 +182,8 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN
+      ExchangeTradeStatusEnum.OPEN,
+      '1'
     ));
 
     expect(exchangeAssetPair.shouldBuy(session)).toBe(false);
