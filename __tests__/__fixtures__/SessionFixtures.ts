@@ -50,8 +50,9 @@ const exchangeTrades: ExchangeTrade[] = [];
     Assets.USDT,
     new AssetPair(Assets.BTC, Assets.USDT),
     ExchangeTradeTypeEnum.LONG,
-    object.status,
-    '1'
+    '1',
+    Date.now(),
+    object.status
   );
 
   if (object.buyPrice) {

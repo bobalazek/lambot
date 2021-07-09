@@ -145,7 +145,6 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
       '1'
     ));
 
@@ -160,7 +159,6 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETH),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
       '1'
     ));
 
@@ -171,7 +169,6 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BCH),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
       '1'
     ));
 
@@ -182,7 +179,6 @@ describe('ExchangeAssetPair', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
       '1'
     ));
 

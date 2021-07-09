@@ -23,7 +23,6 @@ describe('ExchangeTrade', () => {
       Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
-      ExchangeTradeStatusEnum.OPEN,
       '1'
     );
     exchangeTrade.buyPrice = 1.0;

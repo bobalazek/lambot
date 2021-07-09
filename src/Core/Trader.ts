@@ -157,7 +157,6 @@ export class Trader implements TraderInterface {
       assetPair.assetBase,
       assetPair,
       tradeType,
-      ExchangeTradeStatusEnum.OPEN,
       buyOrder.amount,
       now
     );
