@@ -3,9 +3,53 @@ import { Exchange } from '../../src/Core/Exchange/Exchange';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
+import { ExchangeResponseAssetPairTickerInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairTicker';
 import { Manager } from '../../src/Core/Manager';
 import { SessionTradingTypeEnum } from '../../src/Core/Session/Session';
 import { createMockSession } from './SessionFixtures';
+
+export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[] = [
+  {
+    symbol: 'ETHUSDT',
+    open: '1',
+    high: '1',
+    low: '1',
+    close: '1',
+    volume: '1',
+    openTime: 0,
+    closeTime: 1000,
+  },
+  {
+    symbol: 'BTCUSDT',
+    open: '1',
+    high: '1',
+    low: '1',
+    close: '1',
+    volume: '1',
+    openTime: 0,
+    closeTime: 1000,
+  },
+  {
+    symbol: 'BNBUSDT',
+    open: '1',
+    high: '1',
+    low: '1',
+    close: '1',
+    volume: '1',
+    openTime: 0,
+    closeTime: 1000,
+  },
+  {
+    symbol: 'BCHUSDT',
+    open: '1',
+    high: '1',
+    low: '1',
+    close: '1',
+    volume: '1',
+    openTime: 0,
+    closeTime: 1000,
+  },
+];
 
 export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterface[][] = [
   [

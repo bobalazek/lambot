@@ -79,8 +79,8 @@ export class BinanceExchange extends Exchange {
     }
 
     return (
-      assetPair.assetBase.symbol +
-      assetPair.assetQuote.symbol
+      assetPair.assetQuote.symbol +
+      assetPair.assetBase.symbol
     );
   }
 

@@ -5,6 +5,7 @@ import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/Exch
 import { SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
 import { Trader } from '../../../src/Core/Trader';
 import {
+  assetPairTickersResponse,
   assetPairPricesResponses,
   assetPairsResponse,
   accountAssetsResponse,
@@ -21,6 +22,7 @@ describe('Trader', () => {
     jest.useFakeTimers();
 
     const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
+    exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
     exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
@@ -38,8 +40,6 @@ describe('Trader', () => {
     jest.spyOn(Date, 'now').mockImplementation(() => 0);
 
     // Initial tick
-    await trader.priceTick();
-
     const session = trader.session;
     expect(session.asset).toBe(Assets.USDT);
     expect(session.assetPairs).toHaveLength(4);

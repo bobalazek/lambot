@@ -5,9 +5,10 @@ import { SessionManager } from '../../../src/Core/Session/SessionManager';
 import { Trader } from '../../../src/Core/Trader';
 import { exchangeTrades } from '../../__fixtures__/SessionFixtures';
 import {
-  accountAssetsResponse,
+  assetPairTickersResponse,
   assetPairPricesResponses,
   assetPairsResponse,
+  accountAssetsResponse,
   createMockTrader,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
@@ -23,6 +24,7 @@ describe('SessionManager', () => {
     jest.useFakeTimers();
 
     const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
+    exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
     exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
     exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
     exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
