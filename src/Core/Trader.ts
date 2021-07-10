@@ -205,6 +205,9 @@ export class Trader implements TraderInterface {
     }
 
     const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
+    const orderFeesType = this.session.orderTypes.buy === ExchangeOrderTypeEnum.LIMIT
+      ? ExchangeOrderFeesTypeEnum.MAKER
+      : ExchangeOrderFeesTypeEnum.TAKER;
     const order = new ExchangeOrder(
       id + '_' + ExchangeOrderSideEnum.BUY,
       assetPair,
@@ -217,9 +220,7 @@ export class Trader implements TraderInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       assetPair,
       this.session.strategy.parameters.tradeAmount,
-      this.session.orderTypes.buy === ExchangeOrderTypeEnum.LIMIT
-        ? ExchangeOrderFeesTypeEnum.MAKER
-        : ExchangeOrderFeesTypeEnum.TAKER,
+      orderFeesType,
       tradeType
     );
 
@@ -257,6 +258,9 @@ export class Trader implements TraderInterface {
     const accountType = exchangeTrade.type === ExchangeTradeTypeEnum.SHORT
       ? ExchangeAccountTypeEnum.MARGIN
       : ExchangeAccountTypeEnum.SPOT;
+    const orderFeesType = this.session.orderTypes.sell === ExchangeOrderTypeEnum.LIMIT
+      ? ExchangeOrderFeesTypeEnum.MAKER
+      : ExchangeOrderFeesTypeEnum.TAKER;
     const order = new ExchangeOrder(
       exchangeTrade.id + '_' + ExchangeOrderSideEnum.SELL,
       exchangeTrade.assetPair,
@@ -269,9 +273,7 @@ export class Trader implements TraderInterface {
     const orderFees = await this.session.exchange.getAssetFees(
       exchangeTrade.assetPair,
       this.session.strategy.parameters.tradeAmount,
-      this.session.orderTypes.sell === ExchangeOrderTypeEnum.LIMIT
-        ? ExchangeOrderFeesTypeEnum.MAKER
-        : ExchangeOrderFeesTypeEnum.TAKER,
+      orderFeesType,
       exchangeTrade.type
     );
 

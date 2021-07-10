@@ -14,8 +14,14 @@ import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
 
 export class SessionManager {
-  static async save(session: Session): Promise<string> {
+  static save(session: Session): string {
     logger.info(chalk.cyan('Saving the session ...'));
+
+    if (process.env.NODE_ENV === 'test') {
+      logger.debug(`Test environment. Skipping save ...`);
+
+      return null;
+    }
 
     const sessionFilePath = this.getPathById(session.id);
 
@@ -36,8 +42,14 @@ export class SessionManager {
     return sessionFilePath;
   }
 
-  static async load(id: string): Promise<Session | null> {
+  static load(id: string): Promise<Session | null> {
     logger.info(chalk.cyan(`Loading session with ID "${id}" ...`));
+
+    if (process.env.NODE_ENV === 'test') {
+      logger.debug(`Test environment. Skipping load ...`);
+
+      return null;
+    }
 
     const sessionFilePath = this.getPathById(id);
     if (!fs.existsSync(sessionFilePath)) {

@@ -11,20 +11,28 @@ import logger from '../Utils/Logger';
 
 export class Server {
   app: Application;
+  port: number;
 
   constructor(port: number) {
     this.app = express();
+    this.port = port;
+  }
 
+  async boot(): Promise<Application> {
     logger.info(chalk.cyan(
-      `Starting the server ...`
+      `Booting the server ...`
     ));
 
     this._configureRoutes();
 
-    this.app.listen(port, () => {
-      logger.info(chalk.cyan(
-        `Server started at port ${port}`
-      ));
+    return new Promise((resolve) => {
+      this.app.listen(this.port, () => {
+        logger.info(chalk.cyan(
+          `Server started at port ${this.port}`
+        ));
+
+        resolve(this.app);
+      });
     });
   }
 

@@ -88,7 +88,7 @@ export class Exchange implements ExchangeInterface {
 
     this._printTradableAssets();
 
-    await SessionManager.save(this.session);
+    SessionManager.save(this.session);
 
     return true;
   }
@@ -194,48 +194,51 @@ export class Exchange implements ExchangeInterface {
     });
   }
 
-  async _checkPersistenceData(): Promise<boolean> {
+  async _checkPersistenceData(): Promise<any> {
     if (
       Manager.isTestMode ||
       !this.session.isLoadedFromPersistence
     ) {
-      return false;
+      return;
     }
 
     logger.debug('Checking persistence data ...');
 
-    // TODO: also for margin account if implemented?
-    const exchangeOpenTrades = await this.getAccountOrders(
-      ExchangeAccountTypeEnum.SPOT
-    );
-    const exchangeOpenTradesMap = new Map();
-    exchangeOpenTrades.forEach((openTrade) => {
-      exchangeOpenTradesMap.set(openTrade.id, openTrade);
+    const exchangeOpenTradesSet = new Set<string>();
+    const sessionOpenTrades = this.session.getOpenTrades();
+
+    await asyncForEach(this.session.tradingTypes, async (accountType) => {
+      const exchangeAccountType = this.getAccountType(accountType);
+      const exchangeAccountOpenTrades = await this.getAccountOrders(exchangeAccountType);
+
+      exchangeAccountOpenTrades.forEach((openTrade) => {
+        exchangeOpenTradesSet.add(openTrade.id);
+      });
+
+      logger.debug(
+        `Found ${exchangeAccountOpenTrades.length} open trades on the exchange for account type "${accountType}".`
+      );
     });
 
-    logger.debug(`Found ${exchangeOpenTrades.length} open trades on the exchange.`);
-
-    const openTrades = this.session.getOpenTrades();
-    openTrades.forEach((openTrade) => {
-      if (exchangeOpenTradesMap.has(openTrade.id)) {
+    sessionOpenTrades.forEach((openTrade) => {
+      if (exchangeOpenTradesSet.has(openTrade.id)) {
         return;
       }
 
       for (let i = 0; i < this.session.trades.length; i++) {
-        if (this.session.trades[i].id !== openTrade.id) {
+        const sessionTrade = this.session.trades[i];
+        if (sessionTrade.id !== openTrade.id) {
           continue;
         }
 
         this.session.trades.splice(i, 1);
+
+        logger.info(chalk.bold(
+          `Seems like you closed the trade with ID "${sessionTrade.id}" manually on the exchange, ` +
+          `so we are removing this trade from our trades array!`
+        ));
       }
-
-      logger.info(chalk.bold(
-        `Seems like you closed the trade with ID "${openTrade.id}" manually on the exchange, ` +
-        `so we are removing this trade from our trades array.`
-      ));
     });
-
-    return true;
   }
 
   _printTradableAssets() {

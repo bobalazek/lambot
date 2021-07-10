@@ -35,6 +35,8 @@ export class Manager {
       this.server = new Server(
         this.session.config.webServerApiPort
       );
+
+      await this.server.boot();
     }
 
     this._startMemoryUsageMonitoring();
