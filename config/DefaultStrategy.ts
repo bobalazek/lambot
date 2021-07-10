@@ -106,7 +106,9 @@ export class DefaultStrategy extends Strategy {
     assetPair: AssetPair,
     uptrendMaximumAgeTime: number
   ): number {
-    const assetPairPrice = this._getAssetPairPrice(assetPair);
+    const assetPairPrice = this.session.exchange.assetPairs.get(
+      assetPair.getKey()
+    );
     const newestPriceEntry = assetPairPrice.getNewestPriceEntry();
     const largestTroughPriceEntry = assetPairPrice.getLargestTroughPriceEntry(
       uptrendMaximumAgeTime
@@ -121,12 +123,6 @@ export class DefaultStrategy extends Strategy {
     return calculatePercentage(
       parseFloat(newestPriceEntry.price),
       parseFloat(largestTroughPriceEntry.price)
-    );
-  }
-
-  _getAssetPairPrice(assetPair: AssetPair): ExchangeAssetPairInterface {
-    return this.session.exchange.assetPairs.get(
-      assetPair.getKey()
     );
   }
 }
