@@ -1,5 +1,5 @@
 import { AssetPairDataInterface } from '../../Asset/AssetPair';
-import { SessionTradingTypeEnum } from '../../Session/Session';
+import { SessionTradingTypeEnum } from '../../Session/SessionTradingType';
 
 export interface ExchangeResponseAssetPairInterface extends AssetPairDataInterface {
   amountMinimum: string;

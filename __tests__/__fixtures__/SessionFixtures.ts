@@ -4,8 +4,9 @@ import { Exchange } from '../../src/Core/Exchange/Exchange';
 import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
 import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/ExchangesFactory';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../src/Core/Exchange/ExchangeTrade';
-import { Session, SessionTradingTypeEnum } from '../../src/Core/Session/Session';
+import { Session } from '../../src/Core/Session/Session';
 import { SessionConfig } from '../../src/Core/Session/SessionConfig';
+import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
 import { Strategy } from '../../src/Core/Strategy/Strategy';
 
 const exchangeTrades: ExchangeTrade[] = [];

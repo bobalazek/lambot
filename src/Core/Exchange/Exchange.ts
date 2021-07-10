@@ -16,8 +16,9 @@ import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFees';
 import { ExchangesFactory } from './ExchangesFactory';
 import { Manager } from '../Manager';
-import { Session, SessionTradingTypeEnum } from '../Session/Session';
+import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
+import { SessionTradingTypeEnum } from '../Session/SessionTradingType';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
 

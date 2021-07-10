@@ -64,7 +64,7 @@ export class Trader implements TraderInterface {
 
     const priceIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (priceIntervalTime) {
-      // await this.priceTick(); // TODO: sort out the race conditions issue first
+      await this.priceTick();
       this._priceTickInterval = setInterval(
         this.priceTick.bind(this),
         priceIntervalTime
@@ -73,7 +73,7 @@ export class Trader implements TraderInterface {
 
     const candlestickIntervalTime = this.session.config.assetPairCandlestickUpdateIntervalSeconds * 1000;
     if (candlestickIntervalTime) {
-      // await this.candlestickTick(); // TODO: sort out the race conditions issue first
+      await this.candlestickTick();
       this._candlestickTickInterval = setInterval(
         this.candlestickTick.bind(this),
         candlestickIntervalTime

@@ -2,8 +2,8 @@
 
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
 import { Trader } from '../../../src/Core/Trader';
+import { SessionTradingTypeEnum } from '../../../src/Core/Session/SessionTradingType';
 import { assetPairPricesResponses, createMockTrader } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
 
@@ -16,12 +16,6 @@ describe('Trader', () => {
     jest.useFakeTimers();
 
     trader = await createMockTrader();
-  });
-
-  afterEach(() => {
-    // Sometimes it only works with that, sometimes only without ...
-    //jest.runOnlyPendingTimers();
-    //jest.useRealTimers();
   });
 
   it('should have set all the correct data', async () => {

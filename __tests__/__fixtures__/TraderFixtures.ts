@@ -6,7 +6,7 @@ import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Resp
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairTickerInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairTicker';
 import { Manager } from '../../src/Core/Manager';
-import { SessionTradingTypeEnum } from '../../src/Core/Session/Session';
+import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
 import { createMockSession } from './SessionFixtures';
 
 export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[] = [

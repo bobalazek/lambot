@@ -3,8 +3,8 @@ import { Assets } from '../src/Core/Asset/Assets';
 import { ConfigInterface } from '../src/Core/Config';
 import { ExchangeOrderTypeEnum } from '../src/Core/Exchange/ExchangeOrder';
 import { ExchangesEnum } from '../src/Core/Exchange/ExchangesFactory';
-import { SessionTradingTypeEnum } from '../src/Core/Session/Session';
 import { SessionConfig } from '../src/Core/Session/SessionConfig';
+import { SessionTradingTypeEnum } from '../src/Core/Session/SessionTradingType';
 import { DefaultStrategy } from './DefaultStrategy';
 
 // Config

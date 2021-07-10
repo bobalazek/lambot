@@ -18,9 +18,6 @@ describe('SessionManager', () => {
 
     trader = await createMockTrader();
 
-    // We need the initial tick, the price entries are hydrated and processed!
-    await trader.priceTick();
-
     trader.session.trades = exchangeTrades;
   });
 

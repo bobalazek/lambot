@@ -6,6 +6,7 @@ import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
 import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
+import { SessionTradingTypeEnum } from './SessionTradingType';
 import { SessionConfig } from './SessionConfig';
 import { Strategy } from '../Strategy/Strategy';
 import logger from '../../Utils/Logger';
@@ -30,12 +31,6 @@ export interface SessionInterface {
   getAssetPairs(): Set<string>;
   addAssetPair(assetPair: AssetPair): ExchangeAssetPair;
   getKey(): string;
-}
-
-export enum SessionTradingTypeEnum {
-  SPOT = 'SPOT',
-  MARGIN = 'MARGIN',
-  FUTURES = 'FUTURES',
 }
 
 export enum SessionStatusEnum {

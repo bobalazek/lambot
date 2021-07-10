@@ -17,7 +17,8 @@ import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/R
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeResponseAssetPairTickerInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairTicker';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
-import { Session, SessionTradingTypeEnum } from '../Core/Session/Session';
+import { Session } from '../Core/Session/Session';
+import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
 import logger from '../Utils/Logger';
 
 enum RequestMethodEnum {
