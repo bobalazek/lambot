@@ -2,6 +2,7 @@ import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
 import { Exchange } from '../../src/Core/Exchange/Exchange';
 import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
+import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/ExchangesFactory';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../src/Core/Exchange/ExchangeTrade';
 import { Session, SessionTradingTypeEnum } from '../../src/Core/Session/Session';
 import { SessionConfig } from '../../src/Core/Session/SessionConfig';
@@ -71,8 +72,9 @@ const exchangeTrades: ExchangeTrade[] = [];
   exchangeTrades.push(exchangeTrade);
 });
 
-export const createMockSession = (exchange: Exchange) => {
+export const createMockSession = (exchange: Exchange = ExchangesFactory.get(ExchangesEnum.MOCK)) => {
   const baseAsset = Assets.USDT;
+
   return new Session(
     'MOCK_SESSION',
     exchange,

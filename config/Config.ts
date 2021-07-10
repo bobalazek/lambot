@@ -25,7 +25,7 @@ const sessionConfig = new SessionConfig({
 const sessionExchange = ExchangesEnum.BINANCE;
 const sessionAsset = Assets.USDT;
 const sessionAssetPairs = assets.map((asset) => {
-  return new AssetPair(sessionAsset, asset);
+  return new AssetPair(asset, sessionAsset);
 });
 const sessionStrategy = new DefaultStrategy({});
 const sessionTradingTypes = [

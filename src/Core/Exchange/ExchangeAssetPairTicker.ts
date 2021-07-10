@@ -1,5 +1,7 @@
+import { AssetPair } from '../Asset/AssetPair';
+
 export interface ExchangeAssetPairTickerInterface {
-  symbol: string;
+  assetPair: AssetPair;
   open: string;
   high: string;
   low: string;

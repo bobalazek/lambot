@@ -133,9 +133,7 @@ describe('ExchangeAssetPair', () => {
   });
 
   it('should correctly return shouldBuy', () => {
-    const session = createMockSession(
-      ExchangesFactory.get(ExchangesEnum.MOCK)
-    );
+    const session = createMockSession();
 
     // Without any trades, it should work!
     expect(exchangeAssetPair.shouldBuy(session)).toBe(true);

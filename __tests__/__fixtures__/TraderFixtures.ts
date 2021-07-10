@@ -1,5 +1,6 @@
+import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
-import { Exchange } from '../../src/Core/Exchange/Exchange';
+import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/ExchangesFactory';
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
@@ -10,7 +11,7 @@ import { createMockSession } from './SessionFixtures';
 
 export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[] = [
   {
-    symbol: 'ETHUSDT',
+    assetPair: new AssetPair(Assets.ETH, Assets.USDT),
     open: '1',
     high: '1',
     low: '1',
@@ -20,7 +21,7 @@ export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[
     closeTime: 1000,
   },
   {
-    symbol: 'BTCUSDT',
+    assetPair: new AssetPair(Assets.BTC, Assets.USDT),
     open: '1',
     high: '1',
     low: '1',
@@ -30,7 +31,7 @@ export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[
     closeTime: 1000,
   },
   {
-    symbol: 'BNBUSDT',
+    assetPair: new AssetPair(Assets.BNB, Assets.USDT),
     open: '1',
     high: '1',
     low: '1',
@@ -40,7 +41,7 @@ export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[
     closeTime: 1000,
   },
   {
-    symbol: 'BCHUSDT',
+    assetPair: new AssetPair(Assets.BCH, Assets.USDT),
     open: '1',
     high: '1',
     low: '1',
@@ -54,88 +55,88 @@ export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[
 export const assetPairPricesResponses: ExchangeResponseAssetPairPriceEntryInterface[][] = [
   [
     {
-      symbol: 'ETHUSDT',
+      assetPair: new AssetPair(Assets.ETH, Assets.USDT),
       timestamp: 0,
       price: '1.000',
     },
     {
-      symbol: 'BTCUSDT',
+      assetPair: new AssetPair(Assets.BTC, Assets.USDT),
       timestamp: 0,
       price: '1.000',
     },
     {
-      symbol: 'BNBUSDT',
+      assetPair: new AssetPair(Assets.BNB, Assets.USDT),
       timestamp: 0,
       price: '1.000',
     },
     {
-      symbol: 'BCHUSDT',
+      assetPair: new AssetPair(Assets.BCH, Assets.USDT),
       timestamp: 0,
       price: '1.000',
     },
   ],
   [
     {
-      symbol: 'ETHUSDT',
+      assetPair: new AssetPair(Assets.ETH, Assets.USDT),
       timestamp: 1000,
       price: '0.500',
     },
     {
-      symbol: 'BTCUSDT',
+      assetPair: new AssetPair(Assets.BTC, Assets.USDT),
       timestamp: 1000,
       price: '2.500',
     },
     {
-      symbol: 'BNBUSDT',
+      assetPair: new AssetPair(Assets.BNB, Assets.USDT),
       timestamp: 1000,
       price: '1.000',
     },
     {
-      symbol: 'BCHUSDT',
+      assetPair: new AssetPair(Assets.BCH, Assets.USDT),
       timestamp: 1000,
       price: '3.000',
     },
   ],
   [
     {
-      symbol: 'ETHUSDT',
+      assetPair: new AssetPair(Assets.ETH, Assets.USDT),
       timestamp: 2000,
       price: '1.500',
     },
     {
-      symbol: 'BTCUSDT',
+      assetPair: new AssetPair(Assets.BTC, Assets.USDT),
       timestamp: 2000,
       price: '0.800',
     },
     {
-      symbol: 'BNBUSDT',
+      assetPair: new AssetPair(Assets.BNB, Assets.USDT),
       timestamp: 2000,
       price: '1.000',
     },
     {
-      symbol: 'BCHUSDT',
+      assetPair: new AssetPair(Assets.BCH, Assets.USDT),
       timestamp: 2000,
       price: '0.200',
     },
   ],
   [
     {
-      symbol: 'ETHUSDT',
+      assetPair: new AssetPair(Assets.ETH, Assets.USDT),
       timestamp: 2000,
       price: '1.000',
     },
     {
-      symbol: 'BTCUSDT',
+      assetPair: new AssetPair(Assets.BTC, Assets.USDT),
       timestamp: 2000,
       price: '1.200',
     },
     {
-      symbol: 'BNBUSDT',
+      assetPair: new AssetPair(Assets.BNB, Assets.USDT),
       timestamp: 2000,
       price: '1.000',
     },
     {
-      symbol: 'BCHUSDT',
+      assetPair: new AssetPair(Assets.BCH, Assets.USDT),
       timestamp: 2000,
       price: '1.300',
     },
@@ -217,7 +218,13 @@ export const accountAssetsResponse: ExchangeResponseAccountAssetInterface[] = [
   },
 ];
 
-export const createMockTrader = async (exchange: Exchange) => {
+export const createMockTrader = async () => {
+  const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
+  exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
+  exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
+  exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
+  exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
+
   const session = createMockSession(exchange);
 
   return await Manager.boot(session);

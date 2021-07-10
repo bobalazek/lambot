@@ -118,14 +118,15 @@ export class Trader implements TraderInterface {
     const assetPairPrices = await this.session.exchange.getAssetPairPrices();
     for (let i = 0; i < assetPairPrices.length; i++) {
       const priceData = assetPairPrices[i];
-      if (!assetPairs.has(priceData.symbol)) {
+      const assetPairKey = priceData.assetPair.getKey();
+      if (!assetPairs.has(assetPairKey)) {
         continue;
       }
 
-      const assetPair = this.session.exchange.assetPairs.get(priceData.symbol);
+      const assetPair = this.session.exchange.assetPairs.get(assetPairKey);
       if (!assetPair) {
         logger.info(chalk.red.bold(
-          `Asset pair for symbol "${priceData.symbol}" not found.`
+          `Asset pair for symbol "${assetPairKey}" not found.`
         ));
         process.exit(1);
       }
@@ -167,14 +168,15 @@ export class Trader implements TraderInterface {
     const assetPairTickers = await this.session.exchange.getAssetPairTickers();
     for (let i = 0; i < assetPairTickers.length; i++) {
       const tickerData = assetPairTickers[i];
-      if (!assetPairs.has(tickerData.symbol)) {
+      const assetPairKey = tickerData.assetPair.getKey();
+      if (!assetPairs.has(assetPairKey)) {
         continue;
       }
 
-      const assetPair = this.session.exchange.assetPairs.get(tickerData.symbol);
+      const assetPair = this.session.exchange.assetPairs.get(assetPairKey);
       if (!assetPair) {
         logger.info(chalk.red.bold(
-          `Asset pair for symbol "${tickerData.symbol}" not found.`
+          `Asset pair for symbol "${assetPairKey}" not found.`
         ));
         process.exit(1);
       }

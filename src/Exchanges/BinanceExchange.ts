@@ -79,8 +79,8 @@ export class BinanceExchange extends Exchange {
     }
 
     return (
-      assetPair.assetQuote.symbol +
-      assetPair.assetBase.symbol
+      assetPair.assetBase.symbol +
+      assetPair.assetQuote.symbol
     );
   }
 
@@ -123,21 +123,15 @@ export class BinanceExchange extends Exchange {
 
       if (!this._symbolAssetPairsMap.has(orderData.symbol)) {
         logger.critical(chalk.red.bold(
-          'Could not find the symbol in the asset pairs array. ' +
-          'Make sure getAssetPairs() was called before.'
+          'Could not find the symbol in the asset pairs array. Make sure getAssetPairs() was called before.'
         ));
         process.exit(1);
       }
 
-      const assetPairArray = this._symbolAssetPairsMap.get(orderData.symbol);
-
       orders.push(
         new ExchangeOrder(
           orderData.clientOrderId ?? orderData.orderId,
-          new AssetPair(
-            Assets.getBySymbol(assetPairArray[0]),
-            Assets.getBySymbol(assetPairArray[1])
-          ),
+          this._getAssetPairBySymbol(orderData.symbol),
           orderData.side,
           orderData.origQty,
           orderData.price,
@@ -343,7 +337,7 @@ export class BinanceExchange extends Exchange {
       const data = response.data[i];
 
       assetPairPrices.push({
-        symbol: data.symbol,
+        assetPair: this._getAssetPairBySymbol(data.symbol),
         price: data.price,
         timestamp: now,
       });
@@ -366,14 +360,16 @@ export class BinanceExchange extends Exchange {
     for (let i = 0; i < response.data.length; i++) {
       const data = response.data[i];
 
+      const assetPair = this._getAssetPairBySymbol(data.symbol);
+
       assetPairTickers.push({
-        symbol: data.symbol,
+        assetPair,
         open: data.openPrice,
         high: data.highPrice,
         low: data.lowPrice,
         close: data.lastPrice,
         volume: (
-          parseFloat(data.volume) /* quote asset */ *
+          parseFloat(data.volume) /* base asset */ *
           parseFloat(data.lastPrice)
         ) + '',
         openTime: data.openTime,
@@ -471,6 +467,15 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** Helpers *****/
+  _getAssetPairBySymbol(symbol: string) {
+    const assetPairArray = this._symbolAssetPairsMap.get(symbol);
+
+    return new AssetPair(
+      Assets.getBySymbol(assetPairArray[0]),
+      Assets.getBySymbol(assetPairArray[1])
+    );
+  }
+
   async _setTimeOffset(): Promise<void> {
     const response = await this._doRequest(
       RequestMethodEnum.GET,

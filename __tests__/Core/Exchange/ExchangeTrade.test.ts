@@ -2,21 +2,20 @@
 
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
-import {
-  ExchangeTrade,
-  ExchangeTradeStatusEnum,
-  ExchangeTradeTypeEnum,
-} from '../../../src/Core/Exchange/ExchangeTrade';
+import { ExchangeTrade, ExchangeTradeTypeEnum } from '../../../src/Core/Exchange/ExchangeTrade';
+import { Session } from '../../../src/Core/Session/Session';
 import { createMockSession } from '../../__fixtures__/SessionFixtures';
 
 describe('ExchangeTrade', () => {
+  let session: Session;
   let exchangeTrade: ExchangeTrade;
 
   beforeEach(() => {
     jest.useFakeTimers();
 
     jest.spyOn(Date, 'now').mockImplementation(() => 0);
+
+    session = createMockSession();
 
     exchangeTrade = new ExchangeTrade(
       'MOCK_TRADE',
@@ -50,10 +49,6 @@ describe('ExchangeTrade', () => {
   });
 
   it('should correctly return shouldSell for stopLoss', () => {
-    const session = createMockSession(
-      ExchangesFactory.get(ExchangesEnum.MOCK)
-    );
-
     const assetPair = exchangeTrade.assetPair;
     const exchangeAssetPair = session.addAssetPair(assetPair);
 
@@ -110,10 +105,6 @@ describe('ExchangeTrade', () => {
   });
 
   it('should correctly return shouldSell for takeProfit', () => {
-    const session = createMockSession(
-      ExchangesFactory.get(ExchangesEnum.MOCK)
-    );
-
     const assetPair = exchangeTrade.assetPair;
     const exchangeAssetPair = session.addAssetPair(assetPair);
 

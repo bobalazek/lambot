@@ -7,8 +7,12 @@ import logger from '../../Utils/Logger';
 export class ExchangeValidator {
   public static async validate(exchange: Exchange) {
     const {
-      warmupPeriodSeconds,
-    } = exchange.session.config;
+      tradingTypes,
+      strategy,
+      config: {
+        warmupPeriodSeconds,
+      },
+    } = exchange.session;
 
     logger.debug(chalk.italic(
       'Starting session and exchange validation ...'
@@ -28,11 +32,6 @@ export class ExchangeValidator {
     }));
 
     // Do session asset validations
-    const {
-      tradingTypes,
-      strategy,
-    } = exchange.session;
-
     const tradeAmount = parseFloat(strategy.parameters.tradeAmount);
 
     // Check if trailing take profit is enabled and we have no slippage set
@@ -57,39 +56,39 @@ export class ExchangeValidator {
       process.exit(1);
     }
 
-    exchange.session.getAssetPairs().forEach((assetPairSymbol) => {
+    exchange.session.getAssetPairs().forEach((assetPairKey) => {
       // Check if that pair exists on the exchange
-      if (!exhangeAssetPairsMap.has(assetPairSymbol)) {
+      if (!exhangeAssetPairsMap.has(assetPairKey)) {
         logger.critical(chalk.red.bold(
-          `Oh dear. We did not seem to have found the "${assetPairSymbol}" asset pair on the exchange.`
+          `Oh dear. We did not seem to have found the "${assetPairKey}" asset pair on the exchange.`
         ));
         process.exit(1);
       }
 
-      const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
+      const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairKey);
 
       // Check if we can to the trading type we specified
       if (!tradingTypes.every((item) => {
         return exchangeAssetPair.tradingTypes.includes(item);
       })) {
         logger.critical(chalk.red.bold(
-          `Trading type "${tradingTypes}" is not available for "${assetPairSymbol}".`
+          `Trading type "${tradingTypes}" is not available for "${assetPairKey}".`
         ));
         process.exit(1);
       }
 
       // Check if our order amount is too small or big
-      const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairSymbol);
+      const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairKey);
       if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
         logger.critical(chalk.red.bold(
-          `The order amount for "${assetPairSymbol}" is too big for this exchange asset. ` +
+          `The order amount for "${assetPairKey}" is too big for this exchange asset. ` +
           `You specified: "${strategy.parameters.tradeAmount}". ` +
           `Maximum: "${exhangeAssetPair.amountMaximum}"`
         ));
         process.exit(1);
       } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
         logger.critical(chalk.red.bold(
-          `The order amount for "${assetPairSymbol}" is too small for this exchange asset. ` +
+          `The order amount for "${assetPairKey}" is too small for this exchange asset. ` +
           `You specified: "${strategy.parameters.tradeAmount}". ` +
           `Minimum: "${exhangeAssetPair.amountMinimum}"`
         ));

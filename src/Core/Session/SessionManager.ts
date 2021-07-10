@@ -171,10 +171,18 @@ export class SessionManager {
       return total + current;
     }, 0) / closedTrades.length;
     const openProfitPercentage = openTrades.map((exchangeTrade) => {
-      const assetPairPrice = Manager.session.exchange.assetPairs.get(
+      const assetPair = Manager.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
-      const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+      if (!assetPair) {
+        return 0;
+      }
+
+      const assetPairPriceEntryNewest = assetPair.getNewestPriceEntry();
+      if (!assetPairPriceEntryNewest) {
+        return 0;
+      }
+
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
 
       return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
@@ -182,10 +190,18 @@ export class SessionManager {
       return total + current;
     }, 0) / openTrades.length;
     const openProfitIncludingFeesPercentage = openTrades.map((exchangeTrade) => {
-      const assetPairPrice = Manager.session.exchange.assetPairs.get(
+      const assetPair = Manager.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
-      const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+      if (!assetPair) {
+        return 0;
+      }
+
+      const assetPairPriceEntryNewest = assetPair.getNewestPriceEntry();
+      if (!assetPairPriceEntryNewest) {
+        return 0;
+      }
+
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
 
       return exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);

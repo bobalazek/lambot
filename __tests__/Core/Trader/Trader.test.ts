@@ -1,14 +1,11 @@
 /// <reference types="jest" />
 
+import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
 import { SessionTradingTypeEnum } from '../../../src/Core/Session/Session';
 import { Trader } from '../../../src/Core/Trader';
 import {
-  assetPairTickersResponse,
   assetPairPricesResponses,
-  assetPairsResponse,
-  accountAssetsResponse,
   createMockTrader,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
@@ -21,13 +18,7 @@ describe('Trader', () => {
   beforeEach(async () => {
     jest.useFakeTimers();
 
-    const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-    exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
-    exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
-    exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
-    exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
-
-    trader = await createMockTrader(exchange);
+    trader = await createMockTrader();
   });
 
   afterEach(() => {
@@ -48,7 +39,8 @@ describe('Trader', () => {
     ]);
     expect(session.trades).toHaveLength(0);
 
-    const assetPairPrice = trader.session.exchange.assetPairs.get('ETHUSDT');
+    const assetPairKey = (new AssetPair(Assets.ETH, Assets.USDT)).getKey();
+    const assetPairPrice = trader.session.exchange.assetPairs.get(assetPairKey);
     const assetPairPriceEntries = assetPairPrice.getPriceEntries();
 
     expect(assetPairPriceEntries).toHaveLength(1);
@@ -66,7 +58,7 @@ describe('Trader', () => {
     trader.session.exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[3]);
     await trader.priceTick();
 
-    const assetPairPriceSecondary = trader.session.exchange.assetPairs.get('ETHUSDT');
+    const assetPairPriceSecondary = trader.session.exchange.assetPairs.get(assetPairKey);
     const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getPriceEntries();
 
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);

@@ -1,14 +1,9 @@
 /// <reference types="jest" />
 
-import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
 import { SessionManager } from '../../../src/Core/Session/SessionManager';
 import { Trader } from '../../../src/Core/Trader';
 import { exchangeTrades } from '../../__fixtures__/SessionFixtures';
 import {
-  assetPairTickersResponse,
-  assetPairPricesResponses,
-  assetPairsResponse,
-  accountAssetsResponse,
   createMockTrader,
 } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
@@ -23,15 +18,7 @@ describe('SessionManager', () => {
   beforeEach(async () => {
     jest.useFakeTimers();
 
-    const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-    exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
-    exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
-    exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
-    exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
-
-    trader = await createMockTrader(exchange);
-
-    await trader.priceTick();
+    trader = await createMockTrader();
 
     trader.session.trades = exchangeTrades;
   });
