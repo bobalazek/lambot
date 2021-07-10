@@ -49,7 +49,7 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.getProfitPercentage(true)).toBe(-2.9207920792079287);
   });
 
-  it('should correctly return shouldSell', () => {
+  it('should correctly return shouldSell for stopLoss', () => {
     const session = createMockSession(
       ExchangesFactory.get(ExchangesEnum.MOCK)
     );
@@ -106,6 +106,110 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.troughProfitPercentage).toBe(-2.500000000000002);
     expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(3000);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(true);
+  });
+
+  it('should correctly return shouldSell for takeProfit', () => {
+    const session = createMockSession(
+      ExchangesFactory.get(ExchangesEnum.MOCK)
+    );
+
+    const assetPair = exchangeTrade.assetPair;
+    const exchangeAssetPair = session.addAssetPair(assetPair);
+
+    // Tick
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+    expect(exchangeTrade.peakProfitPercentage).toBe(null);
+    expect(exchangeTrade.troughProfitPercentage).toBe(null);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(null);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+
+    // Tick
+    jest.spyOn(Date, 'now').mockImplementation(() => 1000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 1000,
+      price: '1.005',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
+    expect(exchangeTrade.troughProfitPercentage).toBe(0.49999999999998934);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+
+    // Tick
+    jest.spyOn(Date, 'now').mockImplementation(() => 2000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 2000,
+      price: '0.995',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
+    expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+
+    // Tick
+    jest.spyOn(Date, 'now').mockImplementation(() => 3000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 3000,
+      price: '1.025',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(2.499999999999991);
+    expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(0.4999999999999911);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+
+    // Tick
+    jest.spyOn(Date, 'now').mockImplementation(() => 4000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 4000,
+      price: '1.04',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
+    expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+
+    // Tick
+    // Do not trigger the sell yet, because it still hasn't
+    // reached the trailingTakeProfitSlipPercentage!
+    jest.spyOn(Date, 'now').mockImplementation(() => 5000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 5000,
+      price: '1.0398',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
+    expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
+    expect(exchangeTrade.shouldSell(session, false)).toBe(false);
+
+    // Tick
+    jest.spyOn(Date, 'now').mockImplementation(() => 6000);
+    exchangeAssetPair.addPriceEntry({
+      timestamp: 6000,
+      price: '1.038',
+    });
+    exchangeTrade.prepareData(session);
+
+    expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
+    expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
+    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(true);
   });
 });

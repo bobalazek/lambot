@@ -16,6 +16,7 @@ export interface ExchangeTradeInterface {
   sellPrice?: number;
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
+  currentProfitPercentage?: number;
   peakProfitPercentage?: number; // What is the peak profit we reached?
   troughProfitPercentage?: number; // What is the trough profit we reached?
   triggerStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger (can be positive or negative?
@@ -53,6 +54,7 @@ export class ExchangeTrade {
   sellPrice?: number;
   buyFeesPercentage?: number;
   sellFeesPercentage?: number;
+  currentProfitPercentage?: number;
   peakProfitPercentage?: number;
   troughProfitPercentage?: number;
   triggerStopLossPercentage?: number;
@@ -76,6 +78,7 @@ export class ExchangeTrade {
     this.amount = amount;
     this.timestamp = timestamp;
     this.status = status;
+    this.currentProfitPercentage = null;
     this.peakProfitPercentage = null;
     this.troughProfitPercentage = null;
     this.triggerStopLossPercentage = null;
@@ -99,22 +102,22 @@ export class ExchangeTrade {
       return;
     }
 
-    const currentProfitPercentage = this.getCurrentProfitPercentage(
+    this.currentProfitPercentage = this.getCurrentProfitPercentage(
       parseFloat(exchangeAssetPairEntryNewest.price)
     );
 
     if (
       this.peakProfitPercentage === null ||
-      this.peakProfitPercentage < currentProfitPercentage
+      this.peakProfitPercentage < this.currentProfitPercentage
     ) {
-      this.peakProfitPercentage = currentProfitPercentage;
+      this.peakProfitPercentage = this.currentProfitPercentage;
     }
 
     if (
       this.troughProfitPercentage === null ||
-      this.troughProfitPercentage > currentProfitPercentage
+      this.troughProfitPercentage > this.currentProfitPercentage
     ) {
-      this.troughProfitPercentage = currentProfitPercentage;
+      this.troughProfitPercentage = this.currentProfitPercentage;
     }
 
     if (this.triggerStopLossPercentage === null) {
@@ -133,13 +136,13 @@ export class ExchangeTrade {
 
     if (
       strategy.parameters.stopLossEnabled &&
-      currentProfitPercentage < this.triggerStopLossPercentage &&
+      this.currentProfitPercentage < this.triggerStopLossPercentage &&
       !this.triggerStopLossSellAt
     ) {
       this.triggerStopLossSellAt = now;
     } else if (
       strategy.parameters.stopLossEnabled &&
-      currentProfitPercentage > this.triggerStopLossPercentage &&
+      this.currentProfitPercentage > this.triggerStopLossPercentage &&
       this.triggerStopLossSellAt
     ) {
       this.triggerStopLossSellAt = null;
@@ -151,6 +154,11 @@ export class ExchangeTrade {
     const {
       strategy,
     } = session;
+
+    if (prepareData) {
+      this.prepareData(session);
+    }
+
     const exchangeAssetPair = session.exchange.assetPairs.get(
       this.assetPair.getKey()
     );
@@ -166,10 +174,6 @@ export class ExchangeTrade {
     const currentProfitPercentage = this.getCurrentProfitPercentage(
       parseFloat(exchangeAssetPairEntryNewest.price)
     );
-
-    if (prepareData) {
-      this.prepareData(session);
-    }
 
     if (currentProfitPercentage > strategy.parameters.takeProfitPercentage) {
       if (!strategy.parameters.trailingTakeProfitEnabled) {
@@ -225,7 +229,7 @@ export class ExchangeTrade {
   /**
    * Gets the current profit, relating to the current price we provide it.
    */
-  getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
+  getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
     const buyPrice = includingFees
       ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
       : this.buyPrice;
@@ -267,6 +271,7 @@ export class ExchangeTrade {
       sellPrice: this.sellPrice,
       buyFeesPercentage: this.buyFeesPercentage,
       sellFeesPercentage: this.sellFeesPercentage,
+      currentProfitPercentage: this.currentProfitPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
       troughProfitPercentage: this.troughProfitPercentage,
       triggerStopLossPercentage: this.triggerStopLossPercentage,
