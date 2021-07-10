@@ -7,6 +7,7 @@ import {
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
 import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
+import { ExchangeAssetPairTickerInterface } from './ExchangeAssetPairTicker';
 import { ExchangeTradeStatusEnum } from './ExchangeTrade';
 import { Session } from '../Session/Session';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
@@ -14,6 +15,7 @@ import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Hel
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
+  ticker24h: ExchangeAssetPairTickerInterface;
   metadata: any;
   shouldBuy(session: Session): boolean;
   getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
@@ -38,6 +40,7 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
+  ticker24h: ExchangeAssetPairTickerInterface;
   metadata: any;
 
   private _candlesticks: ExchangeAssetPairCandlestickInterface[];
@@ -48,6 +51,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
     this.indicators = new Map();
+    this.ticker24h = null;
 
     this._candlesticks = [];
     this._priceEntries = [];
@@ -86,7 +90,18 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
       return false;
     }
 
-    // TODO: implement minimum hourly/daily volume
+    if (
+      strategy.parameters.minimumDailyVolume !== -1 &&
+      (
+        !this.ticker24h ||
+        (
+          this.ticker24h &&
+          parseFloat(this.ticker24h.volume) < strategy.parameters.minimumDailyVolume
+        )
+      )
+    ) {
+      return false;
+    }
 
     return true
   }

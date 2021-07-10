@@ -91,6 +91,7 @@ export const createMockSession = (exchange: Exchange) => {
       tradeAmount: '15',
       maximumOpenTrades: 3,
       maximumOpenTradesPerAssetPair: 1,
+      minimumDailyVolume: -1,
       takeProfitPercentage: 2,
       trailingTakeProfitEnabled: true,
       trailingTakeProfitSlipPercentage: 0.1,

@@ -179,7 +179,7 @@ export class Session implements SessionInterface {
         return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(sessionData.strategy),
-      sessionData.orderType,
+      sessionData.orderTypes,
       sessionData.tradingTypes
     );
 

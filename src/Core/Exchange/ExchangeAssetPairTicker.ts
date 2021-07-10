@@ -1,10 +1,10 @@
-export interface ExchangeAssetPairCandlestickInterface {
+export interface ExchangeAssetPairTickerInterface {
+  symbol: string;
   open: string;
   high: string;
   low: string;
   close: string;
   volume: string;
-  tradesCount: number;
   openTime: number;
   closeTime: number;
 }

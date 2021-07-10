@@ -9,6 +9,7 @@ import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseO
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from './Response/ExchangeResponseAssetPairCandlestick';
+import { ExchangeResponseAssetPairTickerInterface } from './Response/ExchangeResponseAssetPairTicker';
 import { ExchangeTradeTypeEnum } from './ExchangeTrade';
 import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
@@ -34,6 +35,7 @@ export interface ExchangeInterface {
   getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]>;
+  getAssetPairTickers(): Promise<ExchangeResponseAssetPairTickerInterface[]>;
   getAssetPairCandlesticks(
     assetPair: AssetPair,
     timeframeSeconds: number,
@@ -113,6 +115,10 @@ export class Exchange implements ExchangeInterface {
 
   async getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]> {
     throw new Error('getAssetPairPrices() not implemented yet.');
+  }
+
+  async getAssetPairTickers(): Promise<ExchangeResponseAssetPairTickerInterface[]> {
+    throw new Error('getAssetPairTickers() not implemented yet.');
   }
 
   async getAssetPairCandlesticks(

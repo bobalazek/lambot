@@ -15,6 +15,7 @@ import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/Ex
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
+import { ExchangeResponseAssetPairTickerInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairTicker';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session, SessionTradingTypeEnum } from '../Core/Session/Session';
 import logger from '../Utils/Logger';
@@ -351,6 +352,38 @@ export class BinanceExchange extends Exchange {
     return assetPairPrices;
   }
 
+  async getAssetPairTickers(): Promise<ExchangeResponseAssetPairTickerInterface[]> {
+    logger.debug(chalk.italic(
+      'Fetching asset pair tickers ...'
+    ));
+
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/ticker/24hr'
+    );
+
+    const assetPairTickers: ExchangeResponseAssetPairTickerInterface[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      const data = response.data[i];
+
+      assetPairTickers.push({
+        symbol: data.symbol,
+        open: data.openPrice,
+        high: data.highPrice,
+        low: data.lowPrice,
+        close: data.lastPrice,
+        volume: (
+          parseFloat(data.volume) /* quote asset */ *
+          parseFloat(data.lastPrice)
+        ) + '',
+        openTime: data.openTime,
+        closeTime: data.closeTime,
+      });
+    }
+
+    return assetPairTickers;
+  }
+
   async getAssetPairCandlesticks(
     assetPair: AssetPair,
     timeframeSeconds: number,
@@ -401,14 +434,14 @@ export class BinanceExchange extends Exchange {
 
       assetPairCandlesticks.push({
         symbol,
-        openTime: data[0],
-        closeTime: data[6],
         open: data[1],
         high: data[2],
         low: data[3],
         close: data[4],
         volume: data[5],
         tradesCount: data[8],
+        openTime: data[0],
+        closeTime: data[6],
       });
     }
 

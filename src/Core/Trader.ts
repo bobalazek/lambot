@@ -18,6 +18,7 @@ export interface TraderInterface {
   startTime: number;
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
+  ticker24hTick(): void;
   priceTick(): void;
   candlestickTick(): void;
   executeBuy(assetPair: AssetPair, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
@@ -34,6 +35,7 @@ export class Trader implements TraderInterface {
   status: TraderStatusEnum;
   startTime: number;
 
+  _ticker24TickInterval: ReturnType<typeof setInterval>;
   _priceTickInterval: ReturnType<typeof setInterval>;
   _candlestickTickInterval: ReturnType<typeof setInterval>;
   _openTradesInterval: ReturnType<typeof setInterval>;
@@ -51,8 +53,18 @@ export class Trader implements TraderInterface {
     await this.session.strategy.boot(this.session);
 
     // Intervals
+    const ticker24hIntervalTime = 3600 * 1000; // TODO: make configurable?
+    if (ticker24hIntervalTime) {
+      await this.ticker24hTick();
+      this._ticker24TickInterval = setInterval(
+        this.ticker24hTick.bind(this),
+        ticker24hIntervalTime
+      );
+    }
+
     const priceIntervalTime = this.session.config.assetPairPriceUpdateIntervalSeconds * 1000;
     if (priceIntervalTime) {
+      await this.priceTick();
       this._priceTickInterval = setInterval(
         this.priceTick.bind(this),
         priceIntervalTime
@@ -61,6 +73,7 @@ export class Trader implements TraderInterface {
 
     const candlestickIntervalTime = this.session.config.assetPairCandlestickUpdateIntervalSeconds * 1000;
     if (candlestickIntervalTime) {
+      await this.candlestickTick();
       this._candlestickTickInterval = setInterval(
         this.candlestickTick.bind(this),
         candlestickIntervalTime
@@ -89,6 +102,7 @@ export class Trader implements TraderInterface {
   async stop(): Promise<boolean> {
     this.status = TraderStatusEnum.STOPPED;
 
+    clearInterval(this._ticker24TickInterval);
     clearInterval(this._priceTickInterval);
     clearInterval(this._candlestickTickInterval);
     clearInterval(this._openTradesInterval);
@@ -100,7 +114,29 @@ export class Trader implements TraderInterface {
   async priceTick() {
     logger.debug(`Price tick ...`);
 
-    await this._updateAssetPairPrices();
+    const assetPairs = this.session.getAssetPairs();
+    const assetPairPrices = await this.session.exchange.getAssetPairPrices();
+    for (let i = 0; i < assetPairPrices.length; i++) {
+      const priceData = assetPairPrices[i];
+      if (!assetPairs.has(priceData.symbol)) {
+        continue;
+      }
+
+      const assetPair = this.session.exchange.assetPairs.get(priceData.symbol);
+      if (!assetPair) {
+        logger.info(chalk.red.bold(
+          `Asset pair for symbol "${priceData.symbol}" not found.`
+        ));
+        process.exit(1);
+      }
+
+      assetPair.addPriceEntry({
+        timestamp: priceData.timestamp,
+        price: priceData.price,
+      });
+
+      assetPair.processPriceEntries();
+    }
 
     await this._processTrades();
   }
@@ -108,7 +144,43 @@ export class Trader implements TraderInterface {
   async candlestickTick() {
     logger.debug(`Candlestick tick ...`);
 
-    await this._updateAssetPairCandlesticks();
+    for (const assetPair of this.session.assetPairs) {
+      const assetPairCandlesticksData = await this.session.exchange.getAssetPairCandlesticks(
+        assetPair,
+        this.session.config.assetPairCandlestickUpdateIntervalSeconds
+      );
+
+      const exchangeAssetPair = this.session.exchange.assetPairs.get(
+        assetPair.getKey()
+      );
+
+      exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
+
+      await this._processTrades(assetPair);
+    }
+  }
+
+  async ticker24hTick() {
+    logger.debug(`Ticker (24h) tick ...`);
+
+    const assetPairs = this.session.getAssetPairs();
+    const assetPairTickers = await this.session.exchange.getAssetPairTickers();
+    for (let i = 0; i < assetPairTickers.length; i++) {
+      const tickerData = assetPairTickers[i];
+      if (!assetPairs.has(tickerData.symbol)) {
+        continue;
+      }
+
+      const assetPair = this.session.exchange.assetPairs.get(tickerData.symbol);
+      if (!assetPair) {
+        logger.info(chalk.red.bold(
+          `Asset pair for symbol "${tickerData.symbol}" not found.`
+        ));
+        process.exit(1);
+      }
+
+      assetPair.ticker24h = tickerData;
+    }
   }
 
   async executeBuy(
@@ -220,55 +292,6 @@ export class Trader implements TraderInterface {
   }
 
   /***** Helpers *****/
-  async _updateAssetPairPrices() {
-    const assetPairs = this.session.getAssetPairs();
-
-    logger.debug(`Updating asset prices ...`);
-
-    const assetPairPrices = await this.session.exchange.getAssetPairPrices();
-    for (let i = 0; i < assetPairPrices.length; i++) {
-      const priceData = assetPairPrices[i];
-      if (!assetPairs.has(priceData.symbol)) {
-        continue;
-      }
-
-      const assetPairPrice = this.session.exchange.assetPairs.get(priceData.symbol);
-      if (!assetPairPrice) {
-        logger.info(chalk.red.bold(
-          `Asset price for symbol "${priceData.symbol}" not found.`
-        ));
-
-        process.exit(1);
-      }
-
-      assetPairPrice.addPriceEntry({
-        timestamp: priceData.timestamp,
-        price: priceData.price,
-      });
-
-      assetPairPrice.processPriceEntries();
-    }
-  }
-
-  async _updateAssetPairCandlesticks() {
-    logger.debug(`Updating asset candlesticks ...`);
-
-    for (const assetPair of this.session.assetPairs) {
-      const assetPairCandlesticksData = await this.session.exchange.getAssetPairCandlesticks(
-        assetPair,
-        this.session.config.assetPairCandlestickUpdateIntervalSeconds
-      );
-
-      const exchangeAssetPair = this.session.exchange.assetPairs.get(
-        assetPair.getKey()
-      );
-
-      exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
-
-      await this._processTrades(assetPair);
-    }
-  }
-
   _printAssetPairPriceUpdates() {
     logger.info(chalk.bold('Asset pair price updates:'));
     this.session.exchange.assetPairs.forEach((exchangeAssetPairPrice, key) => {
