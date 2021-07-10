@@ -3,8 +3,7 @@
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
 import { ExchangeAssetPair } from '../../../src/Core/Exchange/ExchangeAssetPair';
-import { ExchangesEnum, ExchangesFactory } from '../../../src/Core/Exchange/ExchangesFactory';
-import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../../src/Core/Exchange/ExchangeTrade';
+import { ExchangeTrade, ExchangeTradeTypeEnum } from '../../../src/Core/Exchange/ExchangeTrade';
 import { entries, entriesPriceTexts, } from '../../__fixtures__/ExchangeAssetPairPriceFixtures';
 import { createMockSession } from '../../__fixtures__/SessionFixtures';
 

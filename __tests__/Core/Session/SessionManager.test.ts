@@ -3,9 +3,7 @@
 import { SessionManager } from '../../../src/Core/Session/SessionManager';
 import { Trader } from '../../../src/Core/Trader';
 import { exchangeTrades } from '../../__fixtures__/SessionFixtures';
-import {
-  createMockTrader,
-} from '../../__fixtures__/TraderFixtures';
+import { createMockTrader } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';
 
 logger.isEnabled = false;
@@ -19,6 +17,9 @@ describe('SessionManager', () => {
     jest.useFakeTimers();
 
     trader = await createMockTrader();
+
+    // We need the initial tick, the price entries are hydrated and processed!
+    await trader.priceTick();
 
     trader.session.trades = exchangeTrades;
   });

@@ -45,6 +45,7 @@ const BinanceExchangeCandlestickTimeframesMap = new Map([
 
 export class BinanceExchange extends Exchange {
   private _timeOffset: number;
+  private _assetPairs: ExchangeResponseAssetPairInterface[];
   private _symbolAssetPairsMap: Map<string, [string, string]>;
 
   constructor(apiCredentials: ExchangeApiCredentialsInterface) {
@@ -62,15 +63,15 @@ export class BinanceExchange extends Exchange {
     }
 
     this._timeOffset = 0;
+    this._assetPairs = [];
     this._symbolAssetPairsMap = new Map();
   }
 
   async boot(session: Session): Promise<boolean> {
-    super.boot(session);
-
     await this._setTimeOffset();
+    await this._prepareInfo();
 
-    return true;
+    return super.boot(session);
   }
 
   convertAssetPairToString(assetPair: AssetPair): string {
@@ -260,65 +261,7 @@ export class BinanceExchange extends Exchange {
   async getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]> {
     logger.debug(chalk.italic('Fetching asset pairs ...'));
 
-    const response = await this._doRequest(
-      RequestMethodEnum.GET,
-      'https://api.binance.com/api/v3/exchangeInfo'
-    );
-
-    // TODO: split that into a separate call (getInfo() or something)
-    // and cache those pairs locally when we need them.
-
-    const assetPairs: ExchangeResponseAssetPairInterface[] = [];
-    for (let i = 0; i < response.data.symbols.length; i++) {
-      const symbolData = response.data.symbols[i];
-
-      let amountMinimum = '0';
-      let amountMaximum = '0';
-      let priceMinimum = '0';
-      let priceMaximum = '0';
-
-      symbolData.filters.forEach((symbolFilterData) => {
-        if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
-          amountMinimum = symbolFilterData.minQty;
-          amountMaximum = symbolFilterData.maxQty;
-        } else if (symbolFilterData.filterType === 'PRICE_FILTER') {
-          priceMinimum = symbolFilterData.minPrice;
-          priceMaximum = symbolFilterData.maxPrice;
-        }
-      });
-
-      let tradingTypes: SessionTradingTypeEnum[] = [];
-      if (
-        symbolData.isSpotTradingAllowed &&
-        symbolData.permissions.includes('SPOT')
-      ) {
-        tradingTypes.push(SessionTradingTypeEnum.SPOT);
-      }
-
-      if (
-        symbolData.isMarginTradingAllowed &&
-        symbolData.permissions.includes('MARGIN')
-      ) {
-        tradingTypes.push(SessionTradingTypeEnum.MARGIN);
-      }
-
-      assetPairs.push({
-        assetBase: Assets.getBySymbol(symbolData.baseAsset),
-        assetQuote: Assets.getBySymbol(symbolData.quoteAsset),
-        amountMinimum,
-        amountMaximum,
-        priceMinimum,
-        priceMaximum,
-        tradingTypes
-      });
-
-      this._symbolAssetPairsMap.set(
-        symbolData.symbol,
-        [symbolData.baseAsset, symbolData.quoteAsset]
-      );
-    }
-
-    return assetPairs;
+    return this._assetPairs;
   }
 
   async getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]> {
@@ -467,7 +410,14 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** Helpers *****/
-  _getAssetPairBySymbol(symbol: string) {
+  _getAssetPairBySymbol(symbol: string): AssetPair {
+    if (!this._symbolAssetPairsMap.has(symbol)) {
+      logger.critical(chalk.red.bold(
+        `Symbol asset pair ${symbol} not found on this exchange!`
+      ));
+      process.exit(1);
+    }
+
     const assetPairArray = this._symbolAssetPairsMap.get(symbol);
 
     return new AssetPair(
@@ -556,5 +506,66 @@ export class BinanceExchange extends Exchange {
     ));
 
     return response;
+  }
+
+  async _prepareInfo(): Promise<boolean> {
+    logger.debug(chalk.italic('Fetching exchange info ...'));
+
+    const response = await this._doRequest(
+      RequestMethodEnum.GET,
+      'https://api.binance.com/api/v3/exchangeInfo'
+    );
+
+    this._assetPairs = [];
+    for (let i = 0; i < response.data.symbols.length; i++) {
+      const symbolData = response.data.symbols[i];
+
+      let amountMinimum = '0';
+      let amountMaximum = '0';
+      let priceMinimum = '0';
+      let priceMaximum = '0';
+
+      symbolData.filters.forEach((symbolFilterData) => {
+        if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
+          amountMinimum = symbolFilterData.minQty;
+          amountMaximum = symbolFilterData.maxQty;
+        } else if (symbolFilterData.filterType === 'PRICE_FILTER') {
+          priceMinimum = symbolFilterData.minPrice;
+          priceMaximum = symbolFilterData.maxPrice;
+        }
+      });
+
+      let tradingTypes: SessionTradingTypeEnum[] = [];
+      if (
+        symbolData.isSpotTradingAllowed &&
+        symbolData.permissions.includes('SPOT')
+      ) {
+        tradingTypes.push(SessionTradingTypeEnum.SPOT);
+      }
+
+      if (
+        symbolData.isMarginTradingAllowed &&
+        symbolData.permissions.includes('MARGIN')
+      ) {
+        tradingTypes.push(SessionTradingTypeEnum.MARGIN);
+      }
+
+      this._assetPairs.push({
+        assetBase: Assets.getBySymbol(symbolData.baseAsset),
+        assetQuote: Assets.getBySymbol(symbolData.quoteAsset),
+        amountMinimum,
+        amountMaximum,
+        priceMinimum,
+        priceMaximum,
+        tradingTypes
+      });
+
+      this._symbolAssetPairsMap.set(
+        symbolData.symbol,
+        [symbolData.baseAsset, symbolData.quoteAsset]
+      );
+    }
+
+    return true;
   }
 }

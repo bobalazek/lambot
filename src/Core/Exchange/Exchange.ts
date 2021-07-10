@@ -203,6 +203,7 @@ export class Exchange implements ExchangeInterface {
 
     logger.debug('Checking persistence data ...');
 
+    // TODO: also for margin account if implemented?
     const exchangeOpenTrades = await this.getAccountOrders(
       ExchangeAccountTypeEnum.SPOT
     );
