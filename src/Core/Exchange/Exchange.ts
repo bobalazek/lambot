@@ -225,19 +225,21 @@ export class Exchange implements ExchangeInterface {
         return;
       }
 
-      for (let i = 0; i < this.session.trades.length; i++) {
-        const sessionTrade = this.session.trades[i];
-        if (sessionTrade.id !== openTrade.id) {
-          continue;
-        }
-
-        this.session.trades.splice(i, 1);
-
-        logger.info(chalk.bold(
-          `Seems like you closed the trade with ID "${sessionTrade.id}" manually on the exchange, ` +
-          `so we are removing this trade from our trades array!`
-        ));
+      const sessionTradeIndex = this.session.trades.findIndex((trade) => {
+        return trade.id === openTrade.id;
+      });
+      if (sessionTradeIndex === -1) {
+        return;
       }
+
+      const sessionTrade = this.session.trades[sessionTradeIndex];
+
+      this.session.trades.splice(sessionTradeIndex, 1);
+
+      logger.info(chalk.bold(
+        `Seems like you closed the trade with ID "${sessionTrade.id}" manually on the exchange, ` +
+        `so we are removing this trade from our trades array!`
+      ));
     });
   }
 
