@@ -12,6 +12,7 @@ import { Strategy } from '../Strategy/Strategy';
 import { Manager } from '../Manager';
 import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
+import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 
 export class SessionManager {
   static save(session: Session): string {
@@ -165,122 +166,12 @@ export class SessionManager {
   }
 
   static getTradesSummary(session: Session) {
-    // Total
-    const allTrades = session.trades;
-    const totalCount = allTrades.length;
-
-    // Open
-    const openTrades = session.getOpenTrades();
-    const openCount = openTrades.length;
-    const openProfitAveragePercentage = (openTrades.map((exchangeTrade) => {
-      const assetPair = session.exchange.assetPairs.get(
-        exchangeTrade.assetPair.getKey()
-      );
-      const assetPairPriceEntryNewest = assetPair?.getNewestPriceEntry();
-      if (!assetPairPriceEntryNewest) {
-        return 0;
-      }
-      return exchangeTrade.getCurrentProfitPercentage(
-        parseFloat(assetPairPriceEntryNewest.price)
-      );
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) / openCount) || 0;
-    const openProfitIncludingFeesAveragePercentage = (openTrades.map((exchangeTrade) => {
-      const assetPair = session.exchange.assetPairs.get(
-        exchangeTrade.assetPair.getKey()
-      );
-      const assetPairPriceEntryNewest = assetPair?.getNewestPriceEntry();
-      if (!assetPairPriceEntryNewest) {
-        return 0;
-      }
-      return exchangeTrade.getCurrentProfitPercentage(
-        parseFloat(assetPairPriceEntryNewest.price),
-        true
-      );
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) / openCount) || 0;
-    const openProfitAmount = openTrades.map((exchangeTrade) => {
-      const assetPair = session.exchange.assetPairs.get(
-        exchangeTrade.assetPair.getKey()
-      );
-      const assetPairPriceEntryNewest = assetPair?.getNewestPriceEntry();
-      if (!assetPairPriceEntryNewest) {
-        return 0;
-      }
-      return exchangeTrade.getCurrentProfitAmount(
-        parseFloat(assetPairPriceEntryNewest.price)
-      );
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) || 0;
-    const openProfitIncludingFeesAmount = openTrades.map((exchangeTrade) => {
-      const assetPair = session.exchange.assetPairs.get(
-        exchangeTrade.assetPair.getKey()
-      );
-      const assetPairPriceEntryNewest = assetPair?.getNewestPriceEntry();
-      if (!assetPairPriceEntryNewest) {
-        return 0;
-      }
-      return exchangeTrade.getCurrentProfitAmount(
-        parseFloat(assetPairPriceEntryNewest.price),
-        true
-      );
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) || 0;
-
-    // Closed
-    const closedTrades = session.getClosedTrades();
-    const closedCount = closedTrades.length;
-    const closedProfitAveragePercentage = (closedTrades.map((exchangeTrade) => {
-      return exchangeTrade.getProfitPercentage();
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) / closedCount) || 0;
-    const closedProfitIncludingFeesAveragePercentage = (closedTrades.map((exchangeTrade) => {
-      return exchangeTrade.getProfitPercentage(true);
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) / closedCount) || 0;
-    const closedProfitAmount = closedTrades.map((exchangeTrade) => {
-      return exchangeTrade.getProfitAmount();
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) || 0;
-    const closedProfitIncludingFeesAmount = closedTrades.map((exchangeTrade) => {
-      return exchangeTrade.getProfitAmount(true);
-    }).reduce((total, current) => {
-      return total + current;
-    }, 0) || 0;
-
     return {
       total: {
-        count: totalCount,
+        count: session.trades.length,
       },
-      open: {
-        count: openCount,
-        profitAmount: {
-          withoutFees: openProfitAmount,
-          withFees: openProfitIncludingFeesAmount,
-        },
-        profitAveragePercentage: {
-          withoutFees: openProfitAveragePercentage,
-          withFees: openProfitIncludingFeesAveragePercentage,
-        },
-      },
-      closed: {
-        count: closedCount,
-        profitAmount: {
-          withoutFees: closedProfitAmount,
-          withFees: closedProfitIncludingFeesAmount,
-        },
-        profitAveragePercentage: {
-          withoutFees: closedProfitAveragePercentage,
-          withFees: closedProfitIncludingFeesAveragePercentage,
-        },
-      },
+      open: SessionManager.tradeStatisticsForType(session, session.getOpenTrades(), false),
+      closed: SessionManager.tradeStatisticsForType(session, session.getClosedTrades(), true),
     }
   }
 
@@ -291,5 +182,80 @@ export class SessionManager {
       : '.production';
 
     return path.resolve(DATA_SESSIONS_DIR, id + suffix + '.json');
+  }
+
+  static tradeStatisticsForType(session: Session, trades: ExchangeTrade[], isClosed: boolean) {
+    const sum = (total: number, current: number) => {
+      return total + current;
+    };
+    const count = trades.length;
+
+    let withFeesPercentages = [];
+    let withoutFeesPercentages = [];
+    let withFeesAmounts = [];
+    let withoutFeesAmounts = [];
+
+    trades.forEach((exchangeTrade) => {
+      const assetPair = session.exchange.assetPairs.get(
+        exchangeTrade.assetPair.getKey()
+      );
+      const assetPairPriceEntryNewest = assetPair?.getNewestPriceEntry();
+      if (!assetPairPriceEntryNewest) {
+        withFeesPercentages.push(0);
+        withoutFeesPercentages.push(0);
+        withFeesAmounts.push(0);
+        withoutFeesAmounts.push(0);
+
+        return;
+      }
+
+      const price = parseFloat(assetPairPriceEntryNewest.price);
+
+      withFeesPercentages.push(
+        isClosed
+          ? exchangeTrade.getProfitPercentage(true)
+          : exchangeTrade.getCurrentProfitPercentage(price, true)
+      );
+      withoutFeesPercentages.push(
+        isClosed
+          ? exchangeTrade.getProfitPercentage()
+          : exchangeTrade.getCurrentProfitPercentage(price)
+      );
+      withFeesAmounts.push(
+        isClosed
+          ? exchangeTrade.getProfitAmount(true)
+          : exchangeTrade.getCurrentProfitAmount(price, true)
+      );
+      withoutFeesAmounts.push(
+        isClosed
+          ? exchangeTrade.getProfitAmount()
+          :  exchangeTrade.getCurrentProfitAmount(price)
+      );
+    });
+
+    return {
+      count,
+      profitPercentages: {
+        withoutFees: {
+          sum: (withoutFeesPercentages.reduce(sum, 0) / count) || 0,
+          percentages: withoutFeesPercentages,
+        },
+        withFees: {
+          sum: (withFeesPercentages.reduce(sum, 0) / count) || 0,
+          percentages: withFeesPercentages,
+        },
+      },
+      profitAmounts: {
+        asset: session.asset,
+        withoutFees: {
+          sum: withoutFeesAmounts.reduce(sum, 0) || 0,
+          amounts: withoutFeesAmounts,
+        },
+        withFees: {
+          sum: withFeesAmounts.reduce(sum, 0) || 0,
+          amounts: withFeesAmounts,
+        },
+      },
+    }
   }
 }
