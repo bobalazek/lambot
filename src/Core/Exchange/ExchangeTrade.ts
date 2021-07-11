@@ -231,11 +231,9 @@ export class ExchangeTrade {
    */
   getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
     return (
-      calculatePercentage(
-        currentPrice,
-        this.buyPrice
-      ) -
-      (includingFees ? this.buyFeesPercentage : 0)
+      calculatePercentage(currentPrice, this.buyPrice) -
+      (includingFees ? this.buyFeesPercentage : 0) -
+      (includingFees ? this.buyFeesPercentage : 0) // at this point we don't have the sellSeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -244,10 +242,7 @@ export class ExchangeTrade {
    */
   getProfitPercentage(includingFees: boolean = false): number {
     return (
-      calculatePercentage(
-        this.sellPrice,
-        this.buyPrice
-      ) -
+      calculatePercentage(this.sellPrice, this.buyPrice) -
       (includingFees ? this.buyFeesPercentage : 0) -
       (includingFees ? this.sellFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
@@ -259,7 +254,8 @@ export class ExchangeTrade {
    getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
     return (
       (parseFloat(this.amount) * (currentPrice - this.buyPrice)) -
-      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0)
+      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0) -
+      (includingFees ? currentPrice * this.buyFeesPercentage : 0) // at this point we don't have the sellSeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 

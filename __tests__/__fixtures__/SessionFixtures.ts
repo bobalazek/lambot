@@ -46,13 +46,13 @@ const exchangeTrades: ExchangeTrade[] = [];
     sellPrice: 0.8,
     sellFeesPercentage: 0.01,
   },
-].forEach((object) => {
+].forEach((object, index) => {
   const exchangeTrade = new ExchangeTrade(
-    'testTrade1',
+    'MOCK_TRADE_' + (index + 1),
     Assets.USDT,
     new AssetPair(Assets.BTC, Assets.USDT),
     ExchangeTradeTypeEnum.LONG,
-    '1',
+    '15',
     Date.now(),
     object.status
   );
