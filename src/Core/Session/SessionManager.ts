@@ -256,17 +256,31 @@ export class SessionManager {
     }, 0) || 0;
 
     return {
-      totalCount,
-      openCount,
-      openProfitAveragePercentage,
-      openProfitIncludingFeesAveragePercentage,
-      openProfitAmount,
-      openProfitIncludingFeesAmount,
-      closedCount,
-      closedProfitAveragePercentage,
-      closedProfitIncludingFeesAveragePercentage,
-      closedProfitAmount,
-      closedProfitIncludingFeesAmount,
+      total: {
+        count: totalCount,
+      },
+      open: {
+        count: openCount,
+        profitAmount: {
+          withoutFees: openProfitAmount,
+          withFees: openProfitIncludingFeesAmount,
+        },
+        profitAveragePercentage: {
+          withoutFees: openProfitAveragePercentage,
+          withFees: openProfitIncludingFeesAveragePercentage,
+        },
+      },
+      closed: {
+        count: closedCount,
+        profitAmount: {
+          withoutFees: closedProfitAmount,
+          withFees: closedProfitIncludingFeesAmount,
+        },
+        profitAveragePercentage: {
+          withoutFees: closedProfitAveragePercentage,
+          withFees: closedProfitIncludingFeesAveragePercentage,
+        },
+      },
     }
   }
 

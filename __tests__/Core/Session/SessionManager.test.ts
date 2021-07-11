@@ -24,16 +24,16 @@ describe('SessionManager', () => {
   it('should return the correct trades summary', async () => {
     const tradesSummary = SessionManager.getTradesSummary(trader.session);
 
-    expect(tradesSummary.totalCount).toBe(5);
-    expect(tradesSummary.openCount).toBe(3);
-    expect(tradesSummary.openProfitAveragePercentage).toBe(9.006734006734);
-    expect(tradesSummary.openProfitIncludingFeesAveragePercentage).toBe(8.986734006733998);
-    expect(tradesSummary.openProfitAmount).toBe(2.999999999999997);
-    expect(tradesSummary.openProfitIncludingFeesAmount).toBe(2.1299999999999972);
-    expect(tradesSummary.closedCount).toBe(2);
-    expect(tradesSummary.closedProfitAveragePercentage).toBe(-14.999999999999996);
-    expect(tradesSummary.closedProfitIncludingFeesAveragePercentage).toBe(-15.02);
-    expect(tradesSummary.closedProfitAmount).toBe(-4.499999999999998);
-    expect(tradesSummary.closedProfitIncludingFeesAmount).toBe(-5.054999999999999);
+    expect(tradesSummary.total.count).toBe(5);
+    expect(tradesSummary.open.count).toBe(3);
+    expect(tradesSummary.open.profitAveragePercentage.withoutFees).toBe(9.006734006734);
+    expect(tradesSummary.open.profitAveragePercentage.withFees).toBe(8.986734006733998);
+    expect(tradesSummary.open.profitAmount.withoutFees).toBe(2.999999999999997);
+    expect(tradesSummary.open.profitAmount.withFees).toBe(2.991299999999997);
+    expect(tradesSummary.closed.count).toBe(2);
+    expect(tradesSummary.closed.profitAveragePercentage.withoutFees).toBe(-14.999999999999996);
+    expect(tradesSummary.closed.profitAveragePercentage.withFees).toBe(-15.02);
+    expect(tradesSummary.closed.profitAmount.withoutFees).toBe(-4.499999999999998);
+    expect(tradesSummary.closed.profitAmount.withFees).toBe(-4.505549999999999);
   });
 });

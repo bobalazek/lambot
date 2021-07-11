@@ -250,8 +250,8 @@ export class ExchangeTrade {
     const amount = parseFloat(this.amount);
     return (
       (amount * (currentPrice - this.buyPrice)) -
-      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage : 0) -
-      (includingFees ? amount * currentPrice * this.buyFeesPercentage : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
+      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage * 0.01 : 0) -
+      (includingFees ? amount * currentPrice * this.buyFeesPercentage * 0.01 : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -262,8 +262,8 @@ export class ExchangeTrade {
     const amount = parseFloat(this.amount);
     return (
       (amount * (this.sellPrice - this.buyPrice)) -
-      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage : 0) -
-      (includingFees ? amount * this.sellPrice * this.sellFeesPercentage : 0)
+      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage * 0.01 : 0) -
+      (includingFees ? amount * this.sellPrice * this.sellFeesPercentage * 0.01 : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
