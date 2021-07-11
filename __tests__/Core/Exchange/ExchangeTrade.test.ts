@@ -32,30 +32,30 @@ describe('ExchangeTrade', () => {
     exchangeTrade.buyFeesPercentage = 0.01;
 
     // Long
-    expect(exchangeTrade.getCurrentProfitPercentage(5.1)).toBe(1.9999999999999927);
-    expect(exchangeTrade.getCurrentProfitPercentage(5.1, true)).toBe(1.9799999999999927);
-    expect(exchangeTrade.getCurrentProfitAmount(5.1)).toBe(1.4999999999999947);
-    expect(exchangeTrade.getCurrentProfitAmount(5.1, true)).toBe(1.3989999999999947);
+    expect(exchangeTrade.getCurrentProfitPercentage(5.5)).toBe(10);
+    expect(exchangeTrade.getCurrentProfitPercentage(5.5, true)).toBe(9.98);
+    expect(exchangeTrade.getCurrentProfitAmount(5.5)).toBe(7.5);
+    expect(exchangeTrade.getCurrentProfitAmount(5.5, true)).toBe(5.925);
 
-    exchangeTrade.sellPrice = 5.1;
+    exchangeTrade.sellPrice = 5.5;
     exchangeTrade.sellFeesPercentage = 0.01;
 
-    expect(exchangeTrade.getProfitPercentage()).toBe(1.9999999999999927);
-    expect(exchangeTrade.getProfitPercentage(true)).toBe(1.9799999999999927);
-    expect(exchangeTrade.getProfitAmount()).toBe(1.4999999999999947);
-    expect(exchangeTrade.getProfitAmount(true)).toBe(1.3989999999999947);
+    expect(exchangeTrade.getProfitPercentage()).toBe(10);
+    expect(exchangeTrade.getProfitPercentage(true)).toBe(9.98);
+    expect(exchangeTrade.getProfitAmount()).toBe(7.5);
+    expect(exchangeTrade.getProfitAmount(true)).toBe(5.925);
 
     // Short
     exchangeTrade.type = ExchangeTradeTypeEnum.SHORT;
 
-    expect(exchangeTrade.getCurrentProfitPercentage(5.1)).toBe(-1.9999999999999927);
-    expect(exchangeTrade.getCurrentProfitPercentage(5.1, true)).toBe(-1.9799999999999927);
-    expect(exchangeTrade.getCurrentProfitAmount(5.1)).toBe(-1.4999999999999947);
-    expect(exchangeTrade.getCurrentProfitAmount(5.1, true)).toBe(-1.3989999999999947);
-    expect(exchangeTrade.getProfitPercentage()).toBe(-1.9999999999999927);
-    expect(exchangeTrade.getProfitPercentage(true)).toBe(-1.9799999999999927);
-    expect(exchangeTrade.getProfitAmount()).toBe(-1.4999999999999947);
-    expect(exchangeTrade.getProfitAmount(true)).toBe(-1.3989999999999947);
+    expect(exchangeTrade.getCurrentProfitPercentage(5.5)).toBe(-10);
+    expect(exchangeTrade.getCurrentProfitPercentage(5.5, true)).toBe(-9.98);
+    expect(exchangeTrade.getCurrentProfitAmount(5.5)).toBe(-7.5);
+    expect(exchangeTrade.getCurrentProfitAmount(5.5, true)).toBe(-5.925);
+    expect(exchangeTrade.getProfitPercentage()).toBe(-10);
+    expect(exchangeTrade.getProfitPercentage(true)).toBe(-9.98);
+    expect(exchangeTrade.getProfitAmount()).toBe(-7.5);
+    expect(exchangeTrade.getProfitAmount(true)).toBe(-5.925);
   });
 
   it('should correctly return shouldSell for stopLoss', () => {

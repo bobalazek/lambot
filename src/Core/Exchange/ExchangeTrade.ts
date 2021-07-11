@@ -228,7 +228,7 @@ export class ExchangeTrade {
     return (
       calculatePercentage(currentPrice, this.buyPrice) -
       (includingFees ? this.buyFeesPercentage : 0) -
-      (includingFees ? this.buyFeesPercentage : 0) // at this point we don't have the sellSeesPercentage yet, so assume it's the same as buy
+      (includingFees ? this.buyFeesPercentage : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -246,22 +246,24 @@ export class ExchangeTrade {
   /**
    * Gets the current profit in the quote currency!
    */
-   getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
+  getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
+    const amount = parseFloat(this.amount);
     return (
-      (parseFloat(this.amount) * (currentPrice - this.buyPrice)) -
-      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0) -
-      (includingFees ? currentPrice * this.buyFeesPercentage : 0) // at this point we don't have the sellSeesPercentage yet, so assume it's the same as buy
+      (amount * (currentPrice - this.buyPrice)) -
+      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage : 0) -
+      (includingFees ? amount * currentPrice * this.buyFeesPercentage : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
   /**
    * Gets the final profit in the quote currency!
    */
-   getProfitAmount(includingFees: boolean = false): number {
+  getProfitAmount(includingFees: boolean = false): number {
+    const amount = parseFloat(this.amount);
     return (
-      (parseFloat(this.amount) * (this.sellPrice - this.buyPrice)) -
-      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0) -
-      (includingFees ? this.sellPrice * this.sellFeesPercentage : 0)
+      (amount * (this.sellPrice - this.buyPrice)) -
+      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage : 0) -
+      (includingFees ? amount * this.sellPrice * this.sellFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 

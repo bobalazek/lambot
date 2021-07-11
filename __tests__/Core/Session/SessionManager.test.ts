@@ -29,11 +29,11 @@ describe('SessionManager', () => {
     expect(tradesSummary.openProfitAveragePercentage).toBe(9.006734006734);
     expect(tradesSummary.openProfitIncludingFeesAveragePercentage).toBe(8.986734006733998);
     expect(tradesSummary.openProfitAmount).toBe(2.999999999999997);
-    expect(tradesSummary.openProfitIncludingFeesAmount).toBe(2.941999999999998);
+    expect(tradesSummary.openProfitIncludingFeesAmount).toBe(2.1299999999999972);
     expect(tradesSummary.closedCount).toBe(2);
     expect(tradesSummary.closedProfitAveragePercentage).toBe(-14.999999999999996);
     expect(tradesSummary.closedProfitIncludingFeesAveragePercentage).toBe(-15.02);
     expect(tradesSummary.closedProfitAmount).toBe(-4.499999999999998);
-    expect(tradesSummary.closedProfitIncludingFeesAmount).toBe(-4.536999999999998);
+    expect(tradesSummary.closedProfitIncludingFeesAmount).toBe(-5.054999999999999);
   });
 });
