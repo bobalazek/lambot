@@ -139,7 +139,6 @@ describe('ExchangeAssetPair', () => {
 
     session.trades.push(new ExchangeTrade(
       'MOCK_TRADE_ID',
-      Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
       '1'
@@ -153,7 +152,6 @@ describe('ExchangeAssetPair', () => {
 
     session.trades.push(new ExchangeTrade(
       'MOCK_TRADE_ID_2',
-      Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETH),
       ExchangeTradeTypeEnum.LONG,
       '1'
@@ -163,7 +161,6 @@ describe('ExchangeAssetPair', () => {
 
     session.trades.push(new ExchangeTrade(
       'MOCK_TRADE_ID_3',
-      Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BCH),
       ExchangeTradeTypeEnum.LONG,
       '1'
@@ -173,7 +170,6 @@ describe('ExchangeAssetPair', () => {
 
     session.trades.push(new ExchangeTrade(
       'MOCK_TRADE_ID_4',
-      Assets.USDT,
       new AssetPair(Assets.USDT, Assets.ETC),
       ExchangeTradeTypeEnum.LONG,
       '1'

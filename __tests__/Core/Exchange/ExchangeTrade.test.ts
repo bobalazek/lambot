@@ -19,7 +19,6 @@ describe('ExchangeTrade', () => {
 
     exchangeTrade = new ExchangeTrade(
       'MOCK_TRADE',
-      Assets.USDT,
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
       '15'

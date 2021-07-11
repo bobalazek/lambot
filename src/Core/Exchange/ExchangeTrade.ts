@@ -1,4 +1,3 @@
-import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 import { calculatePercentage } from '../../Utils/Helpers';
@@ -6,10 +5,9 @@ import { Session } from '../Session/Session';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
-  asset: Asset;
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
-  amount: string; // The amount of the quote currency we invested in this trade (USDT in case of BTC/USDT)
+  amount: string; // The amount of the base currency bought
   timestamp: number;
   status: ExchangeTradeStatusEnum;
   buyPrice?: number;
@@ -44,7 +42,6 @@ export enum ExchangeTradeStatusEnum {
 
 export class ExchangeTrade {
   id: string;
-  asset: Asset;
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
   amount: string;
@@ -64,7 +61,6 @@ export class ExchangeTrade {
 
   constructor(
     id: string,
-    asset: Asset,
     assetPair: AssetPair,
     type: ExchangeTradeTypeEnum,
     amount: string,
@@ -72,7 +68,6 @@ export class ExchangeTrade {
     status: ExchangeTradeStatusEnum = ExchangeTradeStatusEnum.OPEN
   ) {
     this.id = id;
-    this.asset = asset;
     this.assetPair = assetPair;
     this.type = type;
     this.amount = amount;
@@ -274,7 +269,6 @@ export class ExchangeTrade {
   toExport() {
     return {
       id: this.id,
-      asset: this.asset.toExport(),
       assetPair: this.assetPair.toExport(),
       type: this.type,
       amount: this.amount,
@@ -297,7 +291,6 @@ export class ExchangeTrade {
   static fromImport(data: any): ExchangeTrade {
     const exchangeTrade = new ExchangeTrade(
       data.id,
-      Asset.fromImport(data.asset),
       AssetPair.fromImport(data.assetPair),
       data.type,
       data.amount,

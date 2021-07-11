@@ -49,7 +49,6 @@ const exchangeTrades: ExchangeTrade[] = [];
 ].forEach((object, index) => {
   const exchangeTrade = new ExchangeTrade(
     'MOCK_TRADE_' + (index + 1),
-    Assets.USDT,
     new AssetPair(Assets.BTC, Assets.USDT),
     ExchangeTradeTypeEnum.LONG,
     '15',

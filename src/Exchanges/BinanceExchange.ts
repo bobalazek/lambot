@@ -199,8 +199,9 @@ export class BinanceExchange extends Exchange {
       process.exit(1);
     }
 
-    order.price = response.data.price;
     order.exchangeResponse = response.data;
+    order.price = response.data.price;
+    order.amount = response.data.origQty;
 
     return order;
   }
