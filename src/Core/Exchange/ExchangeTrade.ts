@@ -230,13 +230,12 @@ export class ExchangeTrade {
    * Gets the current profit, relating to the current price we provide it.
    */
   getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
-    const buyPrice = includingFees
-      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
-      : this.buyPrice;
-
-    return calculatePercentage(
-      currentPrice,
-      buyPrice
+    return (
+      calculatePercentage(
+        currentPrice,
+        this.buyPrice
+      ) -
+      (includingFees ? this.buyFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -244,16 +243,13 @@ export class ExchangeTrade {
    * Gets the final profit of this trade - must be called after the sellPrice is set to make sense.
    */
   getProfitPercentage(includingFees: boolean = false): number {
-    const sellPrice = includingFees
-      ? this.sellPrice - (this.sellPrice * this.sellFeesPercentage)
-      : this.sellPrice;
-    const buyPrice = includingFees
-      ? this.buyPrice + (this.buyPrice * this.buyFeesPercentage)
-      : this.buyPrice;
-
-    return calculatePercentage(
-      sellPrice,
-      buyPrice
+    return (
+      calculatePercentage(
+        this.sellPrice,
+        this.buyPrice
+      ) -
+      (includingFees ? this.buyFeesPercentage : 0) -
+      (includingFees ? this.sellFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 

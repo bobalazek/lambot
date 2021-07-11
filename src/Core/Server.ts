@@ -43,19 +43,19 @@ export class Server {
       });
     });
 
-    this.app.get('/session', (request: Request, response: Response) => {
+    this.app.get('/api/session', (request: Request, response: Response) => {
       const data = Manager.session.toExport();
       delete data.trades;
       response.status(200).json(data);
     });
 
-    this.app.get('/session/trades', (request: Request, response: Response) => {
+    this.app.get('/api/session/trades', (request: Request, response: Response) => {
       response.status(200).json(Manager.session.trades.map((exchangeTrade) => {
         return exchangeTrade.toExport();
       }));
     });
 
-    this.app.get('/session/trades/summary', (request: Request, response: Response) => {
+    this.app.get('/api/session/trades/summary', (request: Request, response: Response) => {
       response.status(200).json(SessionManager.getTradesSummary(Manager.session));
     });
   }

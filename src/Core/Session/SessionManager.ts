@@ -190,7 +190,6 @@ export class SessionManager {
       if (!assetPair) {
         return 0;
       }
-
       const assetPairPriceEntryNewest = assetPair.getNewestPriceEntry();
       if (!assetPairPriceEntryNewest) {
         return 0;
@@ -209,7 +208,6 @@ export class SessionManager {
       if (!assetPair) {
         return 0;
       }
-
       const assetPairPriceEntryNewest = assetPair.getNewestPriceEntry();
       if (!assetPairPriceEntryNewest) {
         return 0;

@@ -287,9 +287,13 @@ export class Trader implements TraderInterface {
 
     SessionManager.save(this.session);
 
+    const profitPercentage = exchangeTrade.getProfitPercentage();
+    const profitPercentageIncludingFees = exchangeTrade.getProfitPercentage(true);
+
     logger.notice(chalk.green.bold(
       `I sold "${exchangeTrade.assetPair.getKey()}". ` +
-      `It made (${colorTextPercentageByValue(exchangeTrade.getProfitPercentage())}) profit (excluding fees)!`
+      `It made ${colorTextPercentageByValue(profitPercentage)} profit ` +
+      `(${colorTextPercentageByValue(profitPercentageIncludingFees)} including fees)!`
     ));
 
     return exchangeTrade;
@@ -379,13 +383,15 @@ export class Trader implements TraderInterface {
 
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
       const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
+      const profitPercentageIncludingFees = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);
       const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
 
       logger.info(
         chalk.bold(exchangeTrade.assetPair.getKey()) +
         ` @ ${currentAssetPairPrice}` +
         ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
-        ` current profit: ${colorTextPercentageByValue(profitPercentage)} (excluding fees)`
+        ` current profit: ${colorTextPercentageByValue(profitPercentage)} ` +
+        ` (${colorTextPercentageByValue(profitPercentageIncludingFees)} including fees)`
       );
     });
 
