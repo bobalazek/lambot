@@ -173,18 +173,18 @@ export class SessionManager {
     const closedCount = closedTrades.length;
     const openCount = openTrades.length;
 
-    const closedProfitPercentage = closedTrades.map((exchangeTrade) => {
+    const closedProfitAveragePercentage = closedTrades.map((exchangeTrade) => {
       return exchangeTrade.getProfitPercentage();
     }).reduce((total, current) => {
       return total + current;
     }, 0) / closedTrades.length;
-    const closedProfitIncludingFeesPercentage = closedTrades.map((exchangeTrade) => {
+    const closedProfitIncludingFeesAveragePercentage = closedTrades.map((exchangeTrade) => {
       return exchangeTrade.getProfitPercentage(true);
     }).reduce((total, current) => {
       return total + current;
     }, 0) / closedTrades.length;
-    const openProfitPercentage = openTrades.map((exchangeTrade) => {
-      const assetPair = Manager.session.exchange.assetPairs.get(
+    const openProfitAveragePercentage = openTrades.map((exchangeTrade) => {
+      const assetPair = session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
       if (!assetPair) {
@@ -201,8 +201,8 @@ export class SessionManager {
     }).reduce((total, current) => {
       return total + current;
     }, 0) / openTrades.length;
-    const openProfitIncludingFeesPercentage = openTrades.map((exchangeTrade) => {
-      const assetPair = Manager.session.exchange.assetPairs.get(
+    const openProfitIncludingFeesAveragePercentage = openTrades.map((exchangeTrade) => {
+      const assetPair = session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
       if (!assetPair) {
@@ -224,10 +224,10 @@ export class SessionManager {
       totalCount,
       closedCount,
       openCount,
-      closedProfitPercentage,
-      closedProfitIncludingFeesPercentage,
-      openProfitPercentage,
-      openProfitIncludingFeesPercentage,
+      closedProfitAveragePercentage,
+      closedProfitIncludingFeesAveragePercentage,
+      openProfitAveragePercentage,
+      openProfitIncludingFeesAveragePercentage,
     }
   }
 

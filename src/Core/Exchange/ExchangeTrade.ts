@@ -9,7 +9,7 @@ export interface ExchangeTradeInterface {
   asset: Asset;
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
-  amount: string;
+  amount: string; // The amount of the quote currency we invested in this trade (USDT in case of BTC/USDT)
   timestamp: number;
   status: ExchangeTradeStatusEnum;
   buyPrice?: number;
@@ -250,6 +250,27 @@ export class ExchangeTrade {
       ) -
       (includingFees ? this.buyFeesPercentage : 0) -
       (includingFees ? this.sellFeesPercentage : 0)
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
+  }
+
+  /**
+   * Gets the current profit in the quote currency!
+   */
+   getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
+    return (
+      (parseFloat(this.amount) * (currentPrice - this.buyPrice)) -
+      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0)
+    ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
+  }
+
+  /**
+   * Gets the final profit in the quote currency!
+   */
+   getProfitAmount(includingFees: boolean = false): number {
+    return (
+      (parseFloat(this.amount) * (this.sellPrice - this.buyPrice)) -
+      (includingFees ? this.buyPrice * this.buyFeesPercentage : 0) -
+      (includingFees ? this.sellPrice * this.sellFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 

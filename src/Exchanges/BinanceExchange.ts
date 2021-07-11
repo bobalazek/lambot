@@ -130,10 +130,19 @@ export class BinanceExchange extends Exchange {
         process.exit(1);
       }
 
+      const assetPair = this._getAssetPairBySymbol(orderData.symbol);
+      if (!assetPair) {
+        logger.error(chalk.red(
+          `Symbol asset pair ${orderData.symbol} not found on this exchange!`
+        ));
+
+        continue;
+      }
+
       orders.push(
         new ExchangeOrder(
           orderData.clientOrderId ?? orderData.orderId,
-          this._getAssetPairBySymbol(orderData.symbol),
+          assetPair,
           orderData.side,
           orderData.origQty,
           orderData.price,
@@ -280,8 +289,17 @@ export class BinanceExchange extends Exchange {
     for (let i = 0; i < response.data.length; i++) {
       const data = response.data[i];
 
+      const assetPair = this._getAssetPairBySymbol(data.symbol);
+      if (!assetPair) {
+        logger.error(chalk.red(
+          `Symbol asset pair ${data.symbol} not found on this exchange!`
+        ));
+
+        continue;
+      }
+
       assetPairPrices.push({
-        assetPair: this._getAssetPairBySymbol(data.symbol),
+        assetPair,
         price: data.price,
         timestamp: now,
       });
@@ -305,6 +323,13 @@ export class BinanceExchange extends Exchange {
       const data = response.data[i];
 
       const assetPair = this._getAssetPairBySymbol(data.symbol);
+      if (!assetPair) {
+        logger.error(chalk.red(
+          `Symbol asset pair ${data.symbol} not found on this exchange!`
+        ));
+
+        continue;
+      }
 
       assetPairTickers.push({
         assetPair,
@@ -413,10 +438,7 @@ export class BinanceExchange extends Exchange {
   /***** Helpers *****/
   _getAssetPairBySymbol(symbol: string): AssetPair {
     if (!this._symbolAssetPairsMap.has(symbol)) {
-      logger.critical(chalk.red.bold(
-        `Symbol asset pair ${symbol} not found on this exchange!`
-      ));
-      process.exit(1);
+      return null;
     }
 
     const assetPairArray = this._symbolAssetPairsMap.get(symbol);
