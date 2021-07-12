@@ -1,3 +1,3 @@
 export interface ExchangeResponseOrderFeesInterface {
-  amountPercentage: number;
+  percentage: number;
 }

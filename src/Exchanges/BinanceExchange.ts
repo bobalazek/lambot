@@ -427,12 +427,12 @@ export class BinanceExchange extends Exchange {
 
     if (tradeType === ExchangeTradeTypeEnum.SHORT) {
       return {
-        amountPercentage: 0.09,
+        percentage: 0.09,
       };
     }
 
     return {
-      amountPercentage: 0.075,
+      percentage: 0.075,
     };
   }
 

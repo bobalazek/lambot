@@ -10,17 +10,19 @@ export interface ExchangeTradeInterface {
   amount: string; // The amount of the base currency bought
   timestamp: number;
   status: ExchangeTradeStatusEnum;
-  buyPrice?: number;
-  sellPrice?: number;
-  buyFeesPercentage?: number;
-  sellFeesPercentage?: number;
+  entryPrice?: number;
+  exitPrice?: number;
+  entryFeesPercentage?: number;
+  exitFeesPercentage?: number;
+  entryAt?: number;
+  exitAt?: number;
   currentProfitPercentage?: number;
   peakProfitPercentage?: number; // What is the peak profit we reached?
   troughProfitPercentage?: number; // What is the trough profit we reached?
   triggerStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger (can be positive or negative?
   triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
-  buyOrder?: ExchangeOrderInterface;
-  sellOrder?: ExchangeOrderInterface;
+  entryOrder?: ExchangeOrderInterface;
+  exitOrder?: ExchangeOrderInterface;
   prepareData(): void;
   shouldSell(session: Session, prepareData: boolean): boolean;
   getCurrentProfitPercentage(currentPrice: number): number;
@@ -47,17 +49,19 @@ export class ExchangeTrade {
   amount: string;
   timestamp: number;
   status: ExchangeTradeStatusEnum;
-  buyPrice?: number;
-  sellPrice?: number;
-  buyFeesPercentage?: number;
-  sellFeesPercentage?: number;
+  entryPrice?: number;
+  exitPrice?: number;
+  entryFeesPercentage?: number;
+  exitFeesPercentage?: number;
+  entryAt?: number;
+  exitAt?: number;
   currentProfitPercentage?: number;
   peakProfitPercentage?: number;
   troughProfitPercentage?: number;
   triggerStopLossPercentage?: number;
   triggerStopLossSellAt?: number;
-  buyOrder?: ExchangeOrder;
-  sellOrder?: ExchangeOrder;
+  entryOrder?: ExchangeOrder;
+  exitOrder?: ExchangeOrder;
 
   constructor(
     id: string,
@@ -226,20 +230,20 @@ export class ExchangeTrade {
    */
   getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
     return (
-      calculatePercentage(currentPrice, this.buyPrice) -
-      (includingFees ? this.buyFeesPercentage : 0) -
-      (includingFees ? this.buyFeesPercentage : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
+      calculatePercentage(currentPrice, this.entryPrice) -
+      (includingFees ? this.entryFeesPercentage : 0) -
+      (includingFees ? this.entryFeesPercentage : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
   /**
-   * Gets the final profit of this trade - must be called after the sellPrice is set to make sense.
+   * Gets the final profit of this trade - must be called after the exitPrice is set to make sense.
    */
   getProfitPercentage(includingFees: boolean = false): number {
     return (
-      calculatePercentage(this.sellPrice, this.buyPrice) -
-      (includingFees ? this.buyFeesPercentage : 0) -
-      (includingFees ? this.sellFeesPercentage : 0)
+      calculatePercentage(this.exitPrice, this.entryPrice) -
+      (includingFees ? this.entryFeesPercentage : 0) -
+      (includingFees ? this.exitFeesPercentage : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -249,9 +253,9 @@ export class ExchangeTrade {
   getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
     const amount = parseFloat(this.amount);
     return (
-      (amount * (currentPrice - this.buyPrice)) -
-      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage * 0.01 : 0) -
-      (includingFees ? amount * currentPrice * this.buyFeesPercentage * 0.01 : 0) // at this point we don't have the sellFeesPercentage yet, so assume it's the same as buy
+      (amount * (currentPrice - this.entryPrice)) -
+      (includingFees ? amount * this.entryPrice * this.entryFeesPercentage * 0.01 : 0) -
+      (includingFees ? amount * currentPrice * this.entryFeesPercentage * 0.01 : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -261,9 +265,9 @@ export class ExchangeTrade {
   getProfitAmount(includingFees: boolean = false): number {
     const amount = parseFloat(this.amount);
     return (
-      (amount * (this.sellPrice - this.buyPrice)) -
-      (includingFees ? amount * this.buyPrice * this.buyFeesPercentage * 0.01 : 0) -
-      (includingFees ? amount * this.sellPrice * this.sellFeesPercentage * 0.01 : 0)
+      (amount * (this.exitPrice - this.entryPrice)) -
+      (includingFees ? amount * this.entryPrice * this.entryFeesPercentage * 0.01 : 0) -
+      (includingFees ? amount * this.exitPrice * this.exitFeesPercentage * 0.01 : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -276,17 +280,19 @@ export class ExchangeTrade {
       amount: this.amount,
       timestamp: this.timestamp,
       status: this.status,
-      buyPrice: this.buyPrice,
-      sellPrice: this.sellPrice,
-      buyFeesPercentage: this.buyFeesPercentage,
-      sellFeesPercentage: this.sellFeesPercentage,
+      entryPrice: this.entryPrice,
+      exitPrice: this.exitPrice,
+      entryFeesPercentage: this.entryFeesPercentage,
+      exitFeesPercentage: this.exitFeesPercentage,
+      entryAt: this.entryAt,
+      exitAt: this.exitAt,
       currentProfitPercentage: this.currentProfitPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
       troughProfitPercentage: this.troughProfitPercentage,
       triggerStopLossPercentage: this.triggerStopLossPercentage,
       triggerStopLossSellAt: this.triggerStopLossSellAt,
-      buyOrder: this.buyOrder?.toExport(),
-      sellOrder: this.sellOrder?.toExport(),
+      entryOrder: this.entryOrder?.toExport(),
+      exitOrder: this.exitOrder?.toExport(),
     };
   }
 
@@ -300,20 +306,28 @@ export class ExchangeTrade {
       data.status
     );
 
-    if (typeof data.buyPrice !== 'undefined') {
-      exchangeTrade.buyPrice = data.buyPrice;
+    if (typeof data.entryPrice !== 'undefined') {
+      exchangeTrade.entryPrice = data.entryPrice;
     }
 
-    if (typeof data.sellPrice !== 'undefined') {
-      exchangeTrade.sellPrice = data.sellPrice;
+    if (typeof data.exitPrice !== 'undefined') {
+      exchangeTrade.exitPrice = data.exitPrice;
     }
 
-    if (typeof data.buyFeesPercentage !== 'undefined') {
-      exchangeTrade.buyFeesPercentage = data.buyFeesPercentage;
+    if (typeof data.entryFeesPercentage !== 'undefined') {
+      exchangeTrade.entryFeesPercentage = data.entryFeesPercentage;
     }
 
-    if (typeof data.sellFeesPercentage !== 'undefined') {
-      exchangeTrade.sellFeesPercentage = data.sellFeesPercentage;
+    if (typeof data.exitFeesPercentage !== 'undefined') {
+      exchangeTrade.exitFeesPercentage = data.exitFeesPercentage;
+    }
+
+    if (typeof data.entryAt !== 'undefined') {
+      exchangeTrade.entryAt = data.entryAt;
+    }
+
+    if (typeof data.exitAt !== 'undefined') {
+      exchangeTrade.exitAt = data.exitAt;
     }
 
     if (typeof data.peakProfitPercentage !== 'undefined') {
@@ -332,12 +346,12 @@ export class ExchangeTrade {
       exchangeTrade.triggerStopLossSellAt = data.triggerStopLossSellAt;
     }
 
-    if (typeof data.buyOrder !== 'undefined') {
-      exchangeTrade.buyOrder = ExchangeOrder.fromImport(data.buyOrder);
+    if (typeof data.entryOrder !== 'undefined') {
+      exchangeTrade.entryOrder = ExchangeOrder.fromImport(data.entryOrder);
     }
 
-    if (typeof data.sellOrder !== 'undefined') {
-      exchangeTrade.sellOrder = ExchangeOrder.fromImport(data.sellOrder);
+    if (typeof data.exitOrder !== 'undefined') {
+      exchangeTrade.exitOrder = ExchangeOrder.fromImport(data.exitOrder);
     }
 
     return exchangeTrade;

@@ -13,38 +13,48 @@ const exchangeTrades: ExchangeTrade[] = [];
 [
   {
     status: ExchangeTradeStatusEnum.OPEN,
-    buyPrice: 0.8,
-    buyFeesPercentage: 0.01,
-    sellPrice: null,
-    sellFeesPercentage: null,
+    entryPrice: 0.8,
+    entryFeesPercentage: 0.01,
+    entryAt: 0,
+    exitPrice: null,
+    exitFeesPercentage: null,
+    exitAt: null,
   },
   {
     status: ExchangeTradeStatusEnum.OPEN,
-    buyPrice: 0.9,
-    buyFeesPercentage: 0.01,
-    sellPrice: null,
-    sellFeesPercentage: null,
+    entryPrice: 0.9,
+    entryFeesPercentage: 0.01,
+    entryAt: 0,
+    exitPrice: null,
+    exitFeesPercentage: null,
+    exitAt: null,
   },
   {
     status: ExchangeTradeStatusEnum.OPEN,
-    buyPrice: 1.1,
-    buyFeesPercentage: 0.01,
-    sellPrice: 1.4,
-    sellFeesPercentage: 0.01,
+    entryPrice: 1.1,
+    entryFeesPercentage: 0.01,
+    entryAt: 0,
+    exitPrice: 1.4,
+    exitFeesPercentage: 0.01,
+    exitAt: 1000,
   },
   {
     status: ExchangeTradeStatusEnum.CLOSED,
-    buyPrice: 1,
-    buyFeesPercentage: 0.01,
-    sellPrice: 0.9,
-    sellFeesPercentage: 0.01,
+    entryPrice: 1,
+    entryFeesPercentage: 0.01,
+    entryAt: 0,
+    exitPrice: 0.9,
+    exitFeesPercentage: 0.01,
+    exitAt: 1000,
   },
   {
     status: ExchangeTradeStatusEnum.CLOSED,
-    buyPrice: 1,
-    buyFeesPercentage: 0.01,
-    sellPrice: 0.8,
-    sellFeesPercentage: 0.01,
+    entryPrice: 1,
+    entryFeesPercentage: 0.01,
+    entryAt: 0,
+    exitPrice: 0.8,
+    exitFeesPercentage: 0.01,
+    exitAt: 1000,
   },
 ].forEach((object, index) => {
   const exchangeTrade = new ExchangeTrade(
@@ -56,17 +66,28 @@ const exchangeTrades: ExchangeTrade[] = [];
     object.status
   );
 
-  if (object.buyPrice) {
-    exchangeTrade.buyPrice = object.buyPrice;
+  if (object.entryPrice) {
+    exchangeTrade.entryPrice = object.entryPrice;
   }
-  if (object.buyFeesPercentage) {
-    exchangeTrade.buyFeesPercentage = object.buyFeesPercentage;
+
+  if (object.entryFeesPercentage) {
+    exchangeTrade.entryFeesPercentage = object.entryFeesPercentage;
   }
-  if (object.sellPrice) {
-    exchangeTrade.sellPrice = object.sellPrice;
+
+  if (object.entryAt !== null) {
+    exchangeTrade.entryAt = object.entryAt;
   }
-  if (object.sellFeesPercentage) {
-    exchangeTrade.sellFeesPercentage = object.sellFeesPercentage;
+
+  if (object.exitPrice) {
+    exchangeTrade.exitPrice = object.exitPrice;
+  }
+
+  if (object.exitFeesPercentage) {
+    exchangeTrade.exitFeesPercentage = object.exitFeesPercentage;
+  }
+
+  if (object.exitAt !== null) {
+    exchangeTrade.exitAt = object.exitAt;
   }
 
   exchangeTrades.push(exchangeTrade);

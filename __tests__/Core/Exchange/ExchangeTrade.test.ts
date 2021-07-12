@@ -23,13 +23,13 @@ describe('ExchangeTrade', () => {
       ExchangeTradeTypeEnum.LONG,
       '15'
     );
-    exchangeTrade.buyPrice = 1.0;
-    exchangeTrade.buyFeesPercentage = 0.01;
+    exchangeTrade.entryPrice = 1.0;
+    exchangeTrade.entryFeesPercentage = 0.01;
   });
 
   it('should correctly return the profit', () => {
-    exchangeTrade.buyPrice = 5.0;
-    exchangeTrade.buyFeesPercentage = 0.01;
+    exchangeTrade.entryPrice = 5.0;
+    exchangeTrade.entryFeesPercentage = 0.01;
 
     // Long
     expect(exchangeTrade.getCurrentProfitPercentage(5.5)).toBe(10);
@@ -37,8 +37,8 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.getCurrentProfitAmount(5.5)).toBe(7.5);
     expect(exchangeTrade.getCurrentProfitAmount(5.5, true)).toBe(7.484249999999999);
 
-    exchangeTrade.sellPrice = 5.5;
-    exchangeTrade.sellFeesPercentage = 0.01;
+    exchangeTrade.exitPrice = 5.5;
+    exchangeTrade.exitFeesPercentage = 0.01;
 
     expect(exchangeTrade.getProfitPercentage()).toBe(10);
     expect(exchangeTrade.getProfitPercentage(true)).toBe(9.98);

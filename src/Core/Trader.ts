@@ -228,26 +228,27 @@ export class Trader implements TraderInterface {
       tradeType
     );
 
-    const buyOrder: ExchangeOrder = !Manager.isTestMode
+    const entryOrder: ExchangeOrder = !Manager.isTestMode
       ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
     const exchangeTrade = new ExchangeTrade(
       id,
       assetPair,
       tradeType,
-      buyOrder.amount,
+      entryOrder.amount,
       now
     );
-    exchangeTrade.buyFeesPercentage = orderFees.amountPercentage;
-    exchangeTrade.buyOrder = buyOrder;
-    exchangeTrade.buyPrice = parseFloat(buyOrder.price);
+    exchangeTrade.entryFeesPercentage = orderFees.percentage;
+    exchangeTrade.entryOrder = entryOrder;
+    exchangeTrade.entryPrice = parseFloat(entryOrder.price);
+    exchangeTrade.entryAt = Date.now();
 
     this.session.trades.push(exchangeTrade);
 
     SessionManager.save(this.session);
 
     logger.notice(chalk.green.bold(
-      `I bought "${assetPair.getKey()}" @ ${exchangeTrade.buyPrice}!`
+      `I bought "${assetPair.getKey()}" @ ${exchangeTrade.entryPrice}!`
     ));
 
     return exchangeTrade;
@@ -280,12 +281,13 @@ export class Trader implements TraderInterface {
       exchangeTrade.type
     );
 
-    const sellOrder: ExchangeOrder = !Manager.isTestMode
+    const exitOrder: ExchangeOrder = !Manager.isTestMode
       ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
-    exchangeTrade.sellFeesPercentage = orderFees.amountPercentage;
-    exchangeTrade.sellOrder = sellOrder;
-    exchangeTrade.sellPrice = parseFloat(sellOrder.price);
+    exchangeTrade.exitFeesPercentage = orderFees.percentage;
+    exchangeTrade.exitOrder = exitOrder;
+    exchangeTrade.exitPrice = parseFloat(exitOrder.price);
+    exchangeTrade.exitAt = Date.now();
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
     SessionManager.save(this.session);
@@ -392,7 +394,7 @@ export class Trader implements TraderInterface {
       logger.info(
         chalk.bold(exchangeTrade.assetPair.getKey()) +
         ` @ ${currentAssetPairPrice}` +
-        ` (bought @ ${exchangeTrade.buyPrice}; ${timeAgoSeconds} seconds ago)` +
+        ` (bought @ ${exchangeTrade.entryPrice}; ${timeAgoSeconds} seconds ago)` +
         ` current profit: ${colorTextPercentageByValue(profitPercentage)} ` +
         ` (${colorTextPercentageByValue(profitPercentageIncludingFees)} including fees)`
       );
