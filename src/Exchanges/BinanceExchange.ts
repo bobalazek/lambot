@@ -366,24 +366,16 @@ export class BinanceExchange extends Exchange {
       return [];
     }
 
-    const interval = BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds);
-
-    const symbol = this.convertAssetPairToString(assetPair);
-    const dataOrParams = {
-      symbol,
-      interval,
+    let dataOrParams: any = {
+      symbol: this.convertAssetPairToString(assetPair),
+      interval: BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds),
+      limit: limit ?? 1000
     };
-
     if (startTime) {
-      dataOrParams[startTime] = startTime;
+      dataOrParams.startTime = startTime;
     }
-
     if (endTime) {
-      dataOrParams[endTime] = endTime;
-    }
-
-    if (limit) {
-      dataOrParams[limit] = limit;
+      dataOrParams.endTime = endTime;
     }
 
     const response = await this._doRequest(
