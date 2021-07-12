@@ -1,6 +1,6 @@
 import { AssetPair } from '../Asset/AssetPair';
 
-export interface ExchangeAssetPairTickerInterface {
+export interface ExchangeAssetPairOHLCVInterface {
   assetPair: AssetPair;
   open: string;
   high: string;
@@ -9,4 +9,5 @@ export interface ExchangeAssetPairTickerInterface {
   volume: string;
   openTime: number;
   closeTime: number;
+  tradesCount?: number;
 }

@@ -1,4 +1,3 @@
-import { AssetPair } from '../../Asset/AssetPair';
-import { ExchangeAssetPairCandlestickInterface } from '../ExchangeAssetPairCandlestick';
+import { ExchangeAssetPairOHLCVInterface } from '../ExchangeAssetPairOHLCV';
 
-export interface ExchangeResponseAssetPairCandlestickInterface extends ExchangeAssetPairCandlestickInterface {}
+export interface ExchangeResponseAssetPairCandlestickInterface extends ExchangeAssetPairOHLCVInterface {}

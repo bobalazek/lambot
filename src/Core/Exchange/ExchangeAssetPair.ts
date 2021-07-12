@@ -6,22 +6,21 @@ import {
   ExchangeAssetPairPriceTrendStatusEnum,
   ExchangeAssetPairTrendIconMap,
 } from './ExchangeAssetPairPrice';
-import { ExchangeAssetPairCandlestickInterface } from './ExchangeAssetPairCandlestick';
-import { ExchangeAssetPairTickerInterface } from './ExchangeAssetPairTicker';
 import { ExchangeTradeStatusEnum } from './ExchangeTrade';
+import { ExchangeAssetPairOHLCVInterface } from './ExchangeAssetPairOHLCV';
 import { Session } from '../Session/Session';
 import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Helpers';
 
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  ticker24h: ExchangeAssetPairTickerInterface;
+  ticker24h: ExchangeAssetPairOHLCVInterface;
   metadata: any;
   shouldBuy(session: Session): boolean;
-  getCandlesticks(): ExchangeAssetPairCandlestickInterface[];
-  getNewestCandlestick(): ExchangeAssetPairCandlestickInterface;
-  addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface;
-  setCandlesticks(candlesticks: ExchangeAssetPairCandlestickInterface[]): ExchangeAssetPairCandlestickInterface[];
+  getCandlesticks(): ExchangeAssetPairOHLCVInterface[];
+  getNewestCandlestick(): ExchangeAssetPairOHLCVInterface;
+  addCandlestick(candlestick: ExchangeAssetPairOHLCVInterface): ExchangeAssetPairOHLCVInterface;
+  setCandlesticks(candlesticks: ExchangeAssetPairOHLCVInterface[]): ExchangeAssetPairOHLCVInterface[];
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[];
   getPriceEntriesPeakIndexes(): number[];
   getPriceEntriesTroughIndexes(): number[];
@@ -40,10 +39,10 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  ticker24h: ExchangeAssetPairTickerInterface;
+  ticker24h: ExchangeAssetPairOHLCVInterface;
   metadata: any;
 
-  private _candlesticks: ExchangeAssetPairCandlestickInterface[];
+  private _candlesticks: ExchangeAssetPairOHLCVInterface[];
   private _priceEntries: ExchangeAssetPairPriceEntryInterface[];
   private _priceEntriesPeakIndexes: Array<number>;
   private _priceEntriesTroughIndexes: Array<number>;
@@ -106,11 +105,11 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return true
   }
 
-  getCandlesticks(): ExchangeAssetPairCandlestickInterface[] {
+  getCandlesticks(): ExchangeAssetPairOHLCVInterface[] {
     return this._candlesticks;
   }
 
-  getNewestCandlestick(): ExchangeAssetPairCandlestickInterface {
+  getNewestCandlestick(): ExchangeAssetPairOHLCVInterface {
     if (this._candlesticks.length === 0) {
       return null;
     }
@@ -118,13 +117,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._candlesticks[this._candlesticks.length - 1];
   }
 
-  addCandlestick(candlestick: ExchangeAssetPairCandlestickInterface): ExchangeAssetPairCandlestickInterface {
+  addCandlestick(candlestick: ExchangeAssetPairOHLCVInterface): ExchangeAssetPairOHLCVInterface {
     this._candlesticks.push(candlestick);
 
     return candlestick;
   }
 
-  setCandlesticks(candlesticks: ExchangeAssetPairCandlestickInterface[]): ExchangeAssetPairCandlestickInterface[] {
+  setCandlesticks(candlesticks: ExchangeAssetPairOHLCVInterface[]): ExchangeAssetPairOHLCVInterface[] {
     return this._candlesticks = candlesticks;
   }
 

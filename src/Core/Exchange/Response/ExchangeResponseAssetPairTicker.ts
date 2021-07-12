@@ -1,3 +1,3 @@
-import { ExchangeAssetPairTickerInterface } from '../ExchangeAssetPairTicker';
+import { ExchangeAssetPairOHLCVInterface } from '../ExchangeAssetPairOHLCV';
 
-export interface ExchangeResponseAssetPairTickerInterface extends ExchangeAssetPairTickerInterface {}
+export interface ExchangeResponseAssetPairTickerInterface extends ExchangeAssetPairOHLCVInterface {}

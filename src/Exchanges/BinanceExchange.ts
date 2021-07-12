@@ -399,6 +399,7 @@ export class BinanceExchange extends Exchange {
       const data = response.data[i];
 
       assetPairCandlesticks.push({
+        assetPair,
         open: data[1],
         high: data[2],
         low: data[3],
