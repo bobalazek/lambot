@@ -338,10 +338,8 @@ export class BinanceExchange extends Exchange {
         high: data.highPrice,
         low: data.lowPrice,
         close: data.lastPrice,
-        volume: (
-          parseFloat(data.volume) /* base asset */ *
-          parseFloat(data.lastPrice)
-        ).toPrecision(3),
+        volume: data.volume,
+        volumeQuote: data.quoteVolume,
         openTime: data.openTime,
         closeTime: data.closeTime,
       });
@@ -405,6 +403,7 @@ export class BinanceExchange extends Exchange {
         low: data[3],
         close: data[4],
         volume: data[5],
+        volumeQuote: data[7],
         tradesCount: data[8],
         openTime: data[0],
         closeTime: data[6],

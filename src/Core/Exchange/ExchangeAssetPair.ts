@@ -95,7 +95,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         !this.statistics ||
         (
           this.statistics &&
-          parseFloat(this.statistics.volume) < strategy.parameters.minimumDailyVolume
+          parseFloat(this.statistics.volumeQuote) < strategy.parameters.minimumDailyVolume
         )
       )
     ) {

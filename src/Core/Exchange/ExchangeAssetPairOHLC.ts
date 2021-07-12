@@ -6,7 +6,8 @@ export interface ExchangeAssetPairOHLCInterface {
   high: string;
   low: string;
   close: string;
-  volume: string;
+  volume: string; // baseAsset volume
+  volumeQuote: string; // quoteAsset volume
   openTime: number;
   closeTime: number;
   tradesCount?: number;
