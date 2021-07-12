@@ -1,6 +1,6 @@
 import { AssetPair } from '../Asset/AssetPair';
 
-export interface ExchangeAssetPairOHLCVInterface {
+export interface ExchangeAssetPairOHLCInterface {
   assetPair: AssetPair;
   open: string;
   high: string;
