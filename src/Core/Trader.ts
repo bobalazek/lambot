@@ -120,15 +120,18 @@ export class Trader implements TraderInterface {
       const priceData = assetPairPrices[i];
       const assetPairKey = priceData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
+        logger.error(chalk.red.bold(
+          `Asset pair for symbol "${assetPairKey}" not found.`
+        ));
         continue;
       }
 
       const assetPair = this.session.exchange.assetPairs.get(assetPairKey);
       if (!assetPair) {
-        logger.info(chalk.red.bold(
-          `Asset pair for symbol "${assetPairKey}" not found.`
+        logger.error(chalk.red.bold(
+          `Asset pair for symbol "${assetPairKey}" not found in the exchange.`
         ));
-        process.exit(1);
+        continue;
       }
 
       assetPair.addPriceEntry({
@@ -170,15 +173,18 @@ export class Trader implements TraderInterface {
       const tickerData = assetPairTickers[i];
       const assetPairKey = tickerData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
+        logger.error(chalk.red.bold(
+          `Asset pair for symbol "${assetPairKey}" not found.`
+        ));
         continue;
       }
 
       const assetPair = this.session.exchange.assetPairs.get(assetPairKey);
       if (!assetPair) {
-        logger.info(chalk.red.bold(
-          `Asset pair for symbol "${assetPairKey}" not found.`
+        logger.error(chalk.red.bold(
+          `Asset pair for symbol "${assetPairKey}" not found in the exchange.`
         ));
-        process.exit(1);
+        continue;
       }
 
       assetPair.ticker24h = tickerData;

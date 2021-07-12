@@ -125,9 +125,9 @@ export class BinanceExchange extends Exchange {
 
       if (!this._symbolAssetPairsMap.has(orderData.symbol)) {
         logger.critical(chalk.red.bold(
-          'Could not find the symbol in the asset pairs array. Make sure getAssetPairs() was called before.'
+          'Could not find the symbol in the asset pairs map.'
         ));
-        process.exit(1);
+        continue;
       }
 
       const assetPair = this._getAssetPairBySymbol(orderData.symbol);
@@ -237,17 +237,17 @@ export class BinanceExchange extends Exchange {
       );
 
       if (response.data.borrowEnabled) {
-        logger.critical(chalk.red.bold(
+        logger.error(chalk.red.bold(
           `Seems that borrowing is not enabled for your margin account.`
         ));
-        process.exit(1);
+        return [];
       }
 
       if (response.data.tradeEnabled) {
-        logger.critical(chalk.red.bold(
+        logger.error(chalk.red.bold(
           `Seems that trading is not enabled for your margin account.`
         ));
-        process.exit(1);
+        return [];
       }
 
       for (let i = 0; i < response.data.userAssets.length; i++) {
@@ -260,10 +260,10 @@ export class BinanceExchange extends Exchange {
         });
       }
     } else {
-      logger.critical(chalk.red.bold(
+      logger.error(chalk.red.bold(
         `Type "${accountType}" is not supported.`
       ));
-      process.exit(1);
+      return [];
     }
 
     return accountAssets;
@@ -362,10 +362,10 @@ export class BinanceExchange extends Exchange {
     ));
 
     if (!BinanceExchangeCandlestickTimeframesMap.has(timeframeSeconds)) {
-      logger.critical(chalk.red.bold(
+      logger.error(chalk.red.bold(
         'Invalid timeframeSeconds provided.'
       ));
-      process.exit(1);
+      return [];
     }
 
     const interval = BinanceExchangeCandlestickTimeframesMap.get(timeframeSeconds);
@@ -399,7 +399,6 @@ export class BinanceExchange extends Exchange {
       const data = response.data[i];
 
       assetPairCandlesticks.push({
-        symbol,
         open: data[1],
         high: data[2],
         low: data[3],
