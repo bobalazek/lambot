@@ -18,7 +18,7 @@ export interface TraderInterface {
   startTime: number;
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
-  ticker24hTick(): void;
+  statisticsTick(): void;
   priceTick(): void;
   candlestickTick(): void;
   executeBuy(assetPair: AssetPair, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
@@ -35,7 +35,7 @@ export class Trader implements TraderInterface {
   status: TraderStatusEnum;
   startTime: number;
 
-  _ticker24TickInterval: ReturnType<typeof setInterval>;
+  _statisticsTickInterval: ReturnType<typeof setInterval>;
   _priceTickInterval: ReturnType<typeof setInterval>;
   _candlestickTickInterval: ReturnType<typeof setInterval>;
   _openTradesInterval: ReturnType<typeof setInterval>;
@@ -53,12 +53,12 @@ export class Trader implements TraderInterface {
     await this.session.strategy.boot(this.session);
 
     // Intervals
-    const ticker24hIntervalTime = 3600 * 1000; // TODO: make configurable?
-    if (ticker24hIntervalTime) {
-      await this.ticker24hTick();
-      this._ticker24TickInterval = setInterval(
-        this.ticker24hTick.bind(this),
-        ticker24hIntervalTime
+    const statisticsIntervalTime = 3600 * 1000; // TODO: make configurable?
+    if (statisticsIntervalTime) {
+      await this.statisticsTick();
+      this._statisticsTickInterval = setInterval(
+        this.statisticsTick.bind(this),
+        statisticsIntervalTime
       );
     }
 
@@ -102,7 +102,7 @@ export class Trader implements TraderInterface {
   async stop(): Promise<boolean> {
     this.status = TraderStatusEnum.STOPPED;
 
-    clearInterval(this._ticker24TickInterval);
+    clearInterval(this._statisticsTickInterval);
     clearInterval(this._priceTickInterval);
     clearInterval(this._candlestickTickInterval);
     clearInterval(this._openTradesInterval);
@@ -164,14 +164,14 @@ export class Trader implements TraderInterface {
     }
   }
 
-  async ticker24hTick() {
-    logger.debug(`Ticker (24h) tick ...`);
+  async statisticsTick() {
+    logger.debug(`Statistics tick ...`);
 
     const assetPairs = this.session.getAssetPairs();
-    const assetPairTickers = await this.session.exchange.getAssetPairTickers();
-    for (let i = 0; i < assetPairTickers.length; i++) {
-      const tickerData = assetPairTickers[i];
-      const assetPairKey = tickerData.assetPair.getKey();
+    const assetPairStatistics = await this.session.exchange.getAssetPairStatistics();
+    for (let i = 0; i < assetPairStatistics.length; i++) {
+      const statisticsData = assetPairStatistics[i];
+      const assetPairKey = statisticsData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
         logger.error(chalk.red.bold(
           `Asset pair for symbol "${assetPairKey}" not found.`
@@ -187,7 +187,7 @@ export class Trader implements TraderInterface {
         continue;
       }
 
-      assetPair.ticker24h = tickerData;
+      assetPair.statistics = statisticsData;
     }
   }
 

@@ -15,7 +15,7 @@ import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/Ex
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
-import { ExchangeResponseAssetPairTickerInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairTicker';
+import { ExchangeResponseAssetPairStatisticsInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
 import { Session } from '../Core/Session/Session';
 import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
@@ -309,9 +309,9 @@ export class BinanceExchange extends Exchange {
     return assetPairPrices;
   }
 
-  async getAssetPairTickers(): Promise<ExchangeResponseAssetPairTickerInterface[]> {
+  async getAssetPairStatistics(): Promise<ExchangeResponseAssetPairStatisticsInterface[]> {
     logger.debug(chalk.italic(
-      'Fetching asset pair tickers ...'
+      'Fetching asset pair statistics ...'
     ));
 
     const response = await this._doRequest(
@@ -319,7 +319,7 @@ export class BinanceExchange extends Exchange {
       'https://api.binance.com/api/v3/ticker/24hr'
     );
 
-    const assetPairTickers: ExchangeResponseAssetPairTickerInterface[] = [];
+    const assetPairStatistics: ExchangeResponseAssetPairStatisticsInterface[] = [];
     for (let i = 0; i < response.data.length; i++) {
       const data = response.data[i];
 
@@ -332,7 +332,7 @@ export class BinanceExchange extends Exchange {
         continue;
       }
 
-      assetPairTickers.push({
+      assetPairStatistics.push({
         assetPair,
         open: data.openPrice,
         high: data.highPrice,
@@ -341,13 +341,13 @@ export class BinanceExchange extends Exchange {
         volume: (
           parseFloat(data.volume) /* base asset */ *
           parseFloat(data.lastPrice)
-        ) + '',
+        ).toPrecision(3),
         openTime: data.openTime,
         closeTime: data.closeTime,
       });
     }
 
-    return assetPairTickers;
+    return assetPairStatistics;
   }
 
   async getAssetPairCandlesticks(

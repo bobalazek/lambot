@@ -14,7 +14,7 @@ import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Hel
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  ticker24h: ExchangeAssetPairOHLCInterface;
+  statistics: ExchangeAssetPairOHLCInterface;
   metadata: any;
   shouldBuy(session: Session): boolean;
   getCandlesticks(): ExchangeAssetPairOHLCInterface[];
@@ -39,7 +39,7 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  ticker24h: ExchangeAssetPairOHLCInterface;
+  statistics: ExchangeAssetPairOHLCInterface;
   metadata: any;
 
   private _candlesticks: ExchangeAssetPairOHLCInterface[];
@@ -50,7 +50,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   constructor(assetPair: AssetPair) {
     this.assetPair = assetPair;
     this.indicators = new Map();
-    this.ticker24h = null;
+    this.statistics = null;
 
     this._candlesticks = [];
     this._priceEntries = [];
@@ -92,10 +92,10 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     if (
       strategy.parameters.minimumDailyVolume !== -1 &&
       (
-        !this.ticker24h ||
+        !this.statistics ||
         (
-          this.ticker24h &&
-          parseFloat(this.ticker24h.volume) < strategy.parameters.minimumDailyVolume
+          this.statistics &&
+          parseFloat(this.statistics.volume) < strategy.parameters.minimumDailyVolume
         )
       )
     ) {

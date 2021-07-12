@@ -4,12 +4,12 @@ import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/Exchang
 import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
-import { ExchangeResponseAssetPairTickerInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairTicker';
+import { ExchangeResponseAssetPairStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
 import { Manager } from '../../src/Core/Manager';
 import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
 import { createMockSession } from './SessionFixtures';
 
-export const assetPairTickersResponse: ExchangeResponseAssetPairTickerInterface[] = [
+export const assetPairStatisticsResponse: ExchangeResponseAssetPairStatisticsInterface[] = [
   {
     assetPair: new AssetPair(Assets.ETH, Assets.USDT),
     open: '1',
@@ -220,7 +220,7 @@ export const accountAssetsResponse: ExchangeResponseAccountAssetInterface[] = [
 
 export const createMockTrader = async () => {
   const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-  exchange.getAssetPairTickers = jest.fn().mockReturnValue(assetPairTickersResponse);
+  exchange.getAssetPairStatistics = jest.fn().mockReturnValue(assetPairStatisticsResponse);
   exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
   exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
   exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
