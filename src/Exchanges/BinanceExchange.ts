@@ -311,7 +311,7 @@ export class BinanceExchange extends Exchange {
     return assetPairPrices;
   }
 
-  async getAssetPairStatistics(): Promise<ExchangeResponseAssetPairStatisticsInterface[]> {
+  async getAssetPairStatistics24Hours(): Promise<ExchangeResponseAssetPairStatisticsInterface[]> {
     logger.debug(chalk.italic(
       'Fetching asset pair statistics ...'
     ));

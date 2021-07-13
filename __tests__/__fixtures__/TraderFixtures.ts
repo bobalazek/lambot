@@ -9,7 +9,7 @@ import { Manager } from '../../src/Core/Manager';
 import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
 import { createMockSession } from './SessionFixtures';
 
-export const assetPairStatisticsResponse: ExchangeResponseAssetPairStatisticsInterface[] = [
+export const assetPairStatistics24HoursResponse: ExchangeResponseAssetPairStatisticsInterface[] = [
   {
     assetPair: new AssetPair(Assets.ETH, Assets.USDT),
     openPrice: '1',
@@ -224,7 +224,7 @@ export const accountAssetsResponse: ExchangeResponseAccountAssetInterface[] = [
 
 export const createMockTrader = async () => {
   const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-  exchange.getAssetPairStatistics = jest.fn().mockReturnValue(assetPairStatisticsResponse);
+  exchange.getAssetPairStatistics24Hours = jest.fn().mockReturnValue(assetPairStatistics24HoursResponse);
   exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
   exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
   exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);

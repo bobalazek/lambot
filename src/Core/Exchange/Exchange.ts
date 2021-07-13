@@ -36,7 +36,7 @@ export interface ExchangeInterface {
   getAccountAssets(accountType: ExchangeAccountTypeEnum): Promise<ExchangeResponseAccountAssetInterface[]>;
   getAssetPairs(): Promise<ExchangeResponseAssetPairInterface[]>;
   getAssetPairPrices(): Promise<ExchangeResponseAssetPairPriceEntryInterface[]>;
-  getAssetPairStatistics(): Promise<ExchangeResponseAssetPairStatisticsInterface[]>;
+  getAssetPairStatistics24Hours(): Promise<ExchangeResponseAssetPairStatisticsInterface[]>;
   getAssetPairCandlesticks(
     assetPair: AssetPair,
     timeframeSeconds: number,
@@ -118,8 +118,8 @@ export class Exchange implements ExchangeInterface {
     throw new Error('getAssetPairPrices() not implemented yet.');
   }
 
-  async getAssetPairStatistics(): Promise<ExchangeResponseAssetPairStatisticsInterface[]> {
-    throw new Error('getAssetPairStatistics() not implemented yet.');
+  async getAssetPairStatistics24Hours(): Promise<ExchangeResponseAssetPairStatisticsInterface[]> {
+    throw new Error('getAssetPairStatistics24Hours() not implemented yet.');
   }
 
   async getAssetPairCandlesticks(

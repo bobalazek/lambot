@@ -20,7 +20,7 @@ export interface TraderInterface {
   startTime: number;
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
-  statisticsTick(): void;
+  statistics24HoursTick(): void;
   priceTick(): void;
   candlestickTick(): void;
   executeBuy(assetPair: AssetPair, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
@@ -37,7 +37,7 @@ export class Trader implements TraderInterface {
   status: TraderStatusEnum;
   startTime: number;
 
-  _statisticsTickInterval: ReturnType<typeof setInterval>;
+  _statistics24HoursTickInterval: ReturnType<typeof setInterval>;
   _priceTickInterval: ReturnType<typeof setInterval>;
   _candlestickTickInterval: ReturnType<typeof setInterval>;
   _openTradesInterval: ReturnType<typeof setInterval>;
@@ -55,12 +55,12 @@ export class Trader implements TraderInterface {
     await this.session.strategy.boot(this.session);
 
     // Intervals
-    const statisticsIntervalTime = 3600 * 1000; // TODO: make configurable?
-    if (statisticsIntervalTime) {
-      await this.statisticsTick();
-      this._statisticsTickInterval = setInterval(
-        this.statisticsTick.bind(this),
-        statisticsIntervalTime
+    const statistics24HoursIntervalTime = 3600 * 1000; // TODO: make configurable?
+    if (statistics24HoursIntervalTime) {
+      await this.statistics24HoursTick();
+      this._statistics24HoursTickInterval = setInterval(
+        this.statistics24HoursTick.bind(this),
+        statistics24HoursIntervalTime
       );
     }
 
@@ -104,7 +104,7 @@ export class Trader implements TraderInterface {
   async stop(): Promise<boolean> {
     this.status = TraderStatusEnum.STOPPED;
 
-    clearInterval(this._statisticsTickInterval);
+    clearInterval(this._statistics24HoursTickInterval);
     clearInterval(this._priceTickInterval);
     clearInterval(this._candlestickTickInterval);
     clearInterval(this._openTradesInterval);
@@ -162,11 +162,11 @@ export class Trader implements TraderInterface {
     }
   }
 
-  async statisticsTick() {
-    logger.debug(`Statistics tick ...`);
+  async statistics24HoursTick() {
+    logger.debug(`Statistics 24 Horus tick ...`);
 
     const assetPairs = this.session.getAssetPairs();
-    const assetPairStatistics = await this.session.exchange.getAssetPairStatistics();
+    const assetPairStatistics = await this.session.exchange.getAssetPairStatistics24Hours();
     for (const statisticsData of assetPairStatistics) {
       const assetPairKey = statisticsData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
@@ -181,7 +181,7 @@ export class Trader implements TraderInterface {
         continue;
       }
 
-      assetPair.statistics = statisticsData;
+      assetPair.statistics24Hours = statisticsData;
     }
   }
 
