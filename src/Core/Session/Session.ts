@@ -4,7 +4,7 @@ import { Asset } from '../Asset/Asset';
 import { AssetPair } from '../Asset/AssetPair';
 import { Exchange } from '../Exchange/Exchange';
 import { ExchangeAssetPair } from '../Exchange/ExchangeAssetPair';
-import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrder';
+import { ExchangeOrderTypeEnum } from '../Exchange/ExchangeOrderType';
 import { ExchangeTrade, ExchangeTradeStatusEnum } from '../Exchange/ExchangeTrade';
 import { SessionTradingTypeEnum } from './SessionTradingType';
 import { SessionConfig } from './SessionConfig';

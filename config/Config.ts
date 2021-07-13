@@ -1,7 +1,7 @@
 import { AssetPair } from '../src/Core/Asset/AssetPair';
 import { Assets } from '../src/Core/Asset/Assets';
 import { ConfigInterface } from '../src/Core/Config';
-import { ExchangeOrderTypeEnum } from '../src/Core/Exchange/ExchangeOrder';
+import { ExchangeOrderTypeEnum } from '../src/Core/Exchange/ExchangeOrderType';
 import { ExchangesEnum } from '../src/Core/Exchange/ExchangesFactory';
 import { SessionConfig } from '../src/Core/Session/SessionConfig';
 import { SessionTradingTypeEnum } from '../src/Core/Session/SessionTradingType';

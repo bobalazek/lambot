@@ -1,7 +1,7 @@
 import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
 import { Exchange } from '../../src/Core/Exchange/Exchange';
-import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrder';
+import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrderType';
 import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/ExchangesFactory';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../src/Core/Exchange/ExchangeTrade';
 import { Session } from '../../src/Core/Session/Session';

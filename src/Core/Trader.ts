@@ -2,9 +2,11 @@ import chalk from 'chalk';
 
 import { AssetPair } from './Asset/AssetPair';
 import { ExchangeAccountTypeEnum } from './Exchange/ExchangeAccount';
-import { ExchangeOrder, ExchangeOrderSideEnum, ExchangeOrderTypeEnum } from './Exchange/ExchangeOrder';
+import { ExchangeOrder } from './Exchange/ExchangeOrder';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './Exchange/ExchangeTrade';
-import { ExchangeOrderFeesTypeEnum } from './Exchange/ExchangeOrderFees';
+import { ExchangeOrderTypeEnum } from './Exchange/ExchangeOrderType';
+import { ExchangeOrderSideEnum } from './Exchange/ExchangeOrderSide';
+import { ExchangeOrderFeesTypeEnum } from './Exchange/ExchangeOrderFeesType';
 import { Session } from './Session/Session';
 import { SessionManager } from './Session/SessionManager';
 import { Manager } from './Manager';

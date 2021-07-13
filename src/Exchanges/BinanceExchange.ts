@@ -9,17 +9,19 @@ import { Exchange } from '../Core/Exchange/Exchange';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
 import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCredentials';
 import { ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
-import { ExchangeOrder, ExchangeOrderTimeInForceEnum, ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrder';
+import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
 import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeResponseAssetPairStatisticsInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
-import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFees';
+import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFeesType';
 import { Session } from '../Core/Session/Session';
 import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
 import logger from '../Utils/Logger';
+import { ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrderType';
+import { ExchangeOrderTimeInForceEnum } from '../Core/Exchange/ExchangeOrderTimeInForce';
 
 enum RequestMethodEnum {
   GET = 'GET',
