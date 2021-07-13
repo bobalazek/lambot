@@ -118,13 +118,9 @@ export class Trader implements TraderInterface {
 
     const assetPairs = this.session.getAssetPairs();
     const assetPairPrices = await this.session.exchange.getAssetPairPrices();
-    for (let i = 0; i < assetPairPrices.length; i++) {
-      const priceData = assetPairPrices[i];
+    for (const priceData of assetPairPrices) {
       const assetPairKey = priceData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
-        logger.error(chalk.red.bold(
-          `Asset pair for symbol "${assetPairKey}" not found.`
-        ));
         continue;
       }
 
@@ -171,13 +167,9 @@ export class Trader implements TraderInterface {
 
     const assetPairs = this.session.getAssetPairs();
     const assetPairStatistics = await this.session.exchange.getAssetPairStatistics();
-    for (let i = 0; i < assetPairStatistics.length; i++) {
-      const statisticsData = assetPairStatistics[i];
+    for (const statisticsData of assetPairStatistics) {
       const assetPairKey = statisticsData.assetPair.getKey();
       if (!assetPairs.has(assetPairKey)) {
-        logger.error(chalk.red.bold(
-          `Asset pair for symbol "${assetPairKey}" not found.`
-        ));
         continue;
       }
 
