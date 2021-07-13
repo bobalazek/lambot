@@ -2,6 +2,7 @@
 
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
+import { ExchangeFee, ExchangeFeeTypeEnum } from '../../../src/Core/Exchange/ExchangeFee';
 import { ExchangeTrade, ExchangeTradeTypeEnum } from '../../../src/Core/Exchange/ExchangeTrade';
 import { Session } from '../../../src/Core/Session/Session';
 import { createMockSession } from '../../__fixtures__/SessionFixtures';
@@ -24,12 +25,16 @@ describe('ExchangeTrade', () => {
       '15'
     );
     exchangeTrade.entryPrice = 1.0;
-    exchangeTrade.entryFeesPercentage = 0.01;
+    exchangeTrade.entryFees = [
+      new ExchangeFee(ExchangeFeeTypeEnum.PERCENTAGE, 0.01),
+    ];
   });
 
   it('should correctly return the profit', () => {
     exchangeTrade.entryPrice = 5.0;
-    exchangeTrade.entryFeesPercentage = 0.01;
+    exchangeTrade.entryFees = [
+      new ExchangeFee(ExchangeFeeTypeEnum.PERCENTAGE, 0.01),
+    ];
 
     // Long
     expect(exchangeTrade.getCurrentProfitPercentage(5.5)).toBe(10);
@@ -38,7 +43,9 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.getCurrentProfitAmount(5.5, true)).toBe(7.484249999999999);
 
     exchangeTrade.exitPrice = 5.5;
-    exchangeTrade.exitFeesPercentage = 0.01;
+    exchangeTrade.exitFees = [
+      new ExchangeFee(ExchangeFeeTypeEnum.PERCENTAGE, 0.01),
+    ];
 
     expect(exchangeTrade.getProfitPercentage()).toBe(10);
     expect(exchangeTrade.getProfitPercentage(true)).toBe(9.98);

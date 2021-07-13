@@ -5,7 +5,6 @@ import { ExchangeApiCredentialsInterface } from './ExchangeApiCredentials';
 import { ExchangeAccount, ExchangeAccountsMap, ExchangeAccountTypeEnum } from './ExchangeAccount';
 import { ExchangeAssetPairsMap } from './ExchangeAssetPairPrice';
 import { ExchangeResponseAccountAssetInterface } from './Response/ExchangeResponseAccountAsset';
-import { ExchangeResponseOrderFeesInterface } from './Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairInterface } from './Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from './Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from './Response/ExchangeResponseAssetPairCandlestick';
@@ -21,6 +20,7 @@ import { SessionManager } from '../Session/SessionManager';
 import { SessionTradingTypeEnum } from '../Session/SessionTradingType';
 import { asyncForEach } from '../../Utils/Helpers';
 import logger from '../../Utils/Logger';
+import { ExchangeFee } from './ExchangeFee';
 
 export interface ExchangeInterface {
   key: string;
@@ -49,7 +49,7 @@ export interface ExchangeInterface {
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum
-  ): Promise<ExchangeResponseOrderFeesInterface>;
+  ): Promise<ExchangeFee>;
   getAccountType(accountType: SessionTradingTypeEnum): ExchangeAccountTypeEnum;
 }
 
@@ -137,7 +137,7 @@ export class Exchange implements ExchangeInterface {
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum
-  ): Promise<ExchangeResponseOrderFeesInterface> {
+  ): Promise<ExchangeFee> {
     throw new Error('getAssetFees() not implemented yet.');
   }
 

@@ -11,7 +11,6 @@ import { ExchangeApiCredentialsInterface } from '../Core/Exchange/ExchangeApiCre
 import { ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
 import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
 import { ExchangeResponseAccountAssetInterface } from '../Core/Exchange/Response/ExchangeResponseAccountAsset';
-import { ExchangeResponseOrderFeesInterface } from '../Core/Exchange/Response/ExchangeResponseOrderFees';
 import { ExchangeResponseAssetPairInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
@@ -22,6 +21,7 @@ import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
 import logger from '../Utils/Logger';
 import { ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrderType';
 import { ExchangeOrderTimeInForceEnum } from '../Core/Exchange/ExchangeOrderTimeInForce';
+import { ExchangeFee, ExchangeFeeTypeEnum } from '../Core/Exchange/ExchangeFee';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -412,21 +412,25 @@ export class BinanceExchange extends Exchange {
     amount: string,
     orderFeesType: ExchangeOrderFeesTypeEnum,
     tradeType: ExchangeTradeTypeEnum
-  ): Promise<ExchangeResponseOrderFeesInterface> {
+  ): Promise<ExchangeFee> {
     // TODO: check if we have any BNB in our account,
     // because only then the fee is 0.075%, else it's 0.1%.
     // You will also need to enable it in the dashboard
     // https://www.binance.com/en/fee/trading
 
     if (tradeType === ExchangeTradeTypeEnum.SHORT) {
-      return {
-        percentage: 0.09,
-      };
+      return new ExchangeFee(
+        ExchangeFeeTypeEnum.PERCENTAGE,
+        0.09,
+        Assets.BNB
+      );
     }
 
-    return {
-      percentage: 0.075,
-    };
+    return new ExchangeFee(
+      ExchangeFeeTypeEnum.PERCENTAGE,
+      0.075,
+      Assets.BNB
+    );
   }
 
   /***** Helpers *****/

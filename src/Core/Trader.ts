@@ -246,7 +246,7 @@ export class Trader implements TraderInterface {
       entryOrder.amount,
       now
     );
-    exchangeTrade.entryFeesPercentage = orderFees.percentage;
+    exchangeTrade.entryFees.push(orderFees);
     exchangeTrade.entryOrder = entryOrder;
     exchangeTrade.entryPrice = parseFloat(entryOrder.price);
     exchangeTrade.entryAt = Date.now();
@@ -292,7 +292,7 @@ export class Trader implements TraderInterface {
     const exitOrder: ExchangeOrder = !Manager.isTestMode
       ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
-    exchangeTrade.exitFeesPercentage = orderFees.percentage;
+    exchangeTrade.exitFees.push(orderFees);
     exchangeTrade.exitOrder = exitOrder;
     exchangeTrade.exitPrice = parseFloat(exitOrder.price);
     exchangeTrade.exitAt = Date.now();

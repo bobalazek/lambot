@@ -2,6 +2,7 @@ import { AssetPair } from '../Asset/AssetPair';
 import { ExchangeOrder, ExchangeOrderInterface } from './ExchangeOrder';
 import { calculatePercentage } from '../../Utils/Helpers';
 import { Session } from '../Session/Session';
+import { ExchangeFee, ExchangeFeeTypeEnum } from './ExchangeFee';
 
 export interface ExchangeTradeInterface {
   id: string; // Prefix each order with the session id, so we know where it came from.
@@ -10,10 +11,10 @@ export interface ExchangeTradeInterface {
   amount: string; // The amount of the base currency bought
   timestamp: number;
   status: ExchangeTradeStatusEnum;
-  entryPrice?: number;
-  exitPrice?: number;
-  entryFeesPercentage?: number;
-  exitFeesPercentage?: number;
+  entryPrice: number;
+  exitPrice: number;
+  entryFees: ExchangeFee[];
+  exitFees: ExchangeFee[];
   entryAt?: number;
   exitAt?: number;
   currentProfitPercentage?: number;
@@ -42,6 +43,11 @@ export enum ExchangeTradeStatusEnum {
   CLOSED = 'CLOSED',
 }
 
+export enum ExchangeTradeEntryOrExitEnum {
+  ENTRY = 'ENTRY',
+  EXIT = 'EXIT',
+}
+
 export class ExchangeTrade {
   id: string;
   assetPair: AssetPair;
@@ -49,10 +55,10 @@ export class ExchangeTrade {
   amount: string;
   timestamp: number;
   status: ExchangeTradeStatusEnum;
-  entryPrice?: number;
-  exitPrice?: number;
-  entryFeesPercentage?: number;
-  exitFeesPercentage?: number;
+  entryPrice: number;
+  exitPrice: number;
+  entryFees: ExchangeFee[];
+  exitFees: ExchangeFee[];
   entryAt?: number;
   exitAt?: number;
   currentProfitPercentage?: number;
@@ -77,6 +83,10 @@ export class ExchangeTrade {
     this.amount = amount;
     this.timestamp = timestamp;
     this.status = status;
+    this.entryPrice = null;
+    this.exitPrice = null;
+    this.entryFees = [];
+    this.exitFees = [];
     this.currentProfitPercentage = null;
     this.peakProfitPercentage = null;
     this.troughProfitPercentage = null;
@@ -231,8 +241,8 @@ export class ExchangeTrade {
   getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
     return (
       calculatePercentage(currentPrice, this.entryPrice) -
-      (includingFees ? this.entryFeesPercentage : 0) -
-      (includingFees ? this.entryFeesPercentage : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
+      (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) : 0) -
+      (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -242,8 +252,8 @@ export class ExchangeTrade {
   getProfitPercentage(includingFees: boolean = false): number {
     return (
       calculatePercentage(this.exitPrice, this.entryPrice) -
-      (includingFees ? this.entryFeesPercentage : 0) -
-      (includingFees ? this.exitFeesPercentage : 0)
+      (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) : 0) -
+      (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.EXIT) : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -254,8 +264,8 @@ export class ExchangeTrade {
     const amount = parseFloat(this.amount);
     return (
       (amount * (currentPrice - this.entryPrice)) -
-      (includingFees ? amount * this.entryPrice * this.entryFeesPercentage * 0.01 : 0) -
-      (includingFees ? amount * currentPrice * this.entryFeesPercentage * 0.01 : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
+      (includingFees ? amount * this.entryPrice * this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) * 0.01 : 0) -
+      (includingFees ? amount * currentPrice * this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) * 0.01 : 0) // at this point we don't have the exitFeesPercentage yet, so assume it's the same as buy
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
   }
 
@@ -266,9 +276,27 @@ export class ExchangeTrade {
     const amount = parseFloat(this.amount);
     return (
       (amount * (this.exitPrice - this.entryPrice)) -
-      (includingFees ? amount * this.entryPrice * this.entryFeesPercentage * 0.01 : 0) -
-      (includingFees ? amount * this.exitPrice * this.exitFeesPercentage * 0.01 : 0)
+      (includingFees ? amount * this.entryPrice * this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) * 0.01 : 0) -
+      (includingFees ? amount * this.exitPrice * this.getFeePercentage(ExchangeTradeEntryOrExitEnum.EXIT) * 0.01 : 0)
     ) * (this.type === ExchangeTradeTypeEnum.SHORT ? -1 : 1);
+  }
+
+  getFeePercentage(entryOrExit: ExchangeTradeEntryOrExitEnum): number {
+    const fees = entryOrExit === ExchangeTradeEntryOrExitEnum.ENTRY
+      ? this.entryFees
+      : this.exitFees;
+
+    const fee = fees[0];
+    if (
+      !fee ||
+      fee.type !== ExchangeFeeTypeEnum.PERCENTAGE
+    ) {
+      return 0;
+    }
+
+    // TODO: implement amount based fees!
+
+    return fee.amount;
   }
 
   /***** Export/Import *****/
@@ -282,8 +310,8 @@ export class ExchangeTrade {
       status: this.status,
       entryPrice: this.entryPrice,
       exitPrice: this.exitPrice,
-      entryFeesPercentage: this.entryFeesPercentage,
-      exitFeesPercentage: this.exitFeesPercentage,
+      entryFees: this.entryFees,
+      exitFees: this.exitFees,
       entryAt: this.entryAt,
       exitAt: this.exitAt,
       currentProfitPercentage: this.currentProfitPercentage,
@@ -314,12 +342,12 @@ export class ExchangeTrade {
       exchangeTrade.exitPrice = data.exitPrice;
     }
 
-    if (typeof data.entryFeesPercentage !== 'undefined') {
-      exchangeTrade.entryFeesPercentage = data.entryFeesPercentage;
+    if (typeof data.entryFees !== 'undefined') {
+      exchangeTrade.entryFees = data.entryFees;
     }
 
-    if (typeof data.exitFeesPercentage !== 'undefined') {
-      exchangeTrade.exitFeesPercentage = data.exitFeesPercentage;
+    if (typeof data.exitFees !== 'undefined') {
+      exchangeTrade.exitFees = data.exitFees;
     }
 
     if (typeof data.entryAt !== 'undefined') {

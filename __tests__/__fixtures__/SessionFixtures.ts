@@ -1,6 +1,7 @@
 import { AssetPair } from '../../src/Core/Asset/AssetPair';
 import { Assets } from '../../src/Core/Asset/Assets';
 import { Exchange } from '../../src/Core/Exchange/Exchange';
+import { ExchangeFee, ExchangeFeeTypeEnum } from '../../src/Core/Exchange/ExchangeFee';
 import { ExchangeOrderTypeEnum } from '../../src/Core/Exchange/ExchangeOrderType';
 import { ExchangesEnum, ExchangesFactory } from '../../src/Core/Exchange/ExchangesFactory';
 import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../../src/Core/Exchange/ExchangeTrade';
@@ -71,7 +72,9 @@ const exchangeTrades: ExchangeTrade[] = [];
   }
 
   if (object.entryFeesPercentage) {
-    exchangeTrade.entryFeesPercentage = object.entryFeesPercentage;
+    exchangeTrade.entryFees = [
+      new ExchangeFee(ExchangeFeeTypeEnum.PERCENTAGE, object.entryFeesPercentage),
+    ];
   }
 
   if (object.entryAt !== null) {
@@ -83,7 +86,9 @@ const exchangeTrades: ExchangeTrade[] = [];
   }
 
   if (object.exitFeesPercentage) {
-    exchangeTrade.exitFeesPercentage = object.exitFeesPercentage;
+    exchangeTrade.exitFees = [
+      new ExchangeFee(ExchangeFeeTypeEnum.PERCENTAGE, object.exitFeesPercentage),
+    ];
   }
 
   if (object.exitAt !== null) {
