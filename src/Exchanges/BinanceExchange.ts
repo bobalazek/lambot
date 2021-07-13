@@ -334,10 +334,10 @@ export class BinanceExchange extends Exchange {
 
       assetPairStatistics.push({
         assetPair,
-        open: data.openPrice,
-        high: data.highPrice,
-        low: data.lowPrice,
-        close: data.lastPrice,
+        openPrice: data.openPrice,
+        highPrice: data.highPrice,
+        lowPrice: data.lowPrice,
+        closePrice: data.lastPrice,
         volume: data.volume,
         volumeQuote: data.quoteVolume,
         openTime: data.openTime,
@@ -390,10 +390,10 @@ export class BinanceExchange extends Exchange {
 
       assetPairCandlesticks.push({
         assetPair,
-        open: data[1],
-        high: data[2],
-        low: data[3],
-        close: data[4],
+        openPrice: data[1],
+        highPrice: data[2],
+        lowPrice: data[3],
+        closePrice: data[4],
         volume: data[5],
         volumeQuote: data[7],
         tradesCount: data[8],

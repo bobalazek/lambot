@@ -2,10 +2,10 @@ import { AssetPair } from '../Asset/AssetPair';
 
 export interface ExchangeAssetPairOHLCInterface {
   assetPair: AssetPair;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
+  openPrice: string;
+  highPrice: string;
+  lowPrice: string;
+  closePrice: string;
   volume: string; // baseAsset volume
   volumeQuote: string; // quoteAsset volume
   openTime: number;
