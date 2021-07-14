@@ -8,7 +8,7 @@ As you can imagine, it's not really that easy as it sounds. Rather than you earn
 
 First you will need to set up some your config in the `/config/` folder. For now you can just edit the contents of `Config.ts` file inside and and set up the parameters. In addition, you'll also need to edit or create a strategy, which should be located in the same directory. You will also need to copy the contents of `.env.example` to `.env` to setup your exchange credentials.
 
-After that, you'll need to build the bot with `yarn build`, and now finally you can run it with `node dist/main.js --session {sessionId}`.
+After that, you'll need to build the bot with `docker-compose build`, and now finally you can run it with `docker-compose up`.
 
 ## Exchanges
 
