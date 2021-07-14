@@ -10,6 +10,8 @@ services:
       - "./data:/app/data"
     networks:
       - lambot-network
+    ports:
+      - '${SERVER_PORT_3000:-3000}:3000'
 
 networks:
   lambot-network:

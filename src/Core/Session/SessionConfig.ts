@@ -1,5 +1,3 @@
-import { SERVER_PORT } from '../../Constants';
-
 export interface SessionConfigInterface {
   // How long do we wait until we actually start trading?
   warmupPeriodSeconds: number;
@@ -39,7 +37,7 @@ export class SessionConfig implements SessionConfigInterface {
     assetPairCandlestickUpdateIntervalSeconds = 0,
     memoryUsageMonitoringIntervalSeconds = 30,
     webServerApiEnabled = false,
-    webServerApiPort = SERVER_PORT,
+    webServerApiPort = 3000,
   }) {
     this.warmupPeriodSeconds = warmupPeriodSeconds;
     this.openTradeUpdateIntervalSeconds = openTradeUpdateIntervalSeconds;
