@@ -8,7 +8,8 @@ import { SessionTradingTypeEnum } from '../src/Core/Session/SessionTradingType';
 import { DefaultStrategy } from './DefaultStrategy';
 
 // Config
-const assets = [
+const sessionId = '1';
+const sessionAssets = [
   Assets.ETH, Assets.ETC, Assets.BTC, Assets.BNB, Assets.BCH,
   Assets.LTC, Assets.DOGE, Assets.ADA, Assets.DOT, Assets.UNI,
   Assets.SOL, Assets.LINK, Assets.DAI, Assets.MATIC, Assets.ALGO,
@@ -24,7 +25,7 @@ const sessionConfig = new SessionConfig({
 });
 const sessionExchange = ExchangesEnum.BINANCE;
 const sessionAsset = Assets.USDT;
-const sessionAssetPairs = assets.map((asset) => {
+const sessionAssetPairs = sessionAssets.map((asset) => {
   return new AssetPair(asset, sessionAsset);
 });
 const sessionStrategy = new DefaultStrategy({});
@@ -37,6 +38,7 @@ const sessionOrderTypes = {
 };
 
 const config: ConfigInterface = {
+  sessionId,
   sessionConfig,
   sessionExchange,
   sessionAsset,

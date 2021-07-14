@@ -11,7 +11,7 @@ dotenv.config();
 const program = new Command();
 program
   .option('-p, --production', 'Does actual trading with your account.', false)
-  .requiredOption('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
+  .option('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
   .parse(process.argv)
 ;
 const programOptions = program.opts();
@@ -28,7 +28,7 @@ const sessionId = programOptions.session;
   Manager.isTestMode = isTestMode;
 
   const session = await SessionManager.newOrLoad(
-    sessionId,
+    sessionId || config.sessionId,
     config.sessionConfig,
     config.sessionExchange,
     config.sessionAsset,

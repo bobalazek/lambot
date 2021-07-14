@@ -7,6 +7,7 @@ import { SessionTradingTypeEnum } from './Session/SessionTradingType';
 import { Strategy } from './Strategy/Strategy';
 
 export interface ConfigInterface {
+  sessionId: string;
   sessionConfig: SessionConfig;
   sessionExchange: ExchangesEnum;
   sessionAsset: Asset;

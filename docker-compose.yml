@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  node:
+    container_name: lambot_node
+    build: .
+    tty: true
+    volumes:
+      - "./config:/app/config"
+      - "./data:/app/data"
+    networks:
+      - lambot-network
+
+networks:
+  lambot-network:
+    name: labot_network
+    driver: bridge
