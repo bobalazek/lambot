@@ -2,7 +2,7 @@
 /build
 /data
 /config/*
-!config/Config.example.ts
-config/Strategies/*
-!config/Strategies/DefaultStrategy.ts
+!/config/Config.example.ts
+/config/Strategies/*
+!/config/Strategies/DefaultStrategy.ts
 .env
