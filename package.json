@@ -1,14 +1,14 @@
 {
-  "name": "ToTheMoonLamboSoonBot",
+  "name": "lambot",
   "version": "0.0.1",
-  "main": "dist/app.js",
   "license": "ISC",
   "scripts": {
     "watch": "webpack --config webpack.dev.js --progress --watch",
     "watch:server": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js --progress",
-    "test": "cross-env FORCE_COLOR=0 jest --detectOpenHandles",
-    "test:watch": "cross-env FORCE_COLOR=0 jest --watchAll --detectOpenHandles",
+    "build-and-start": "yarn build && node build/bot.js",
+    "test": "cross-env FORCE_COLOR=0 jest",
+    "test:watch": "cross-env FORCE_COLOR=0 jest --watchAll",
     "eslint": "eslint . --ext .js,.jsx,.ts,.tsx --quiet"
   },
   "dependencies": {
@@ -28,7 +28,11 @@
     "express": "^4.17.1",
     "jest": "^27.0.4",
     "nanoevents": "^6.0.0",
+    "pg": "^8.6.0",
+    "pg-hstore": "^2.3.4",
     "qs": "^6.10.1",
+    "sequelize": "^6.6.5",
+    "sequelize-cli": "^6.2.0",
     "ts-jest": "^27.0.3",
     "ts-loader": "^9.2.2",
     "ts-node": "^10.0.0",

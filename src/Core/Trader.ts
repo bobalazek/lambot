@@ -208,8 +208,9 @@ export class Trader implements TraderInterface {
     const orderFeesType = this.session.orderTypes.buy === ExchangeOrderTypeEnum.LIMIT
       ? ExchangeOrderFeesTypeEnum.MAKER
       : ExchangeOrderFeesTypeEnum.TAKER;
+    const amountQuote = this.session.strategy.parameters.tradeAmount;
     const amount = ( // How much amount of the quote asset we want to buy (relative to our quote asset)?
-      parseFloat(this.session.strategy.parameters.tradeAmount) /
+      parseFloat(amountQuote) /
       parseFloat(assetPairPriceEntryNewest.price)
     ).toPrecision(3);
     const order = new ExchangeOrder(
@@ -236,6 +237,7 @@ export class Trader implements TraderInterface {
       assetPair,
       tradeType,
       entryOrder.amount,
+      amountQuote,
       now
     );
     exchangeTrade.entryFees.push(orderFees);

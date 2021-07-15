@@ -11,7 +11,17 @@ services:
     networks:
       - lambot-network
     ports:
-      - '${SERVER_PORT_3000:-3000}:3000'
+      # NOT a typo. We are keeping it flexible, so it will work even without docker (for now)
+      - '${SERVER_PORT_3000:-3000}:${SERVER_PORT_3000:-3000}'
+
+  timescale:
+    container_name: lambot_timescale
+    image: timescale/timescaledb:latest-pg13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    networks:
+      - lambot-network
 
 networks:
   lambot-network:

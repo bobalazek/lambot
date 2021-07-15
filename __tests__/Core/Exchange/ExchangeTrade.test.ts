@@ -22,7 +22,8 @@ describe('ExchangeTrade', () => {
       'MOCK_TRADE',
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
-      '15'
+      '15',
+      '1'
     );
     exchangeTrade.entryPrice = 1.0;
     exchangeTrade.entryFees = [

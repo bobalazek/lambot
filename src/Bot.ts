@@ -10,8 +10,9 @@ dotenv.config();
 // Prepare CLI
 const program = new Command();
 program
+  .option('-a, --action', 'What action do we want to execute? Available: "trade"', 'trade')
   .option('-p, --production', 'Does actual trading with your account.', false)
-  .option('-s, --session <session>', 'Enter your session ID. It will load if one with the same ID already exists, else it will create a new one.')
+  .option('-s, --session <session>', 'You can override your session ID with this parameter. It will load if one with the same ID already exists, else it will create a new one.')
   .parse(process.argv)
 ;
 const programOptions = program.opts();

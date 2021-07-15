@@ -9,6 +9,7 @@ export interface ExchangeTradeInterface {
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
   amount: string; // The amount of the base currency bought
+  amountQuote: string; // The amount of the quote currency used to pay for
   timestamp: number;
   status: ExchangeTradeStatusEnum;
   entryPrice: number;
@@ -53,6 +54,7 @@ export class ExchangeTrade {
   assetPair: AssetPair;
   type: ExchangeTradeTypeEnum;
   amount: string;
+  amountQuote: string;
   timestamp: number;
   status: ExchangeTradeStatusEnum;
   entryPrice: number;
@@ -74,6 +76,7 @@ export class ExchangeTrade {
     assetPair: AssetPair,
     type: ExchangeTradeTypeEnum,
     amount: string,
+    amountQuote: string,
     timestamp: number = Date.now(),
     status: ExchangeTradeStatusEnum = ExchangeTradeStatusEnum.OPEN
   ) {
@@ -81,6 +84,7 @@ export class ExchangeTrade {
     this.assetPair = assetPair;
     this.type = type;
     this.amount = amount;
+    this.amountQuote = amountQuote;
     this.timestamp = timestamp;
     this.status = status;
     this.entryPrice = null;
@@ -306,6 +310,7 @@ export class ExchangeTrade {
       assetPair: this.assetPair.toExport(),
       type: this.type,
       amount: this.amount,
+      amountQuote: this.amountQuote,
       timestamp: this.timestamp,
       status: this.status,
       entryPrice: this.entryPrice,
@@ -330,6 +335,7 @@ export class ExchangeTrade {
       AssetPair.fromImport(data.assetPair),
       data.type,
       data.amount,
+      data.amountQuote,
       data.timestamp,
       data.status
     );

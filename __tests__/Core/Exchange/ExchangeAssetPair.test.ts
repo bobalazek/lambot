@@ -141,6 +141,7 @@ describe('ExchangeAssetPair', () => {
       'MOCK_TRADE_ID',
       new AssetPair(Assets.USDT, Assets.BTC),
       ExchangeTradeTypeEnum.LONG,
+      '1',
       '1'
     ));
 
@@ -154,6 +155,7 @@ describe('ExchangeAssetPair', () => {
       'MOCK_TRADE_ID_2',
       new AssetPair(Assets.USDT, Assets.ETH),
       ExchangeTradeTypeEnum.LONG,
+      '1',
       '1'
     ));
 
@@ -163,6 +165,7 @@ describe('ExchangeAssetPair', () => {
       'MOCK_TRADE_ID_3',
       new AssetPair(Assets.USDT, Assets.BCH),
       ExchangeTradeTypeEnum.LONG,
+      '1',
       '1'
     ));
 
@@ -172,6 +175,7 @@ describe('ExchangeAssetPair', () => {
       'MOCK_TRADE_ID_4',
       new AssetPair(Assets.USDT, Assets.ETC),
       ExchangeTradeTypeEnum.LONG,
+      '1',
       '1'
     ));
 

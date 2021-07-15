@@ -63,6 +63,7 @@ const exchangeTrades: ExchangeTrade[] = [];
     new AssetPair(Assets.BTC, Assets.USDT),
     ExchangeTradeTypeEnum.LONG,
     '15',
+    '1',
     Date.now(),
     object.status
   );
