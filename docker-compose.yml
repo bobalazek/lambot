@@ -11,8 +11,7 @@ services:
     networks:
       - lambot-network
     ports:
-      # NOT a typo. We are keeping it flexible, so it will work even without docker (for now)
-      - '${SERVER_PORT_3000:-3000}:${SERVER_PORT_3000:-3000}'
+      - '${SERVER_PORT_3000:-3000}:3000'
 
   timescale:
     container_name: lambot_timescale

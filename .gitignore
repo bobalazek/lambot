@@ -1,4 +1,8 @@
 /node_modules
 /build
 /data
+/config/*
+!/config/Config.example.ts
+/config/Strategies/*
+!/config/Strategies/DefaultStrategy.ts
 .env
