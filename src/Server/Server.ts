@@ -5,9 +5,9 @@ import express, {
   Response,
 } from 'express';
 
-import { Manager } from './Manager';
-import { SessionManager } from './Core/Session/SessionManager';
-import logger from './Utils/Logger';
+import { Manager } from '../Trader/Manager';
+import { SessionManager } from '../Core/Session/SessionManager';
+import logger from '../Utils/Logger';
 
 export class Server {
   app: Application;

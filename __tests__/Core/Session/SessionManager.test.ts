@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import { SessionManager } from '../../../src/Core/Session/SessionManager';
-import { Trader } from '../../../src/Trader';
+import { Trader } from '../../../src/Trader/Trader';
 import { exchangeTrades } from '../../__fixtures__/SessionFixtures';
 import { createMockTrader } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';

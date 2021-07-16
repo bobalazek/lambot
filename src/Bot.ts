@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
-import { Manager } from './Manager';
+import { Manager } from './Trader/Manager';
 import { SessionManager } from './Core/Session/SessionManager';
 import config from '../config/Config';
 

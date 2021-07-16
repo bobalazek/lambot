@@ -1,18 +1,18 @@
 import chalk from 'chalk';
 
-import { AssetPair } from './Core/Asset/AssetPair';
-import { ExchangeAccountTypeEnum } from './Core/Exchange/ExchangeAccount';
-import { ExchangeOrder } from './Core/Exchange/ExchangeOrder';
-import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from './Core/Exchange/ExchangeTrade';
-import { ExchangeOrderTypeEnum } from './Core/Exchange/ExchangeOrderType';
-import { ExchangeOrderSideEnum } from './Core/Exchange/ExchangeOrderSide';
-import { ExchangeOrderFeesTypeEnum } from './Core/Exchange/ExchangeOrderFeesType';
-import { Session } from './Core/Session/Session';
-import { SessionManager } from './Core/Session/SessionManager';
+import { AssetPair } from '../Core/Asset/AssetPair';
+import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
+import { ExchangeOrder } from '../Core/Exchange/ExchangeOrder';
+import { ExchangeTrade, ExchangeTradeStatusEnum, ExchangeTradeTypeEnum } from '../Core/Exchange/ExchangeTrade';
+import { ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrderType';
+import { ExchangeOrderSideEnum } from '../Core/Exchange/ExchangeOrderSide';
+import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFeesType';
+import { Session } from '../Core/Session/Session';
+import { SessionManager } from '../Core/Session/SessionManager';
 import { Manager } from './Manager';
-import { ID_PREFIX } from './Constants';
-import { colorTextPercentageByValue } from './Utils/Helpers';
-import logger from './Utils/Logger';
+import { ID_PREFIX } from '../Constants';
+import { colorTextPercentageByValue } from '../Utils/Helpers';
+import logger from '../Utils/Logger';
 
 export interface TraderInterface {
   session: Session;

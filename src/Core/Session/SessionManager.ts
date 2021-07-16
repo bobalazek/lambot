@@ -9,7 +9,7 @@ import { Session, SessionOrderTypes } from './Session';
 import { SessionConfig } from './SessionConfig';
 import { SessionTradingTypeEnum } from './SessionTradingType';
 import { Strategy } from '../Strategy/Strategy';
-import { Manager } from '../../Manager';
+import { Manager } from '../../Trader/Manager';
 import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
 import { ExchangeTrade } from '../Exchange/ExchangeTrade';
