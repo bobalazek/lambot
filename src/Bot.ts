@@ -1,10 +1,9 @@
-import fs from 'fs';
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
 import { Manager } from './Manager';
 import { SessionManager } from './Core/Session/SessionManager';
-import { ConfigInterface } from './Config';
+import config from '../config/Config';
 
 dotenv.config();
 
@@ -24,17 +23,6 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
-  const configFile = '../config/Config.ts';
-  if (!fs.existsSync(configFile)) {
-    console.log(
-      `Can not find the "/config/Config.ts" file. ` +
-      `Please create the config file by copying the example file from the same directory!`
-    );
-    process.exit(1);
-  }
-
-  const config: ConfigInterface = (await import(configFile)).default;
-
   // Important!
   // This MUST be set BEFORE session loading, because inside the session manager,
   // we use that variable to determine the file name.
