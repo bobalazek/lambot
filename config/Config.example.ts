@@ -1,6 +1,6 @@
 import { AssetPair } from '../src/Core/Asset/AssetPair';
 import { Assets } from '../src/Core/Asset/Assets';
-import { ConfigInterface } from '../src/Core/Config';
+import { ConfigInterface } from '../src/Config';
 import { ExchangeOrderTypeEnum } from '../src/Core/Exchange/ExchangeOrderType';
 import { ExchangesEnum } from '../src/Core/Exchange/ExchangesFactory';
 import { SessionConfig } from '../src/Core/Session/SessionConfig';

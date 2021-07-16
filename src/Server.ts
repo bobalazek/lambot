@@ -6,8 +6,8 @@ import express, {
 } from 'express';
 
 import { Manager } from './Manager';
-import { SessionManager } from './Session/SessionManager';
-import logger from '../Utils/Logger';
+import { SessionManager } from './Core/Session/SessionManager';
+import logger from './Utils/Logger';
 
 export class Server {
   app: Application;

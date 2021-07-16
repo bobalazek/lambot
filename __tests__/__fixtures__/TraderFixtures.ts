@@ -5,7 +5,7 @@ import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/R
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
-import { Manager } from '../../src/Core/Manager';
+import { Manager } from '../../src/Manager';
 import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
 import { createMockSession } from './SessionFixtures';
 

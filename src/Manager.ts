@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 
-import { Session } from './Session/Session';
+import { Session } from './Core/Session/Session';
 import { Server } from './Server';
 import { Trader } from './Trader';
-import logger from '../Utils/Logger';
+import logger from './Utils/Logger';
 
 export class Manager {
   public static session: Session;

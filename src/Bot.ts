@@ -2,9 +2,9 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
-import { Manager } from './Core/Manager';
+import { Manager } from './Manager';
 import { SessionManager } from './Core/Session/SessionManager';
-import { ConfigInterface } from './Core/Config';
+import { ConfigInterface } from './Config';
 
 dotenv.config();
 
@@ -24,10 +24,10 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
-  const configFile = '../config/Config';
+  const configFile = '../config/Config.ts';
   if (!fs.existsSync(configFile)) {
     console.log(
-      `Can not find the "/config/Config.example.ts" file. ` +
+      `Can not find the "/config/Config.ts" file. ` +
       `Please create the config file by copying the example file from the same directory!`
     );
     process.exit(1);

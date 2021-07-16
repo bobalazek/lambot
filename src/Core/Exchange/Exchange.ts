@@ -14,7 +14,7 @@ import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFeesType';
 import { ExchangesFactory } from './ExchangesFactory';
-import { Manager } from '../Manager';
+import { Manager } from '../../Manager';
 import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { SessionTradingTypeEnum } from '../Session/SessionTradingType';

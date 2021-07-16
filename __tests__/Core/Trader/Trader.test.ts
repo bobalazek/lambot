@@ -2,7 +2,7 @@
 
 import { AssetPair } from '../../../src/Core/Asset/AssetPair';
 import { Assets } from '../../../src/Core/Asset/Assets';
-import { Trader } from '../../../src/Core/Trader';
+import { Trader } from '../../../src/Trader';
 import { SessionTradingTypeEnum } from '../../../src/Core/Session/SessionTradingType';
 import { assetPairPricesResponses, createMockTrader } from '../../__fixtures__/TraderFixtures';
 import logger from '../../../src/Utils/Logger';

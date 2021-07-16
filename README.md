@@ -6,9 +6,13 @@ As you can imagine, it's not really that easy as it sounds. Rather than you earn
 
 ## Getting started
 
-First you will need to set up some your config in the `/config/` folder. For now you can just edit the contents of `Config.ts` file inside and and set up the parameters. In addition, you'll also need to edit or create a strategy, which should be located in the same directory. You will also need to copy the contents of `.env.example` to `.env` to setup your exchange credentials.
+First you will need to copy the contents of `.env.example` to `.env` to setup your environment variables and exchange credentials.
 
-After that, you'll need to build the bot with `docker-compose build`, and now finally you can run it with `docker-compose up`.
+Then you will need to set up some your config in the `./config/` folder. For now you can just edit the contents of `Config.ts` file inside and and set up the parameters. If this file doesn't exist yet, just create one by copying the `Config.example.ts` file.
+
+The last thing you probably want to do is, to create your own strategy. There is a default strategy located in `./config/Strategies/DefaultStrategy.ts`, but you will probably want to create your own, which you can then link in the `./config/Config.ts` file.
+
+After that, you'll just need to build the container with `docker-compose build` and run the bot with `docker-compose up`.
 
 ## Exchanges
 
