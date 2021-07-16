@@ -126,4 +126,3 @@ export class DefaultStrategy extends Strategy {
     );
   }
 }
-{"mode":"full","isActive":false}
