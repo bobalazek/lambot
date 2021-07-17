@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import chalk from 'chalk';
 import express, {
   Application,
@@ -9,7 +7,6 @@ import express, {
 
 import { SessionManager } from '../Core/Session/SessionManager';
 import { Trader } from '../Trader/Trader';
-import { BUILD_DIR, SRC_DIR } from '../Constants';
 import logger from '../Utils/Logger';
 
 export class Server {
@@ -43,18 +40,6 @@ export class Server {
   }
 
   private _configureRoutes() {
-    this.app.get('/', (request: Request, response: Response) => {
-      response.status(200).send(
-        fs.readFileSync(path.resolve(SRC_DIR, 'Web', 'index.html'), 'utf8')
-      );
-    });
-
-    this.app.get('/web.js', (request: Request, response: Response) => {
-      response.status(200).send(
-        fs.readFileSync(path.resolve(BUILD_DIR, 'web.js'), 'utf8')
-      );
-    });
-
     this.app.get('/api', (request: Request, response: Response) => {
       response.status(200).json({
         isTestMode: this.trader.isTestMode,

@@ -4,8 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   entry: {
-    bot: './src/Bot.ts',
-    web: './src/Web.ts',
+    bot: './src/index.ts',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
