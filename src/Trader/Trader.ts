@@ -48,9 +48,6 @@ export class Trader {
       `Session config: ${JSON.stringify(this.session.config)}`
     ));
 
-    await this.session.exchange.boot(this.session);
-    await this.start();
-
     if (this.session.config.webServerApiEnabled) {
       this.server = new Server(
         this.session.config.webServerApiPort
@@ -58,6 +55,9 @@ export class Trader {
 
       await this.server.boot(this);
     }
+
+    await this.session.exchange.boot(this.session);
+    await this.start();
 
     this._startMemoryUsageMonitoring();
 

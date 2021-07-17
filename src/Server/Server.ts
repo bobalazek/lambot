@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import chalk from 'chalk';
 import express, {
   Application,
@@ -8,6 +10,7 @@ import express, {
 import { SessionManager } from '../Core/Session/SessionManager';
 import { Trader } from '../Trader/Trader';
 import logger from '../Utils/Logger';
+import { BUILD_DIR } from '../Constants';
 
 export class Server {
   app: Application;
@@ -41,6 +44,12 @@ export class Server {
 
   private _configureRoutes() {
     this.app.get('/', (request: Request, response: Response) => {
+      response.status(200).send(
+        fs.readFileSync(path.resolve(BUILD_DIR, 'index.html'), 'utf8')
+      );
+    });
+
+    this.app.get('/api', (request: Request, response: Response) => {
       response.status(200).json({
         isTestMode: this.trader.isTestMode,
       });

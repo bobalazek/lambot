@@ -3,6 +3,7 @@
     "module": "esnext",
     "esModuleInterop": true,
     "target": "esnext",
+    "jsx": "react",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "build"

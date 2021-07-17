@@ -1,5 +1,6 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
@@ -7,6 +8,10 @@ module.exports = {
     bot: './src/Bot.ts',
     web: './src/Web.ts',
   },
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  },
+  target: 'node',
   module: {
     rules: [
       {
@@ -20,15 +25,15 @@ module.exports = {
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
     }),
+    new HtmlWebpackPlugin({
+      template: './src/Web/Resources/index.html',
+      excludeChunks: ['bot'],
+    }),
   ],
-  resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
-  },
   output: {
     path: path.resolve(__dirname, 'build'),
   },
   externals: [
     nodeExternals(),
   ],
-  target: 'node',
 };

@@ -1,1 +1,1 @@
-// TODO
+import './Web/index';
