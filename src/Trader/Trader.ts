@@ -349,6 +349,18 @@ export class Trader {
       return false;
     }
 
+    logger.debug(`Populating indicators ...`);
+    for (const exchangeAssetPair of this.session.exchange.assetPairs.values()) {
+      if (
+        assetPairOnly &&
+        assetPairOnly.getKey() !== exchangeAssetPair.assetPair.getKey()
+      ) {
+        continue;
+      }
+
+      this.session.strategy.prepareIndicators(exchangeAssetPair);
+    }
+
     logger.debug(`Checking for sell signals ...`);
     for (const exchangeTrade of this.session.getOpenTrades()) {
       if (

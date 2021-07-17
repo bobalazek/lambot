@@ -10,6 +10,7 @@ export interface StrategyInterface {
   session: Session;
   boot(session: Session): Promise<boolean>;
   getSortedAssetPairs(): AssetPair[];
+  prepareIndicators(exchangeAssetPair: ExchangeAssetPair): ExchangeAssetPair;
   shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false;
   shouldSell(exchangeTrade: ExchangeTrade): boolean;
 }
@@ -32,6 +33,12 @@ export class Strategy implements StrategyInterface {
 
   getSortedAssetPairs(): AssetPair[] {
     return this.session.assetPairs;
+  }
+
+  prepareIndicators(exchangeAssetPair: ExchangeAssetPair): ExchangeAssetPair {
+    exchangeAssetPair.indicators = new Map();
+
+    return exchangeAssetPair;
   }
 
   shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {

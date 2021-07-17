@@ -74,6 +74,14 @@ export class DefaultStrategy extends Strategy {
     });
   }
 
+  prepareIndicators(exchangeAssetPair: ExchangeAssetPair): ExchangeAssetPair {
+    exchangeAssetPair.indicators = new Map();
+
+    // TODO
+
+    return exchangeAssetPair;
+  }
+
   shouldBuy(exchangeAssetPair: ExchangeAssetPair): ExchangeTradeTypeEnum | false {
     const shouldBuy = super.shouldBuy(exchangeAssetPair);
 
