@@ -6,22 +6,18 @@ services:
     build: .
     tty: true
     command: yarn build-and-start
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db
     volumes:
       - ./config:/app/config
-      - ./data:/app/data
+      - ./data/sessions:/app/data/sessions
+      - ./data/postgresql:/var/lib/postgresql/data
     networks:
       - lambot-network
     ports:
       - '${SERVER_PORT_3000:-3000}:3000'
-
-  timescale:
-    container_name: lambot_timescale
-    image: timescale/timescaledb:latest-pg13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    networks:
-      - lambot-network
 
 networks:
   lambot-network:
