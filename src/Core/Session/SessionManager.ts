@@ -9,12 +9,13 @@ import { Session, SessionOrderTypes } from './Session';
 import { SessionConfig } from './SessionConfig';
 import { SessionTradingTypeEnum } from './SessionTradingType';
 import { Strategy } from '../Strategy/Strategy';
-import { Manager } from '../../Trader/Manager';
 import { DATA_SESSIONS_DIR } from '../../Constants';
 import logger from '../../Utils/Logger';
 import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 
 export class SessionManager {
+  static isTestMode: boolean = true;
+
   static save(session: Session): string {
     logger.info(chalk.cyan('Saving the session ...'));
 
@@ -177,7 +178,7 @@ export class SessionManager {
 
   /***** Helpers *****/
   static getPathById(id: string): string {
-    const suffix = Manager.isTestMode
+    const suffix = SessionManager.isTestMode
       ? '.testing'
       : '.production';
 

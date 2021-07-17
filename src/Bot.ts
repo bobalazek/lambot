@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import { Command } from 'commander';
 
-import { Manager } from './Trader/Manager';
 import { SessionManager } from './Core/Session/SessionManager';
+import { Trader } from './Trader/Trader';
 import config from '../config/Config';
 
 dotenv.config();
@@ -23,10 +23,7 @@ const sessionId = programOptions.session;
 
 // A workaround for the top-level-await issue
 (async() => {
-  // Important!
-  // This MUST be set BEFORE session loading, because inside the session manager,
-  // we use that variable to determine the file name.
-  Manager.isTestMode = isTestMode;
+  SessionManager.isTestMode = isTestMode;
 
   const session = await SessionManager.newOrLoad(
     sessionId || config.sessionId,
@@ -39,5 +36,7 @@ const sessionId = programOptions.session;
     config.sessionTradingTypes,
   );
 
-  await Manager.boot(session);
+  const trader = new Trader();
+
+  return await trader.boot(session, isTestMode);
 })();

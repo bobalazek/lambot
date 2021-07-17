@@ -5,8 +5,8 @@ import { ExchangeResponseAccountAssetInterface } from '../../src/Core/Exchange/R
 import { ExchangeResponseAssetPairInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPair';
 import { ExchangeResponseAssetPairPriceEntryInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairPriceEntry';
 import { ExchangeResponseAssetPairStatisticsInterface } from '../../src/Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
-import { Manager } from '../../src/Trader/Manager';
 import { SessionTradingTypeEnum } from '../../src/Core/Session/SessionTradingType';
+import { Trader } from '../../src/Trader/Trader';
 import { createMockSession } from './SessionFixtures';
 
 export const assetPairStatistics24HoursResponse: ExchangeResponseAssetPairStatisticsInterface[] = [
@@ -230,6 +230,7 @@ export const createMockTrader = async () => {
   exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
   const session = createMockSession(exchange);
+  const trader = new Trader();
 
-  return await Manager.boot(session);
+  return await trader.boot(session, true);
 }

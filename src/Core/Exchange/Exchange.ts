@@ -14,7 +14,6 @@ import { ExchangeOrder } from './ExchangeOrder';
 import { ExchangeValidator } from './ExchangeValidator';
 import { ExchangeOrderFeesTypeEnum } from './ExchangeOrderFeesType';
 import { ExchangesFactory } from './ExchangesFactory';
-import { Manager } from '../../Trader/Manager';
 import { Session } from '../Session/Session';
 import { SessionManager } from '../Session/SessionManager';
 import { SessionTradingTypeEnum } from '../Session/SessionTradingType';
@@ -196,7 +195,7 @@ export class Exchange implements ExchangeInterface {
 
   async _checkPersistenceData(): Promise<any> {
     if (
-      Manager.isTestMode ||
+      SessionManager.isTestMode ||
       !this.session.isLoadedFromPersistence
     ) {
       return;

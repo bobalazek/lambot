@@ -5,20 +5,23 @@ import express, {
   Response,
 } from 'express';
 
-import { Manager } from '../Trader/Manager';
 import { SessionManager } from '../Core/Session/SessionManager';
+import { Trader } from '../Trader/Trader';
 import logger from '../Utils/Logger';
 
 export class Server {
   app: Application;
   port: number;
+  trader: Trader;
 
   constructor(port: number) {
     this.app = express();
     this.port = port;
   }
 
-  async boot(): Promise<Application> {
+  async boot(trader: Trader): Promise<Application> {
+    this.trader = trader;
+
     logger.info(chalk.cyan(
       `Booting the server ...`
     ));
@@ -39,24 +42,24 @@ export class Server {
   private _configureRoutes() {
     this.app.get('/', (request: Request, response: Response) => {
       response.status(200).json({
-        isTestMode: Manager.isTestMode,
+        isTestMode: this.trader.isTestMode,
       });
     });
 
     this.app.get('/api/session', (request: Request, response: Response) => {
-      const data = Manager.session.toExport();
+      const data = this.trader.session.toExport();
       delete data.trades;
       response.status(200).json(data);
     });
 
     this.app.get('/api/session/trades', (request: Request, response: Response) => {
-      response.status(200).json(Manager.session.trades.map((exchangeTrade) => {
+      response.status(200).json(this.trader.session.trades.map((exchangeTrade) => {
         return exchangeTrade.toExport();
       }));
     });
 
     this.app.get('/api/session/trades/summary', (request: Request, response: Response) => {
-      response.status(200).json(SessionManager.getTradesSummary(Manager.session));
+      response.status(200).json(SessionManager.getTradesSummary(this.trader.session));
     });
   }
 }

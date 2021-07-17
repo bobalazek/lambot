@@ -9,32 +9,21 @@ import { ExchangeOrderSideEnum } from '../Core/Exchange/ExchangeOrderSide';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFeesType';
 import { Session } from '../Core/Session/Session';
 import { SessionManager } from '../Core/Session/SessionManager';
-import { Manager } from './Manager';
+import { Server } from '../Server/Server';
 import { ID_PREFIX } from '../Constants';
 import { colorTextPercentageByValue } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
-
-export interface TraderInterface {
-  session: Session;
-  status: TraderStatusEnum;
-  startTime: number;
-  start(): Promise<boolean>;
-  stop(): Promise<boolean>;
-  statistics24HoursTick(): void;
-  priceTick(): void;
-  candlestickTick(): void;
-  executeBuy(assetPair: AssetPair, tradeType: ExchangeTradeTypeEnum): Promise<ExchangeTrade>;
-  executeSell(exchangeTrade: ExchangeTrade): Promise<ExchangeTrade>;
-}
 
 export enum TraderStatusEnum {
   STOPPED = 'STOPPED',
   RUNNING = 'RUNNING',
 }
 
-export class Trader implements TraderInterface {
+export class Trader {
   session: Session;
-  status: TraderStatusEnum;
+  server: Server;
+  isTestMode: boolean = true;
+  status: TraderStatusEnum = TraderStatusEnum.STOPPED;
   startTime: number;
 
   _statistics24HoursTickInterval: ReturnType<typeof setInterval>;
@@ -43,9 +32,36 @@ export class Trader implements TraderInterface {
   _openTradesInterval: ReturnType<typeof setInterval>;
   _assetPairPriceInterval: ReturnType<typeof setInterval>;
 
-  constructor(session: Session) {
+  async boot(session: Session, isTestMode: boolean = true): Promise<Trader> {
     this.session = session;
-    this.status = TraderStatusEnum.STOPPED;
+    this.isTestMode = isTestMode;
+
+    logger.info(chalk.cyan(
+      this.isTestMode
+        ? 'Trader (in TEST MODE) is starting now ...'
+        : 'Trader is starting now ...'
+    ));
+
+    logger.info(chalk.cyan(
+      `Exchange: ${this.session.exchange.name}; ` +
+      `Session ID: ${this.session.id}; ` +
+      `Session config: ${JSON.stringify(this.session.config)}`
+    ));
+
+    await this.session.exchange.boot(this.session);
+    await this.start();
+
+    if (this.session.config.webServerApiEnabled) {
+      this.server = new Server(
+        this.session.config.webServerApiPort
+      );
+
+      await this.server.boot(this);
+    }
+
+    this._startMemoryUsageMonitoring();
+
+    return this;
   }
 
   async start(): Promise<boolean> {
@@ -229,7 +245,7 @@ export class Trader implements TraderInterface {
       tradeType
     );
 
-    const entryOrder: ExchangeOrder = !Manager.isTestMode
+    const entryOrder: ExchangeOrder = !this.isTestMode
       ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
     const exchangeTrade = new ExchangeTrade(
@@ -283,7 +299,7 @@ export class Trader implements TraderInterface {
       exchangeTrade.type
     );
 
-    const exitOrder: ExchangeOrder = !Manager.isTestMode
+    const exitOrder: ExchangeOrder = !this.isTestMode
       ? await this.session.exchange.addAccountOrder(accountType, order)
       : order;
     exchangeTrade.exitFees.push(orderFees);
@@ -405,5 +421,21 @@ export class Trader implements TraderInterface {
     if (openTrades.length === 0) {
       logger.debug('No open trades found yet.');
     }
+  }
+
+  _startMemoryUsageMonitoring() {
+    const {
+      memoryUsageMonitoringIntervalSeconds,
+    } = this.session.config;
+
+    return setInterval(() => {
+      const memoryUsage = process.memoryUsage();
+      logger.info(chalk.cyan(
+        'Memory usage: ' +
+        Object.keys(memoryUsage).map((key) => {
+          return `${key} - ${Math.round(memoryUsage[key] / 1024 / 1024 * 100) / 100} MB`;
+        }).join('; ')
+      ));
+    }, memoryUsageMonitoringIntervalSeconds * 1000);
   }
 }

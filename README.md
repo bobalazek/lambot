@@ -18,6 +18,15 @@ After that, you'll just need to build the container with `docker-compose build` 
 
 Right now, Binance is the only supported exchange for this trading bot.
 
+## TODO
+
+* Web UI, where you can see current trades, asset pair prices, charts, ... also manually enter or exit trades
+* Indicators implementation
+* Database persistance (prices, candlesticks, orders, trades, ...) into timescaledb
+* Websocket implementation for fetching prices and candlesticks data
+* Backtesting
+* Other exchanges
+
 ## Disclaimer
 
 **All investment strategies and investments involve risk of loss.
