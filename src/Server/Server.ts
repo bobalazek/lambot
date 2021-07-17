@@ -9,8 +9,8 @@ import express, {
 
 import { SessionManager } from '../Core/Session/SessionManager';
 import { Trader } from '../Trader/Trader';
+import { BUILD_DIR, SRC_DIR } from '../Constants';
 import logger from '../Utils/Logger';
-import { BUILD_DIR } from '../Constants';
 
 export class Server {
   app: Application;
@@ -45,7 +45,13 @@ export class Server {
   private _configureRoutes() {
     this.app.get('/', (request: Request, response: Response) => {
       response.status(200).send(
-        fs.readFileSync(path.resolve(BUILD_DIR, 'index.html'), 'utf8')
+        fs.readFileSync(path.resolve(SRC_DIR, 'Web', 'index.html'), 'utf8')
+      );
+    });
+
+    this.app.get('/web.js', (request: Request, response: Response) => {
+      response.status(200).send(
+        fs.readFileSync(path.resolve(BUILD_DIR, 'web.js'), 'utf8')
       );
     });
 

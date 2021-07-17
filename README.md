@@ -18,6 +18,10 @@ After that, you'll just need to build the container with `docker-compose build` 
 
 Right now, Binance is the only supported exchange for this trading bot.
 
+## Development
+
+After you made your changes run `docker-compose build` to build and then `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up` to start the container. After that you'll need to manually run the bot with `docker exec -i lambot_node node build/bot.js`.
+
 ## TODO
 
 * Web UI, where you can see current trades, asset pair prices, charts, ... also manually enter or exit trades

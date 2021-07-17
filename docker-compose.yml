@@ -5,12 +5,10 @@ services:
     container_name: lambot_node
     build: .
     tty: true
-    command: yarn watch # yarn build-and-start for production
+    command: yarn build-and-start
     volumes:
       - ./config:/app/config
       - ./data:/app/data
-      - ./build:/app/build
-      - ./node_modules:/app/node_modules # need for intellisense
     networks:
       - lambot-network
     ports:

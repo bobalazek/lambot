@@ -1,6 +1,5 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
@@ -24,10 +23,6 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
-    }),
-    new HtmlWebpackPlugin({
-      template: './src/Web/Resources/index.html',
-      excludeChunks: ['bot'],
     }),
   ],
   output: {
