@@ -6,14 +6,9 @@ services:
     build: .
     tty: true
     command: yarn build-and-start
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=db
     volumes:
       - ./config:/app/config
       - ./data/sessions:/app/data/sessions
-      - ./data/postgresql:/var/lib/postgresql/data
     networks:
       - lambot-network
     ports:

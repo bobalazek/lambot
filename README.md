@@ -25,11 +25,12 @@ After you made your changes run `docker-compose build` to build and then `docker
 ## TODO
 
 * Indicators implementation
-* Database persistance (prices, candlesticks, orders, trades, ...) into timescaledb
-* Web UI, where you can see current trades, asset pair prices, charts, ... also manually enter or exit trades -- WILL BE A SEPARATE REPO
 * Websocket exchange implementation for fetching prices and candlesticks data
 * Backtesting
-* Other exchanges
+* Other exchanges besides Binance
+* Separate repository:
+  * Database persistance (prices, candlesticks, orders, trades, ...)
+  * Web UI, where you can see current trades, asset pair prices, charts, ... also manually enter or exit trades
 
 ## Disclaimer
 
