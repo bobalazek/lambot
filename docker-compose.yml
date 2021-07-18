@@ -5,10 +5,8 @@ services:
     container_name: lambot_node
     build: .
     tty: true
-    command: yarn build-and-start
     volumes:
-      - ./config:/app/config
-      - ./data/sessions:/app/data/sessions
+      - ./:/app
     networks:
       - lambot-network
     ports:
