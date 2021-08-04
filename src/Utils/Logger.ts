@@ -33,7 +33,7 @@ const logger = {
       return;
     }
 
-    console.info(new Date().toISOString(), '[WARNING]', ...args);
+    console.warn(new Date().toISOString(), '[WARNING]', ...args);
   },
   error: (...args) => {
     if (!logger.isEnabled) {
