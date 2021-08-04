@@ -12,7 +12,7 @@ const logger = {
       return;
     }
 
-    console.log(new Date().toISOString(), '[DEBUG]', ...args);
+    console.debug(new Date().toISOString(), '[DEBUG]', ...args);
   },
   info: (...args) => {
     if (!logger.isEnabled) {
