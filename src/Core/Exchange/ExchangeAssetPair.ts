@@ -260,7 +260,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
 
       changes.push(relativePricePercentage);
 
-      if (prevPrice !== null && nextPrice !== null) {
+      if (prevPrice !== null) {
         // TODO: figure out a better way to do this
         // I'm aware that the performance is rather terrible,
         // but will need a good idea on how to fix it
@@ -293,6 +293,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         }
 
         if (
+          nextPrice !== null &&
           price < nextPrice &&
           relativePricePercentage <= 0
         ) {

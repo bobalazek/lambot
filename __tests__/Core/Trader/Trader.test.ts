@@ -32,7 +32,7 @@ describe('Trader', () => {
 
     const assetPairKey = (new AssetPair(Assets.ETH, Assets.USDT)).getKey();
     const assetPairPrice = trader.session.exchange.assetPairs.get(assetPairKey);
-    const assetPairPriceEntries = assetPairPrice.getPriceEntries();
+    const assetPairPriceEntries = assetPairPrice!.getPriceEntries();
 
     expect(assetPairPriceEntries).toHaveLength(1);
 
@@ -50,7 +50,7 @@ describe('Trader', () => {
     await trader.priceTick();
 
     const assetPairPriceSecondary = trader.session.exchange.assetPairs.get(assetPairKey);
-    const assetPairPriceSecondaryEntries = assetPairPriceSecondary.getPriceEntries();
+    const assetPairPriceSecondaryEntries = assetPairPriceSecondary!.getPriceEntries();
 
     expect(assetPairPriceSecondaryEntries).toHaveLength(assetPairPricesResponses.length);
 

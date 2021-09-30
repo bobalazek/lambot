@@ -224,12 +224,12 @@ export const accountAssetsResponse: ExchangeResponseAccountAssetInterface[] = [
 
 export const createMockTrader = async () => {
   const exchange = ExchangesFactory.get(ExchangesEnum.MOCK);
-  exchange.getAssetPairStatistics24Hours = jest.fn().mockReturnValue(assetPairStatistics24HoursResponse);
-  exchange.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
-  exchange.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
-  exchange.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
+  exchange!.getAssetPairStatistics24Hours = jest.fn().mockReturnValue(assetPairStatistics24HoursResponse);
+  exchange!.getAssetPairPrices = jest.fn().mockReturnValue(assetPairPricesResponses[0]);
+  exchange!.getAssetPairs = jest.fn().mockReturnValue(assetPairsResponse);
+  exchange!.getAccountAssets = jest.fn().mockReturnValue(accountAssetsResponse);
 
-  const session = createMockSession(exchange);
+  const session = createMockSession(exchange!);
   const trader = new Trader();
 
   return await trader.boot(session, true);

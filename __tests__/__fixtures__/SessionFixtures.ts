@@ -99,12 +99,12 @@ const exchangeTrades: ExchangeTrade[] = [];
   exchangeTrades.push(exchangeTrade);
 });
 
-export const createMockSession = (exchange: Exchange = ExchangesFactory.get(ExchangesEnum.MOCK)) => {
+export const createMockSession = (exchange: Exchange | null = ExchangesFactory.get(ExchangesEnum.MOCK)) => {
   const baseAsset = Assets.USDT;
 
   return new Session(
     'MOCK_SESSION',
-    exchange,
+    exchange!,
     new SessionConfig({
       memoryUsageMonitoringIntervalSeconds: 0,
       webServerApiEnabled: false,
