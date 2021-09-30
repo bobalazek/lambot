@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "license": "ISC",
   "scripts": {
-    "do": "yarn build && node ./build/index.js",
+    "do": "yarn build && node ./build/src/index.js",
     "build": "tsc -p .",
     "build-bundle": "ncc build ./src/index.ts -o ./build-bundle",
     "dev": "nodemon ./src/index.ts",

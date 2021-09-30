@@ -5,6 +5,6 @@ echo "Building the app with yarn ..."
 yarn build
 
 echo "Starting the app ..."
-node build/bot.js "$@"
+yarn do "$@"
 
 exit 0

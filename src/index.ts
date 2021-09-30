@@ -12,7 +12,6 @@ const program = new Command();
 // Prepare CLI
 const tradeCommand = program
   .command('trade')
-  .option('-a, --action', 'What action do we want to execute? Available: "trade"', 'trade')
   .option('-p, --production', 'Does actual trading with your account.', false)
   .option('-s, --session <session>', 'You can override your session ID with this parameter. It will load if one with the same ID already exists, else it will create a new one.')
   .action(async (options: any) => {
