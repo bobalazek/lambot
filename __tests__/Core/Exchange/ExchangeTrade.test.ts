@@ -76,7 +76,7 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
     expect(exchangeTrade.peakProfitPercentage).toBe(null);
     expect(exchangeTrade.troughProfitPercentage).toBe(null);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(null);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(null);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
 
     // Tick
@@ -89,7 +89,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
     expect(exchangeTrade.troughProfitPercentage).toBe(0.49999999999998934);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -103,7 +103,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -117,7 +117,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
     expect(exchangeTrade.troughProfitPercentage).toBe(-2.500000000000002);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(3000);
     expect(exchangeTrade.shouldSell(session, false)).toBe(true);
   });
@@ -132,7 +132,7 @@ describe('ExchangeTrade', () => {
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
     expect(exchangeTrade.peakProfitPercentage).toBe(null);
     expect(exchangeTrade.troughProfitPercentage).toBe(null);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(null);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(null);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
 
     // Tick
@@ -145,7 +145,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
     expect(exchangeTrade.troughProfitPercentage).toBe(0.49999999999998934);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -159,7 +159,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(0.49999999999998934);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(-1.5000000000000107);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(-1.5000000000000107);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -173,7 +173,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(2.499999999999991);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(0.4999999999999911);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(0.4999999999999911);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -187,7 +187,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(2.0000000000000036);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -203,7 +203,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(2.0000000000000036);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(false);
 
@@ -217,7 +217,7 @@ describe('ExchangeTrade', () => {
 
     expect(exchangeTrade.peakProfitPercentage).toBe(4.0000000000000036);
     expect(exchangeTrade.troughProfitPercentage).toBe(-0.5000000000000004);
-    expect(exchangeTrade.triggerStopLossPercentage).toBe(2.0000000000000036);
+    expect(exchangeTrade.targetStopLossPercentage).toBe(2.0000000000000036);
     expect(exchangeTrade.triggerStopLossSellAt).toBe(null);
     expect(exchangeTrade.shouldSell(session, false)).toBe(true);
   });

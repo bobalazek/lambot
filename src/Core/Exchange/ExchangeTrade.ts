@@ -21,7 +21,7 @@ export interface ExchangeTradeInterface {
   currentProfitPercentage?: number;
   peakProfitPercentage?: number; // What is the peak profit we reached?
   troughProfitPercentage?: number; // What is the trough profit we reached?
-  triggerStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger (can be positive or negative?
+  targetStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger - can be positive or negative?
   triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
   entryOrder?: ExchangeOrderInterface;
   exitOrder?: ExchangeOrderInterface;
@@ -66,7 +66,7 @@ export class ExchangeTrade {
   currentProfitPercentage: number | null;
   peakProfitPercentage: number | null;
   troughProfitPercentage: number | null;
-  triggerStopLossPercentage: number | null;
+  targetStopLossPercentage: number | null;
   triggerStopLossSellAt: number | null;
   entryOrder?: ExchangeOrder;
   exitOrder?: ExchangeOrder;
@@ -94,7 +94,7 @@ export class ExchangeTrade {
     this.currentProfitPercentage = null;
     this.peakProfitPercentage = null;
     this.troughProfitPercentage = null;
-    this.triggerStopLossPercentage = null;
+    this.targetStopLossPercentage = null;
     this.triggerStopLossSellAt = null;
   }
 
@@ -133,29 +133,29 @@ export class ExchangeTrade {
       this.troughProfitPercentage = this.currentProfitPercentage;
     }
 
-    if (this.triggerStopLossPercentage === null) {
-      this.triggerStopLossPercentage = -strategy.parameters.stopLossPercentage;
+    if (this.targetStopLossPercentage === null) {
+      this.targetStopLossPercentage = -strategy.parameters.stopLossPercentage;
     }
 
-    const expectedTriggerStopLossPercentage = this.peakProfitPercentage - strategy.parameters.trailingStopLossPercentage;
-    const diffStopLossPercentage = this.peakProfitPercentage - this.triggerStopLossPercentage;
+    const expectedTargetStopLossPercentage = this.peakProfitPercentage - strategy.parameters.trailingStopLossPercentage;
+    const diffStopLossPercentage = this.peakProfitPercentage - this.targetStopLossPercentage;
     if (
       strategy.parameters.trailingStopLossEnabled &&
       strategy.parameters.trailingStopLossPercentage < diffStopLossPercentage &&
-      this.triggerStopLossPercentage < expectedTriggerStopLossPercentage
+      this.targetStopLossPercentage < expectedTargetStopLossPercentage
     ) {
-      this.triggerStopLossPercentage = expectedTriggerStopLossPercentage;
+      this.targetStopLossPercentage = expectedTargetStopLossPercentage;
     }
 
     if (
       strategy.parameters.stopLossEnabled &&
-      this.currentProfitPercentage < this.triggerStopLossPercentage &&
+      this.currentProfitPercentage < this.targetStopLossPercentage &&
       !this.triggerStopLossSellAt
     ) {
       this.triggerStopLossSellAt = now;
     } else if (
       strategy.parameters.stopLossEnabled &&
-      this.currentProfitPercentage > this.triggerStopLossPercentage &&
+      this.currentProfitPercentage > this.targetStopLossPercentage &&
       this.triggerStopLossSellAt
     ) {
       this.triggerStopLossSellAt = null;
@@ -200,7 +200,7 @@ export class ExchangeTrade {
       // Once we reach over this takeProfitPercentage threshold, we should set the stop loss percentage
       // to that value, to prevent dipping down again when the trigger doesn't execute
       // because of trailing take profit enabled.
-      this.triggerStopLossPercentage = strategy.parameters.takeProfitPercentage;
+      this.targetStopLossPercentage = strategy.parameters.takeProfitPercentage;
 
       const slipSincePeakProfitPercentage = this.peakProfitPercentage - currentProfitPercentage;
       if (
@@ -218,21 +218,22 @@ export class ExchangeTrade {
       }
     }
 
-    if (this.triggerStopLossPercentage === null) {
-      return false;
-    }
 
     // Just to make sure that we trigger a sell when the currentProfitPercentage is less than the trigger.
     // This basically covers the case when we have trailingTakeProfitEnabled,
-    // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
+    // and there we set the new targetStopLossPercentage to the takeProfitPercentage,
     // so it doesn't every again fall below this value.
-    if (currentProfitPercentage < this.triggerStopLossPercentage) {
+    if (
+      this.targetStopLossPercentage !== null &&
+      currentProfitPercentage < this.targetStopLossPercentage
+    ) {
       return true;
     }
 
     if (
       strategy.parameters.stopLossEnabled &&
-      currentProfitPercentage < this.triggerStopLossPercentage
+      this.targetStopLossPercentage !== null &&
+      currentProfitPercentage < this.targetStopLossPercentage
     ) {
       if (strategy.parameters.stopLossTimeoutSeconds === 0) {
         return true;
@@ -350,7 +351,7 @@ export class ExchangeTrade {
       currentProfitPercentage: this.currentProfitPercentage,
       peakProfitPercentage: this.peakProfitPercentage,
       troughProfitPercentage: this.troughProfitPercentage,
-      triggerStopLossPercentage: this.triggerStopLossPercentage,
+      targetStopLossPercentage: this.targetStopLossPercentage,
       triggerStopLossSellAt: this.triggerStopLossSellAt,
       entryOrder: this.entryOrder?.toExport(),
       exitOrder: this.exitOrder?.toExport(),
@@ -400,8 +401,8 @@ export class ExchangeTrade {
       exchangeTrade.troughProfitPercentage = data.troughProfitPercentage;
     }
 
-    if (typeof data.triggerStopLossPercentage !== 'undefined') {
-      exchangeTrade.triggerStopLossPercentage = data.triggerStopLossPercentage;
+    if (typeof data.targetStopLossPercentage !== 'undefined') {
+      exchangeTrade.targetStopLossPercentage = data.targetStopLossPercentage;
     }
 
     if (typeof data.triggerStopLossSellAt !== 'undefined') {

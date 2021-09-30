@@ -27,6 +27,7 @@ export interface StrategyParametersInterface {
   stopLossEnabled: boolean;
 
   // How much can we lose until we trigger a sell?
+  // Positive integer, which is inverted to determine the "tirggerStopLossPercentage"
   // Note: This DOES NOT take the fees into account!
   stopLossPercentage: number;
 
