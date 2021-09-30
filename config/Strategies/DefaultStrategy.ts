@@ -113,10 +113,14 @@ export class DefaultStrategy extends Strategy {
   _getLargestTroughPercentage(
     assetPair: AssetPair,
     uptrendMaximumAgeTime: number
-  ): number {
+  ): number | null {
     const assetPairPrice = this.session.exchange.assetPairs.get(
       assetPair.getKey()
     );
+    if (!assetPairPrice) {
+      return null;
+    }
+
     const newestPriceEntry = assetPairPrice.getNewestPriceEntry();
     const largestTroughPriceEntry = assetPairPrice.getLargestTroughPriceEntry(
       uptrendMaximumAgeTime

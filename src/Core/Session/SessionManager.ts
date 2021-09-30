@@ -16,7 +16,7 @@ import { ExchangeTrade } from '../Exchange/ExchangeTrade';
 export class SessionManager {
   static isTestMode: boolean = true;
 
-  static save(session: Session): string {
+  static save(session: Session): string | null {
     logger.info(chalk.cyan('Saving the session ...'));
 
     if (process.env.NODE_ENV === 'test') {
@@ -44,7 +44,7 @@ export class SessionManager {
     return sessionFilePath;
   }
 
-  static load(id: string): Promise<Session | null> {
+  static async load(id: string): Promise<Session | null> {
     logger.info(chalk.cyan(`Loading session with ID "${id}" ...`));
 
     if (process.env.NODE_ENV === 'test') {
@@ -81,6 +81,13 @@ export class SessionManager {
     logger.info(chalk.cyan(`Creating a new session with ID ${id} ...`));
 
     const exchange = ExchangesFactory.get(exchangeKey);
+    if (!exchange) {
+      logger.critical(chalk.red.bold(
+        `Exchange not found.`
+      ));
+      process.exit(1);
+    }
+
     const session = new Session(
       id,
       exchange,
@@ -108,6 +115,12 @@ export class SessionManager {
     const sessionFilePath = this.getPathById(id);
     if (fs.existsSync(sessionFilePath)) {
       const session = await this.load(id);
+      if (!session) {
+        logger.critical(chalk.red.bold(
+          `Exchange not found.`
+        ));
+        process.exit(1);
+      }
 
       // Just to make sure, we will override the config and session assets in case they changed.
       session.isLoadedFromPersistence = true;
@@ -191,10 +204,10 @@ export class SessionManager {
     };
     const count = trades.length;
 
-    let withFeesPercentages = [];
-    let withoutFeesPercentages = [];
-    let withFeesAmounts = [];
-    let withoutFeesAmounts = [];
+    let withFeesPercentages: number[] = [];
+    let withoutFeesPercentages: number[] = [];
+    let withFeesAmounts: number[] = [];
+    let withoutFeesAmounts: number[] = [];
 
     trades.forEach((exchangeTrade) => {
       const assetPair = session.exchange.assetPairs.get(

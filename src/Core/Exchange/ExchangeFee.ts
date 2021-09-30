@@ -3,7 +3,7 @@ import { Asset } from '../Asset/Asset';
 export interface ExchangeFeeInterface {
   type: ExchangeFeeTypeEnum;
   amount: number;
-  asset?: Asset;
+  asset: Asset | null;
 }
 
 export enum ExchangeFeeTypeEnum {
@@ -14,12 +14,12 @@ export enum ExchangeFeeTypeEnum {
 export class ExchangeFee implements ExchangeFeeInterface {
   type: ExchangeFeeTypeEnum;
   amount: number;
-  asset?: Asset;
+  asset: Asset | null;
 
   constructor(
     type: ExchangeFeeTypeEnum,
     amount: number,
-    asset: Asset = null
+    asset: Asset | null = null
   ) {
     this.type = type;
     this.amount = amount;

@@ -58,7 +58,7 @@ export class Exchange implements ExchangeInterface {
   apiCredentials: ExchangeApiCredentialsInterface;
   assetPairs: ExchangeAssetPairsMap;
   accounts: ExchangeAccountsMap;
-  session: Session;
+  session!: Session;
 
   constructor(
     key: string,
@@ -142,7 +142,7 @@ export class Exchange implements ExchangeInterface {
 
   /***** Helpers *****/
   getAccountType(accountType: SessionTradingTypeEnum): ExchangeAccountTypeEnum {
-    let exchangeAccountType: ExchangeAccountTypeEnum = null;
+    let exchangeAccountType: ExchangeAccountTypeEnum | null = null;
 
     switch (accountType) {
       case SessionTradingTypeEnum.FUTURES:
@@ -175,7 +175,7 @@ export class Exchange implements ExchangeInterface {
     };
   }
 
-  static fromImport(data: any): Exchange {
+  static fromImport(data: any): Exchange | null {
     return ExchangesFactory.get(data.key, data.apiCredentials);
   }
 

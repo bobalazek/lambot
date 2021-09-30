@@ -24,7 +24,7 @@ export interface SessionInterface {
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
-  endedAt: number;
+  endedAt: number | null;
   isLoadedFromPersistence: boolean;
   getOpenTrades(): ExchangeTrade[];
   getClosedTrades(): ExchangeTrade[];
@@ -57,7 +57,7 @@ export class Session implements SessionInterface {
   status: SessionStatusEnum;
   createdAt: number;
   startedAt: number;
-  endedAt: number;
+  endedAt: number | null;
   isLoadedFromPersistence: boolean;
 
   constructor(
@@ -83,6 +83,7 @@ export class Session implements SessionInterface {
     this.status = SessionStatusEnum.STARTED;
     this.createdAt = Date.now();
     this.startedAt = Date.now();
+    this.endedAt = null;
     this.isLoadedFromPersistence = false;
 
     assetPairs.forEach((assetPair) => {
@@ -163,6 +164,13 @@ export class Session implements SessionInterface {
     }
 
     const exchange = Exchange.fromImport(sessionData.exchange);
+    if (!exchange) {
+      logger.critical(chalk.red.bold(
+        'Exchange not found.'
+      ));
+      process.exit(1);
+    }
+
     const config = SessionConfig.fromImport(sessionData.config);
 
     const session = new Session(
@@ -170,7 +178,7 @@ export class Session implements SessionInterface {
       exchange,
       config,
       Asset.fromImport(sessionData.asset),
-      sessionData.assetPairs.map((assetPairData) => {
+      sessionData.assetPairs.map((assetPairData: any) => {
         return AssetPair.fromImport(assetPairData);
       }),
       Strategy.fromImport(sessionData.strategy),
@@ -179,7 +187,7 @@ export class Session implements SessionInterface {
     );
 
     if (typeof sessionData.trades !== 'undefined') {
-      session.trades = sessionData.trades.map((tradeData) => {
+      session.trades = sessionData.trades.map((tradeData: any) => {
         return ExchangeTrade.fromImport(tradeData);
       });
     }

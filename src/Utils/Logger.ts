@@ -1,62 +1,62 @@
 const logger = {
   isEnabled: true,
-  log: (...args) => {
+  log: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.log(new Date().toISOString(), '[LOG]', ...args);
   },
-  debug: (...args) => {
+  debug: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.debug(new Date().toISOString(), '[DEBUG]', ...args);
   },
-  info: (...args) => {
+  info: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.info(new Date().toISOString(), '[INFO]', ...args);
   },
-  notice: (...args) => {
+  notice: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.info(new Date().toISOString(), '[NOTICE]', ...args);
   },
-  warning: (...args) => {
+  warning: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.warn(new Date().toISOString(), '[WARNING]', ...args);
   },
-  error: (...args) => {
+  error: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.error(new Date().toISOString(), '[ERROR]', ...args);
   },
-  critical: (...args) => {
+  critical: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.error(new Date().toISOString(), '[CRITICAL]', ...args);
   },
-  alert: (...args) => {
+  alert: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }
 
     console.error(new Date().toISOString(), '[ALERT]', ...args);
   },
-  emergency: (...args) => {
+  emergency: (...args: any[]) => {
     if (!logger.isEnabled) {
       return;
     }

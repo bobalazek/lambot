@@ -18,7 +18,7 @@ export interface StrategyInterface {
 export class Strategy implements StrategyInterface {
   name: string;
   parameters: StrategyParametersInterface;
-  session: Session;
+  session!: Session;
 
   constructor(name: string, parameters: StrategyParametersInterface) {
     this.name = name;

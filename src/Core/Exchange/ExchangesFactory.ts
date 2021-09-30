@@ -13,21 +13,23 @@ export enum ExchangesEnum {
 }
 
 export class ExchangesFactory {
-  static get(key: ExchangesEnum, apiCredentials?: ExchangeApiCredentialsInterface): Exchange {
+  static get(key: ExchangesEnum, apiCredentials?: ExchangeApiCredentialsInterface): Exchange | null {
     switch (key) {
       case ExchangesEnum.BINANCE:
         if (!apiCredentials) {
           apiCredentials = {
-            key: process.env.BINANCE_API_KEY,
-            secret: process.env.BINANCE_API_SECRET,
+            key: <string>process.env.BINANCE_API_KEY,
+            secret: <string>process.env.BINANCE_API_SECRET,
           };
         }
 
-        return new BinanceExchange(apiCredentials);
+        return new BinanceExchange(apiCredentials!);
       case ExchangesEnum.MOCK:
         return new MockExchange();
       default:
         new Error(`Exchange "${key}" does not exist.`);
+
+      return null;
     }
   }
 }

@@ -89,7 +89,10 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** API Data fetching ******/
-  async getAccountOrders(accountType: ExchangeAccountTypeEnum, assetPair: AssetPair = null): Promise<ExchangeOrder[]> {
+  async getAccountOrders(
+    accountType: ExchangeAccountTypeEnum,
+    assetPair: AssetPair
+  ): Promise<ExchangeOrder[]> {
     logger.debug(chalk.italic('Fetching account orders ...'));
 
     const orders: ExchangeOrder[] = [];
@@ -434,12 +437,15 @@ export class BinanceExchange extends Exchange {
   }
 
   /***** Helpers *****/
-  _getAssetPairBySymbol(symbol: string): AssetPair {
+  _getAssetPairBySymbol(symbol: string): AssetPair | null {
     if (!this._symbolAssetPairsMap.has(symbol)) {
       return null;
     }
 
     const assetPairArray = this._symbolAssetPairsMap.get(symbol);
+    if (!assetPairArray) {
+      return null;
+    }
 
     return new AssetPair(
       Assets.getBySymbol(assetPairArray[0]),
@@ -546,7 +552,7 @@ export class BinanceExchange extends Exchange {
       let priceMinimum = '0';
       let priceMaximum = '0';
 
-      symbolData.filters.forEach((symbolFilterData) => {
+      symbolData.filters.forEach((symbolFilterData: any) => {
         if (symbolFilterData.filterType === 'MARKET_LOT_SIZE') { // or LOT_SIZE rather?
           amountMinimum = symbolFilterData.minQty;
           amountMaximum = symbolFilterData.maxQty;

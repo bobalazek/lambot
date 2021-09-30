@@ -67,8 +67,8 @@ export class Assets {
   static readonly BEAM = new Asset('BEAM', 'Beam');
 
   static getBySymbol(symbol: string): Asset {
-    if (this[symbol]) {
-      return this[symbol];
+    if (this[<keyof Assets>symbol]) {
+      return this[<keyof Assets>symbol];
     }
 
     return new Asset(symbol, symbol);

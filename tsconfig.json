@@ -1,12 +1,21 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "esModuleInterop": true,
-    "target": "esnext",
-    "jsx": "react",
+    "target": "es2020",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "outDir": "build"
+    "outDir": "./build",
+    "rootDir": "./",
+    "strict": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "lib": ["es2015"]
+  "exclude": ["node_modules"],
+  "include": [
+    "./config/**/*.tsx",
+    "./config/**/*.ts",
+    "./src/**/*.tsx",
+    "./src/**/*.ts"
+  ]
 }

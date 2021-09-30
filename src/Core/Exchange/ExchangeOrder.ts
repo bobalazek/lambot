@@ -8,7 +8,7 @@ export interface ExchangeOrderInterface {
   assetPair: AssetPair;
   side: ExchangeOrderSideEnum;
   amount: string;
-  price: string; // only relevant for limit orders
+  price: string | null; // only relevant for limit orders
   type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
@@ -19,7 +19,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
   assetPair: AssetPair;
   side: ExchangeOrderSideEnum;
   amount: string;
-  price: string;
+  price: string | null;
   type: ExchangeOrderTypeEnum;
   accountType: ExchangeAccountTypeEnum;
   exchangeResponse: unknown;
@@ -29,7 +29,7 @@ export class ExchangeOrder implements ExchangeOrderInterface {
     assetPair: AssetPair,
     side: ExchangeOrderSideEnum,
     amount: string,
-    price: string = null,
+    price: string | null = null,
     type: ExchangeOrderTypeEnum,
     accountType: ExchangeAccountTypeEnum,
     exchangeResponse: unknown = null

@@ -12,7 +12,7 @@ import logger from '../Utils/Logger';
 export class Server {
   app: Application;
   port: number;
-  trader: Trader;
+  trader!: Trader;
 
   constructor(port: number) {
     this.app = express();
@@ -48,7 +48,7 @@ export class Server {
 
     this.app.get('/api/session', (request: Request, response: Response) => {
       const data = this.trader.session.toExport();
-      delete data.trades;
+      data.trades = [];
       response.status(200).json(data);
     });
 

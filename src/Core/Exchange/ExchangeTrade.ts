@@ -57,17 +57,17 @@ export class ExchangeTrade {
   amountQuote: string;
   timestamp: number;
   status: ExchangeTradeStatusEnum;
-  entryPrice: number;
-  exitPrice: number;
+  entryPrice: number | null;
+  exitPrice: number | null;
   entryFees: ExchangeFee[];
   exitFees: ExchangeFee[];
   entryAt?: number;
   exitAt?: number;
-  currentProfitPercentage?: number;
-  peakProfitPercentage?: number;
-  troughProfitPercentage?: number;
-  triggerStopLossPercentage?: number;
-  triggerStopLossSellAt?: number;
+  currentProfitPercentage: number | null;
+  peakProfitPercentage: number | null;
+  troughProfitPercentage: number | null;
+  triggerStopLossPercentage: number | null;
+  triggerStopLossSellAt: number | null;
   entryOrder?: ExchangeOrder;
   exitOrder?: ExchangeOrder;
 
@@ -193,6 +193,10 @@ export class ExchangeTrade {
         return true;
       }
 
+      if (this.peakProfitPercentage === null) {
+        return false;
+      }
+
       // Once we reach over this takeProfitPercentage threshold, we should set the stop loss percentage
       // to that value, to prevent dipping down again when the trigger doesn't execute
       // because of trailing take profit enabled.
@@ -214,6 +218,10 @@ export class ExchangeTrade {
       }
     }
 
+    if (this.triggerStopLossPercentage === null) {
+      return false;
+    }
+
     // Just to make sure that we trigger a sell when the currentProfitPercentage is less than the trigger.
     // This basically covers the case when we have trailingTakeProfitEnabled,
     // and there we set the new triggerStopLossPercentage to the takeProfitPercentage,
@@ -230,6 +238,10 @@ export class ExchangeTrade {
         return true;
       }
 
+      if (this.triggerStopLossSellAt === null) {
+        return false;
+      }
+
       const stopLossTimeoutTime = strategy.parameters.stopLossTimeoutSeconds * 1000;
       if (now - this.triggerStopLossSellAt > stopLossTimeoutTime) {
         return true;
@@ -242,7 +254,11 @@ export class ExchangeTrade {
   /**
    * Gets the current profit, relating to the current price we provide it.
    */
-  getCurrentProfitPercentage(currentPrice: number = null, includingFees: boolean = false): number {
+  getCurrentProfitPercentage(currentPrice: number, includingFees: boolean = false): number {
+    if (this.entryPrice === null) {
+      return 0;
+    }
+
     return (
       calculatePercentage(currentPrice, this.entryPrice) -
       (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) : 0) -
@@ -254,6 +270,10 @@ export class ExchangeTrade {
    * Gets the final profit of this trade - must be called after the exitPrice is set to make sense.
    */
   getProfitPercentage(includingFees: boolean = false): number {
+    if (this.entryPrice === null || this.exitPrice === null) {
+      return 0;
+    }
+
     return (
       calculatePercentage(this.exitPrice, this.entryPrice) -
       (includingFees ? this.getFeePercentage(ExchangeTradeEntryOrExitEnum.ENTRY) : 0) -
@@ -264,7 +284,11 @@ export class ExchangeTrade {
   /**
    * Gets the current profit in the quote currency!
    */
-  getCurrentProfitAmount(currentPrice: number = null, includingFees: boolean = false): number {
+  getCurrentProfitAmount(currentPrice: number, includingFees: boolean = false): number {
+    if (this.entryPrice === null) {
+      return 0;
+    }
+
     const amount = parseFloat(this.amount);
     return (
       (amount * (currentPrice - this.entryPrice)) -
@@ -277,6 +301,10 @@ export class ExchangeTrade {
    * Gets the final profit in the quote currency!
    */
   getProfitAmount(includingFees: boolean = false): number {
+    if (this.entryPrice === null || this.exitPrice === null) {
+      return 0;
+    }
+
     const amount = parseFloat(this.amount);
     return (
       (amount * (this.exitPrice - this.entryPrice)) -

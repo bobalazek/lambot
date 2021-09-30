@@ -20,17 +20,17 @@ export enum TraderStatusEnum {
 }
 
 export class Trader {
-  session: Session;
-  server: Server;
+  session!: Session;
+  server!: Server;
   isTestMode: boolean = true;
   status: TraderStatusEnum = TraderStatusEnum.STOPPED;
-  startTime: number;
+  startTime!: number;
 
-  _statistics24HoursTickInterval: ReturnType<typeof setInterval>;
-  _priceTickInterval: ReturnType<typeof setInterval>;
-  _candlestickTickInterval: ReturnType<typeof setInterval>;
-  _openTradesInterval: ReturnType<typeof setInterval>;
-  _assetPairPriceInterval: ReturnType<typeof setInterval>;
+  _statistics24HoursTickInterval!: ReturnType<typeof setInterval>;
+  _priceTickInterval!: ReturnType<typeof setInterval>;
+  _candlestickTickInterval!: ReturnType<typeof setInterval>;
+  _openTradesInterval!: ReturnType<typeof setInterval>;
+  _assetPairPriceInterval!: ReturnType<typeof setInterval>;
 
   async boot(session: Session, isTestMode: boolean = true): Promise<Trader> {
     this.session = session;
@@ -171,6 +171,12 @@ export class Trader {
       const exchangeAssetPair = this.session.exchange.assetPairs.get(
         assetPair.getKey()
       );
+      if (!exchangeAssetPair) {
+        logger.critical(chalk.red.bold(
+          'Exchange asset pair not found.'
+        ));
+        process.exit(1);
+      }
 
       exchangeAssetPair.setCandlesticks(assetPairCandlesticksData);
 
@@ -204,13 +210,20 @@ export class Trader {
   async executeBuy(
     assetPair: AssetPair,
     tradeType: ExchangeTradeTypeEnum
-  ): Promise<ExchangeTrade> {
+  ): Promise<ExchangeTrade | null> {
     const now = Date.now();
     const assetPairSymbol = assetPair.getKey();
     const accountType = tradeType === ExchangeTradeTypeEnum.SHORT
       ? ExchangeAccountTypeEnum.MARGIN
       : ExchangeAccountTypeEnum.SPOT;
     const assetPairPrice = this.session.exchange.assetPairs.get(assetPairSymbol);
+    if (!assetPairPrice) {
+      logger.critical(chalk.red.bold(
+        'Asset pair price not found.'
+      ));
+      process.exit(1);
+    }
+
     const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
     if (!assetPairPriceEntryNewest) {
       logger.notice(chalk.green.bold(
@@ -258,7 +271,9 @@ export class Trader {
     );
     exchangeTrade.entryFees.push(orderFees);
     exchangeTrade.entryOrder = entryOrder;
-    exchangeTrade.entryPrice = parseFloat(entryOrder.price);
+    exchangeTrade.entryPrice = entryOrder?.price
+      ? parseFloat(entryOrder.price)
+      : null;
     exchangeTrade.entryAt = Date.now();
 
     this.session.trades.push(exchangeTrade);
@@ -276,7 +291,21 @@ export class Trader {
     const assetPairPrice = this.session.exchange.assetPairs.get(
       exchangeTrade.assetPair.getKey()
     );
+    if (!assetPairPrice) {
+      logger.critical(chalk.red.bold(
+        'Asset pair price not found.'
+      ));
+      process.exit(1);
+    }
+
     const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
+    if (!assetPairPriceEntryNewest) {
+      logger.critical(chalk.red.bold(
+        'Asset pair price entry newest not found.'
+      ));
+      process.exit(1);
+    }
+
     const accountType = exchangeTrade.type === ExchangeTradeTypeEnum.SHORT
       ? ExchangeAccountTypeEnum.MARGIN
       : ExchangeAccountTypeEnum.SPOT;
@@ -304,7 +333,9 @@ export class Trader {
       : order;
     exchangeTrade.exitFees.push(orderFees);
     exchangeTrade.exitOrder = exitOrder;
-    exchangeTrade.exitPrice = parseFloat(exitOrder.price);
+    exchangeTrade.exitPrice = exitOrder?.price
+      ? parseFloat(exitOrder.price)
+      : null;
     exchangeTrade.exitAt = Date.now();
     exchangeTrade.status = ExchangeTradeStatusEnum.CLOSED;
 
@@ -390,6 +421,12 @@ export class Trader {
       const exchangeAssetPair = this.session.exchange.assetPairs.get(
         assetPair.getKey()
       );
+      if (!exchangeAssetPair) {
+        logger.critical(chalk.red.bold(
+          'Exchange asset pair not found.'
+        ));
+        process.exit(1);
+      }
 
       const shouldBuy = this.session.strategy.shouldBuy(exchangeAssetPair);
       if (!shouldBuy) {
@@ -411,6 +448,13 @@ export class Trader {
       const assetPairPrice = this.session.exchange.assetPairs.get(
         exchangeTrade.assetPair.getKey()
       );
+      if (!assetPairPrice) {
+        logger.critical(chalk.red.bold(
+          'Asset pair price not found.'
+        ));
+        process.exit(1);
+      }
+
       const assetPairPriceEntryNewest = assetPairPrice.getNewestPriceEntry();
       if (!assetPairPriceEntryNewest) {
         return;
@@ -445,7 +489,7 @@ export class Trader {
       logger.info(chalk.cyan(
         'Memory usage: ' +
         Object.keys(memoryUsage).map((key) => {
-          return `${key} - ${Math.round(memoryUsage[key] / 1024 / 1024 * 100) / 100} MB`;
+          return `${key} - ${Math.round(memoryUsage[<keyof typeof memoryUsage>key] / 1024 / 1024 * 100) / 100} MB`;
         }).join('; ')
       ));
     }, memoryUsageMonitoringIntervalSeconds * 1000);

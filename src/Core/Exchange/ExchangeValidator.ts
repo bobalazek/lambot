@@ -66,6 +66,12 @@ export class ExchangeValidator {
       }
 
       const exchangeAssetPair = exhangeAssetPairsMap.get(assetPairKey);
+      if (!exchangeAssetPair) {
+        logger.critical(chalk.red.bold(
+          `Exchange asset pair "${assetPairKey}" not found.`
+        ));
+        process.exit(1);
+      }
 
       // Check if we can to the trading type we specified
       if (!tradingTypes.every((item) => {
@@ -78,19 +84,18 @@ export class ExchangeValidator {
       }
 
       // Check if our order amount is too small or big
-      const exhangeAssetPair = exhangeAssetPairsMap.get(assetPairKey);
-      if (parseFloat(exhangeAssetPair.amountMaximum) < tradeAmount) {
+      if (parseFloat(exchangeAssetPair.amountMaximum) < tradeAmount) {
         logger.critical(chalk.red.bold(
           `The order amount for "${assetPairKey}" is too big for this exchange asset. ` +
           `You specified: "${strategy.parameters.tradeAmount}". ` +
-          `Maximum: "${exhangeAssetPair.amountMaximum}"`
+          `Maximum: "${exchangeAssetPair.amountMaximum}"`
         ));
         process.exit(1);
-      } else if (parseFloat(exhangeAssetPair.amountMinimum) > tradeAmount) {
+      } else if (parseFloat(exchangeAssetPair.amountMinimum) > tradeAmount) {
         logger.critical(chalk.red.bold(
           `The order amount for "${assetPairKey}" is too small for this exchange asset. ` +
           `You specified: "${strategy.parameters.tradeAmount}". ` +
-          `Minimum: "${exhangeAssetPair.amountMinimum}"`
+          `Minimum: "${exchangeAssetPair.amountMinimum}"`
         ));
         process.exit(1);
       }

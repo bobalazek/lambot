@@ -14,21 +14,21 @@ import { calculatePercentage, colorTextPercentageByValue } from '../../Utils/Hel
 export interface ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  statistics24Hours: ExchangeAssetPairOHLCInterface;
+  statistics24Hours: ExchangeAssetPairOHLCInterface | null;
   metadata: any;
   shouldBuy(session: Session): boolean;
   getCandlesticks(): ExchangeAssetPairOHLCInterface[];
-  getNewestCandlestick(): ExchangeAssetPairOHLCInterface;
+  getNewestCandlestick(): ExchangeAssetPairOHLCInterface | null;
   addCandlestick(candlestick: ExchangeAssetPairOHLCInterface): ExchangeAssetPairOHLCInterface;
   setCandlesticks(candlesticks: ExchangeAssetPairOHLCInterface[]): ExchangeAssetPairOHLCInterface[];
   getPriceEntries(): ExchangeAssetPairPriceEntryInterface[];
   getPriceEntriesPeakIndexes(): number[];
   getPriceEntriesTroughIndexes(): number[];
-  getNewestPriceEntry(): ExchangeAssetPairPriceEntryInterface;
-  getLastPeakPriceEntry(): ExchangeAssetPairPriceEntryInterface;
-  getLastTroughPriceEntry(): ExchangeAssetPairPriceEntryInterface;
-  getLargestPeakPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface; // How far back (in milliseconds) should we ho to find the max peak/trough?
-  getLargestTroughPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface;
+  getNewestPriceEntry(): ExchangeAssetPairPriceEntryInterface | null;
+  getLastPeakPriceEntry(): ExchangeAssetPairPriceEntryInterface | null;
+  getLastTroughPriceEntry(): ExchangeAssetPairPriceEntryInterface | null;
+  getLargestPeakPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface | null; // How far back (in milliseconds) should we ho to find the max peak/trough?
+  getLargestTroughPriceEntry(maximumAge: number): ExchangeAssetPairPriceEntryInterface | null;
   addPriceEntry(priceEntry: ExchangeAssetPairPriceEntryInterface): ExchangeAssetPairPriceEntryInterface;
   processPriceEntries(): void;
   cleanupPriceEntries(ratio: number): void; // How many entries (percentage; 1 = 100%) should it remove from the start?
@@ -39,7 +39,7 @@ export interface ExchangeAssetPairInterface {
 export class ExchangeAssetPair implements ExchangeAssetPairInterface {
   assetPair: AssetPair;
   indicators: Map<string, number>;
-  statistics24Hours: ExchangeAssetPairOHLCInterface;
+  statistics24Hours: ExchangeAssetPairOHLCInterface | null;
   metadata: any;
 
   private _candlesticks: ExchangeAssetPairOHLCInterface[];
@@ -109,7 +109,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._candlesticks;
   }
 
-  getNewestCandlestick(): ExchangeAssetPairOHLCInterface {
+  getNewestCandlestick(): ExchangeAssetPairOHLCInterface | null {
     if (this._candlesticks.length === 0) {
       return null;
     }
@@ -140,7 +140,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceEntriesTroughIndexes;
   }
 
-  getNewestPriceEntry(): ExchangeAssetPairPriceEntryInterface {
+  getNewestPriceEntry(): ExchangeAssetPairPriceEntryInterface | null {
     if (this._priceEntries.length === 0) {
       return null;
     }
@@ -148,7 +148,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceEntries[this._priceEntries.length - 1];
   }
 
-  getLastPeakPriceEntry(): ExchangeAssetPairPriceEntryInterface {
+  getLastPeakPriceEntry(): ExchangeAssetPairPriceEntryInterface | null {
     if (this._priceEntriesPeakIndexes.length === 0) {
       return null;
     }
@@ -156,7 +156,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceEntries[this._priceEntriesPeakIndexes[this._priceEntriesPeakIndexes.length - 1]];
   }
 
-  getLastTroughPriceEntry(): ExchangeAssetPairPriceEntryInterface {
+  getLastTroughPriceEntry(): ExchangeAssetPairPriceEntryInterface | null {
     if (this._priceEntriesTroughIndexes.length === 0) {
       return null;
     }
@@ -164,13 +164,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return this._priceEntries[this._priceEntriesTroughIndexes[this._priceEntriesTroughIndexes.length - 1]];
   }
 
-  getLargestPeakPriceEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface {
+  getLargestPeakPriceEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface | null {
     if (this._priceEntriesPeakIndexes.length === 0) {
       return null;
     }
 
     const now = Date.now();
-    let largestPeakEntry: ExchangeAssetPairPriceEntryInterface = null;
+    let largestPeakEntry: ExchangeAssetPairPriceEntryInterface | null = null;
     for (let i = this._priceEntriesPeakIndexes.length - 1; i >= 0; i--) {
       const entry = this._priceEntries[this._priceEntriesPeakIndexes[i]];
       if (
@@ -191,13 +191,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
     return largestPeakEntry;
   }
 
-  getLargestTroughPriceEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface {
+  getLargestTroughPriceEntry(maximumAge: number = -1): ExchangeAssetPairPriceEntryInterface | null {
     if (this._priceEntriesTroughIndexes.length === 0) {
       return null;
     }
 
     const now = Date.now();
-    let largestTroughEntry: ExchangeAssetPairPriceEntryInterface = null;
+    let largestTroughEntry: ExchangeAssetPairPriceEntryInterface | null = null;
     for (let i = this._priceEntriesTroughIndexes.length - 1; i >= 0; i--) {
       const entry = this._priceEntries[this._priceEntriesTroughIndexes[i]];
       if (
@@ -254,13 +254,13 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         ? parseFloat(nextEntry?.price)
         : null;
 
-      const relativePricePercentage = prevEntry
+      const relativePricePercentage = prevPrice !== null
         ? calculatePercentage(price, prevPrice)
         : 0;
 
       changes.push(relativePricePercentage);
 
-      if (prevEntry) {
+      if (prevPrice !== null && nextPrice !== null) {
         // TODO: figure out a better way to do this
         // I'm aware that the performance is rather terrible,
         // but will need a good idea on how to fix it
@@ -334,6 +334,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         const lastTroughEntry = this.getLastTroughPriceEntry();
 
         if (
+          newestEntry &&
           lastPeakEntry &&
           parseFloat(lastPeakEntry.price) <= parseFloat(newestEntry.price)
         ) {
@@ -341,6 +342,7 @@ export class ExchangeAssetPair implements ExchangeAssetPairInterface {
         }
 
         if (
+          newestEntry &&
           lastTroughEntry &&
           parseFloat(lastTroughEntry.price) >= parseFloat(newestEntry.price)
         ) {
