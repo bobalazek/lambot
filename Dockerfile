@@ -11,5 +11,5 @@ COPY . .
 
 ENTRYPOINT [ "/app/docker-entrypoint.sh"]
 
-# The base command is "node build/bot.js"
-CMD [ "--action", "trade" ]
+# The base command is "yarn do"
+CMD [ "trade" ]
