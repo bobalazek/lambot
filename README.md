@@ -2,7 +2,9 @@
 
 Yes, you read that right. This Bot could possibly catapult you to the moon, so you can start living your lambo lifestyle!
 
-As you can imagine, it's not really that easy as it sounds. Rather than you earning trillions of dollars from your investments, you will far more likely lose it all, so **INVEST ONLY THE MONEY YOU CAN LOSE AND TREAT ANY INVESTMENT AS LOST AS SOON AS YOU INVESTED TO PREVENT ANY SURPRISES**.
+**This repository is under heavy development and HAS NOT yet been used on live accounts. USE AT YOUR OWN RISK!**
+
+Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite, but the repository will still stay active so I can salvage bits from it.
 
 ## Getting started
 

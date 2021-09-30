@@ -10,19 +10,20 @@ export interface ExchangeTradeInterface {
   type: ExchangeTradeTypeEnum;
   amount: string; // The amount of the base currency bought
   amountQuote: string; // The amount of the quote currency used to pay for
-  timestamp: number;
+  createdAt: number;
   status: ExchangeTradeStatusEnum;
-  entryPrice: number;
-  exitPrice: number;
+  entryPrice: number | null;
+  exitPrice: number | null;
   entryFees: ExchangeFee[];
   exitFees: ExchangeFee[];
   entryAt?: number;
   exitAt?: number;
-  currentProfitPercentage?: number;
-  peakProfitPercentage?: number; // What is the peak profit we reached?
-  troughProfitPercentage?: number; // What is the trough profit we reached?
-  targetStopLossPercentage?: number; // At which currentProfitPercentage will the stop loss trigger - can be positive or negative?
-  triggerStopLossSellAt?: number; // If we are in the stop loss timeout, when should we trigger the sell?
+  currentProfitPercentage: number | null;
+  peakProfitPercentage: number | null; // What is the peak profit we reached?
+  troughProfitPercentage: number | null; // What is the trough profit we reached?
+  targetStopLossPercentage: number | null; // At which currentProfitPercentage will the stop loss trigger - can be positive or negative
+  triggerStopLossSellAt: number | null; // If we are in the stop loss timeout, when should we trigger the sell?
+  lastProcessedAt: number | null;
   entryOrder?: ExchangeOrderInterface;
   exitOrder?: ExchangeOrderInterface;
   prepareData(): void;
@@ -55,7 +56,7 @@ export class ExchangeTrade {
   type: ExchangeTradeTypeEnum;
   amount: string;
   amountQuote: string;
-  timestamp: number;
+  createdAt: number;
   status: ExchangeTradeStatusEnum;
   entryPrice: number | null;
   exitPrice: number | null;
@@ -68,6 +69,7 @@ export class ExchangeTrade {
   troughProfitPercentage: number | null;
   targetStopLossPercentage: number | null;
   triggerStopLossSellAt: number | null;
+  lastProcessedAt: number | null;
   entryOrder?: ExchangeOrder;
   exitOrder?: ExchangeOrder;
 
@@ -77,7 +79,7 @@ export class ExchangeTrade {
     type: ExchangeTradeTypeEnum,
     amount: string,
     amountQuote: string,
-    timestamp: number = Date.now(),
+    createdAt: number = Date.now(),
     status: ExchangeTradeStatusEnum = ExchangeTradeStatusEnum.OPEN
   ) {
     this.id = id;
@@ -85,7 +87,7 @@ export class ExchangeTrade {
     this.type = type;
     this.amount = amount;
     this.amountQuote = amountQuote;
-    this.timestamp = timestamp;
+    this.createdAt = createdAt;
     this.status = status;
     this.entryPrice = null;
     this.exitPrice = null;
@@ -96,6 +98,7 @@ export class ExchangeTrade {
     this.troughProfitPercentage = null;
     this.targetStopLossPercentage = null;
     this.triggerStopLossSellAt = null;
+    this.lastProcessedAt = null;
   }
 
   prepareData(session: Session) {
@@ -160,6 +163,8 @@ export class ExchangeTrade {
     ) {
       this.triggerStopLossSellAt = null;
     }
+
+    this.lastProcessedAt = now;
   }
 
   shouldSell(session: Session, prepareData: boolean = true): boolean {
@@ -239,12 +244,11 @@ export class ExchangeTrade {
         return true;
       }
 
-      if (this.triggerStopLossSellAt === null) {
-        return false;
-      }
-
       const stopLossTimeoutTime = strategy.parameters.stopLossTimeoutSeconds * 1000;
-      if (now - this.triggerStopLossSellAt > stopLossTimeoutTime) {
+      if (
+        this.triggerStopLossSellAt !== null &&
+        now - this.triggerStopLossSellAt > stopLossTimeoutTime
+      ) {
         return true;
       }
     }
@@ -340,7 +344,7 @@ export class ExchangeTrade {
       type: this.type,
       amount: this.amount,
       amountQuote: this.amountQuote,
-      timestamp: this.timestamp,
+      createdAt: this.createdAt,
       status: this.status,
       entryPrice: this.entryPrice,
       exitPrice: this.exitPrice,
@@ -353,6 +357,7 @@ export class ExchangeTrade {
       troughProfitPercentage: this.troughProfitPercentage,
       targetStopLossPercentage: this.targetStopLossPercentage,
       triggerStopLossSellAt: this.triggerStopLossSellAt,
+      lastProcessedAt: this.lastProcessedAt,
       entryOrder: this.entryOrder?.toExport(),
       exitOrder: this.exitOrder?.toExport(),
     };
@@ -365,7 +370,7 @@ export class ExchangeTrade {
       data.type,
       data.amount,
       data.amountQuote,
-      data.timestamp,
+      data.createdAt,
       data.status
     );
 
@@ -407,6 +412,10 @@ export class ExchangeTrade {
 
     if (typeof data.triggerStopLossSellAt !== 'undefined') {
       exchangeTrade.triggerStopLossSellAt = data.triggerStopLossSellAt;
+    }
+
+    if (typeof data.lastProcessedAt !== 'undefined') {
+      exchangeTrade.lastProcessedAt = data.lastProcessedAt;
     }
 
     if (typeof data.entryOrder !== 'undefined') {

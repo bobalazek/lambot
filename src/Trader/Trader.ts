@@ -463,7 +463,7 @@ export class Trader {
       const currentAssetPairPrice = parseFloat(assetPairPriceEntryNewest.price);
       const profitPercentage = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice);
       const profitPercentageIncludingFees = exchangeTrade.getCurrentProfitPercentage(currentAssetPairPrice, true);
-      const timeAgoSeconds = Math.round((now - exchangeTrade.timestamp) / 1000);
+      const timeAgoSeconds = Math.round((now - exchangeTrade.createdAt) / 1000);
 
       logger.info(
         chalk.bold(exchangeTrade.assetPair.getKey()) +
