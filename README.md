@@ -4,7 +4,9 @@ Yes, you read that right. This Bot could possibly catapult you to the moon, so y
 
 **This repository is under heavy development and HAS NOT yet been used on live accounts. USE AT YOUR OWN RISK!**
 
-Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite, but the repository will still stay active so I can salvage bits from it.
+Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite or plain wrong (like using JS numbers, instead of BN), but the repository will still stay online, so I can salvage bits from it.
+
+Besides, it was mostly just a learning experience for me personally. If you want to use something in production, use [Freqtrade](https://www.freqtrade.io/en/stable/).
 
 ## Getting started
 
@@ -36,10 +38,6 @@ After you made your changes run `docker-compose build` to build and then `docker
 
 ## Disclaimer
 
-**All investment strategies and investments involve risk of loss.
-Nothing contained in this program, scripts, code or repository should be construed as investment advice.
-Any reference to an investment's past or potential performance is not,
-and should not be construed as, a recommendation or as a guarantee of any specific outcome or profit.**
+**All investment strategies and investments involve risk of loss. Nothing contained in this program, scripts, code or repository should be construed as investment advice. Any reference to an investment's past or potential performance is not, and should not be construed as, a recommendation or as a guarantee of any specific outcome or profit.**
 
-**The developers of this repository expressly disclaims any liability or loss
-incurred by any person who acts on the information, ideas or strategies discussed herein.**
+**The developers of this repository expressly disclaims any liability or loss incurred by any person who acts on the information, ideas or strategies discussed herein.**
