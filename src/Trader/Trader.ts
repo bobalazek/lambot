@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import crypto from 'crypto';
 
 import { AssetPair } from '../Core/Asset/AssetPair';
 import { ExchangeAccountTypeEnum } from '../Core/Exchange/ExchangeAccount';
@@ -233,12 +234,13 @@ export class Trader {
       return null;
     }
 
-    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + now;
+    const random = crypto.randomBytes(20).toString('hex').slice(0, 6);
+    const id = ID_PREFIX + this.session.id + '_' + assetPairSymbol + '_' + random;
     const orderFeesType = this.session.orderTypes.buy === ExchangeOrderTypeEnum.LIMIT
       ? ExchangeOrderFeesTypeEnum.MAKER
       : ExchangeOrderFeesTypeEnum.TAKER;
     const amountQuote = this.session.strategy.parameters.tradeAmount;
-    const amount = toPlainString( // How much amount of the quote asset we want to buy (relative to our quote asset)?
+    const amount = toPlainString( // TODO: needs amountToPrecision; How much amount of the quote asset we want to buy (relative to our quote asset)?
       parseFloat(amountQuote) /
       parseFloat(assetPairPriceEntryNewest.price)
     );

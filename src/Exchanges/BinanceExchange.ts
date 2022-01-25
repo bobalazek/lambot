@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import qs from 'qs';
 import crypto from 'crypto';
 import chalk from 'chalk';
@@ -16,12 +16,12 @@ import { ExchangeResponseAssetPairPriceEntryInterface } from '../Core/Exchange/R
 import { ExchangeResponseAssetPairCandlestickInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairCandlestick';
 import { ExchangeResponseAssetPairStatisticsInterface } from '../Core/Exchange/Response/ExchangeResponseAssetPairStatistics';
 import { ExchangeOrderFeesTypeEnum } from '../Core/Exchange/ExchangeOrderFeesType';
-import { Session } from '../Core/Session/Session';
-import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
-import logger from '../Utils/Logger';
 import { ExchangeOrderTypeEnum } from '../Core/Exchange/ExchangeOrderType';
 import { ExchangeOrderTimeInForceEnum } from '../Core/Exchange/ExchangeOrderTimeInForce';
 import { ExchangeFee, ExchangeFeeTypeEnum } from '../Core/Exchange/ExchangeFee';
+import { Session } from '../Core/Session/Session';
+import { SessionTradingTypeEnum } from '../Core/Session/SessionTradingType';
+import logger from '../Utils/Logger';
 
 enum RequestMethodEnum {
   GET = 'GET',
@@ -467,22 +467,14 @@ export class BinanceExchange extends Exchange {
   async _doRequest(
     method: RequestMethodEnum,
     url: string,
-    dataOrParams: any = null,
+    params: any = {},
     signed: boolean = false
   ): Promise<any> {
     logger.log(chalk.italic(
-      `Making a ${method} request to ${url}, with parameters: ${JSON.stringify(dataOrParams)}`
+      `Making a ${method} request to ${url}, with parameters: ${JSON.stringify(params)}`
     ));
 
-    let params: any = {};
-    let data: any = {};
     let headers: any = {};
-
-    if (dataOrParams && method === RequestMethodEnum.GET) {
-      params = dataOrParams;
-    } else if (dataOrParams && method === RequestMethodEnum.POST) {
-      data = dataOrParams;
-    }
 
     if (signed) {
       const timestamp = Date.now() + this._timeOffset;
@@ -492,20 +484,12 @@ export class BinanceExchange extends Exchange {
       params.recvWindow = 5000;
       params.timestamp = timestamp;
 
-      const signatureData = method === RequestMethodEnum.POST
-        ? qs.stringify(data)
-        : qs.stringify(params);
-
       const signature = crypto
         .createHmac('sha256', this.apiCredentials.secret)
-        .update(signatureData)
+        .update(qs.stringify(params))
         .digest('hex');
 
-      if (method === RequestMethodEnum.POST) {
-        data.signature = signature;
-      } else {
-        params.signature = signature;
-      }
+      params.signature = signature;
     }
 
     const config: any = {
@@ -513,16 +497,12 @@ export class BinanceExchange extends Exchange {
       url,
     };
 
-    if (Object.keys(params).length !== 0) {
-      config.params = params;
-    }
-
-    if (Object.keys(data).length !== 0) {
-      config.data = Object.keys(data)
-        .map((key) => `${key}=${encodeURIComponent(data[key])}`)
-        .join('&');
+    if (method === RequestMethodEnum.POST) {
+      config.data = qs.stringify(params);
 
       headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+    } else {
+      config.params = params;
     }
 
     if (Object.keys(headers).length !== 0) {
