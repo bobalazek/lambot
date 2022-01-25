@@ -518,23 +518,34 @@ export class BinanceExchange extends Exchange {
     }
 
     if (Object.keys(data).length !== 0) {
-      config.data = data;
+      config.data = Object.keys(data)
+        .map((key) => `${key}=${encodeURIComponent(data[key])}`)
+        .join('&');
+
+      headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
     }
 
     if (Object.keys(headers).length !== 0) {
       config.headers = headers;
     }
 
-    const response = await axios(config);
+    try {
+      const response = await axios(config);
 
-    const rateLimitWeightTotal = 1200;
-    const rateLimitWeightUsed = parseInt(response.headers['x-mbx-used-weight-1m']);
+      const rateLimitWeightTotal = 1200;
+      const rateLimitWeightUsed = parseInt(response.headers['x-mbx-used-weight-1m']);
 
-    logger.log(chalk.italic(
-      `You used ${rateLimitWeightUsed} request weight points out of ${rateLimitWeightTotal}`
-    ));
+      logger.log(chalk.italic(
+        `You used ${rateLimitWeightUsed} request weight points out of ${rateLimitWeightTotal}`
+      ));
 
-    return response;
+      return response;
+    } catch (err) {
+      console.error(config, err)
+      logger.critical(chalk.red.bold(JSON.stringify(err)));
+    }
+
+    return null;
   }
 
   async _prepareInfo(): Promise<boolean> {

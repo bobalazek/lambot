@@ -11,7 +11,7 @@ import { Session } from '../Core/Session/Session';
 import { SessionManager } from '../Core/Session/SessionManager';
 import { Server } from '../Server/Server';
 import { ID_PREFIX } from '../Constants';
-import { colorTextPercentageByValue } from '../Utils/Helpers';
+import { colorTextPercentageByValue, toPlainString } from '../Utils/Helpers';
 import logger from '../Utils/Logger';
 
 export enum TraderStatusEnum {
@@ -238,10 +238,10 @@ export class Trader {
       ? ExchangeOrderFeesTypeEnum.MAKER
       : ExchangeOrderFeesTypeEnum.TAKER;
     const amountQuote = this.session.strategy.parameters.tradeAmount;
-    const amount = ( // How much amount of the quote asset we want to buy (relative to our quote asset)?
+    const amount = toPlainString( // How much amount of the quote asset we want to buy (relative to our quote asset)?
       parseFloat(amountQuote) /
       parseFloat(assetPairPriceEntryNewest.price)
-    ).toPrecision(3);
+    );
     const order = new ExchangeOrder(
       id + '_' + ExchangeOrderSideEnum.BUY,
       assetPair,

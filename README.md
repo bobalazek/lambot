@@ -28,6 +28,7 @@ After you made your changes run `docker-compose build` to build and then `docker
 
 ## TODO
 
+* Fix persistance loading from JSON
 * Indicators implementation
 * Websocket exchange implementation for fetching prices and candlesticks data
 * Backtesting
