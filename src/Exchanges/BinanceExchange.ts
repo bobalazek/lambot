@@ -189,13 +189,15 @@ export class BinanceExchange extends Exchange {
       response = await this._doRequest(
         RequestMethodEnum.POST,
         'https://api.binance.com/api/v3/order',
-        data
+        data,
+        true
       );
     } else if (accountType === ExchangeAccountTypeEnum.MARGIN) {
       response = await this._doRequest(
         RequestMethodEnum.POST,
         'https://api.binance.com/sapi/v1/margin/order',
-        data
+        data,
+        true
       );
     } else {
       logger.critical(chalk.red.bold(
@@ -467,7 +469,7 @@ export class BinanceExchange extends Exchange {
     url: string,
     dataOrParams: any = null,
     signed: boolean = false
-  ): Promise<AxiosResponse<any>> {
+  ): Promise<any> {
     logger.log(chalk.italic(
       `Making a ${method} request to ${url}, with parameters: ${JSON.stringify(dataOrParams)}`
     ));
