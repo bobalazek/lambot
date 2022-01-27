@@ -1,10 +1,10 @@
 # Lambot
 
-Yes, you read that right. This Bot could possibly catapult you to the moon, so you can start living your lambo lifestyle!
+This Bot could possibly catapult you to the moon, so you can start living your lambo lifestyle!
 
-**This repository is under heavy development and HAS NOT yet been used on live accounts. USE AT YOUR OWN RISK!**
+**This repository is under heavy development and HAS NOT been used on live accounts yet. USE AT YOUR OWN RISK!**
 
-Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite or are plain wrong (like using JS numbers, instead of BN), but the repository will still stay online, so I can salvage bits from it.
+**Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite or are plain wrong (like using JS numbers, instead of BN), but the repository will still stay online, so I can salvage bits from it.**
 
 Besides, it was mostly just a learning experience for me personally. If you want to use something in production, use [Freqtrade](https://www.freqtrade.io/en/stable/).
 
