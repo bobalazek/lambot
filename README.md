@@ -40,3 +40,7 @@ After you made your changes run `docker-compose build` to build and then `docker
 **All investment strategies and investments involve risk of loss. Nothing contained in this program, scripts, code or repository should be construed as investment advice. Any reference to an investment's past or potential performance is not, and should not be construed as, a recommendation or as a guarantee of any specific outcome or profit.**
 
 **The developers of this repository expressly disclaims any liability or loss incurred by any person who acts on the information, ideas or strategies discussed herein.**
+
+## License
+
+Lambot is licensed under the MIT license.
