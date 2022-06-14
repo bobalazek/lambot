@@ -4,7 +4,7 @@ Experimental crypto trading bot that may or may not bring you closer to your lam
 
 **Right now a v2 of this bot is being developed where I started from scratch, as I made some decisions at the begining that are hard to solve without a complete rewrite or were just plain wrong. Still, the repository will still stay online, so I can salvage bits from it. Do NOT use it in production, because it was only ever used on a paper trading account!**
 
-Besides, it was mostly just a learning experience for me personally. If you want to use something in production, use [Freqtrade](https://www.freqtrade.io/en/stable/).
+Besides, it was mostly just a learning experience for me personally. If you want to use something in production, use [QuantConnect]([https://www.quantconnect.com]).
 
 ## Getting started
 
